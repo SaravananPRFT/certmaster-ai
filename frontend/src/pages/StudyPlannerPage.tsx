@@ -14,7 +14,7 @@ export default function StudyPlannerPage() {
   const [certId, setCertId] = useState("");
   const [examDate, setExamDate] = useState("");
   const [hours, setHours] = useState(2);
-  const [plan, setPlan] = useState<{ plan_id: string; weeks: Week[] } | null>(null);
+  const [plan, setPlan] = useState<{ plan_id: string; weeks: Week[]; note?: string } | null>(null);
 
   const { data: certs } = useQuery({
     queryKey: ["certifications"],
@@ -83,7 +83,7 @@ export default function StudyPlannerPage() {
           </Button>
           {genMutation.isError && (
             <p className="text-sm text-destructive text-center">
-              Failed. Ensure Ollama is running: <code className="bg-muted px-1 rounded">ollama serve</code>
+              Failed to generate plan. Please try again.
             </p>
           )}
         </CardContent>
@@ -92,6 +92,11 @@ export default function StudyPlannerPage() {
       {plan && (
         <div className="space-y-6">
           <h2 className="text-xl font-semibold">Your Personalized Study Plan</h2>
+          {plan.note && (
+            <div className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3">
+              {plan.note}
+            </div>
+          )}
           {plan.weeks?.map((week) => (
             <Card key={week.week_number}>
               <CardHeader className="pb-3">

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+*.log
+logs/
+
+# SQLite
+backend/certmaster.db
+backend/test_certmaster.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+backend/.env
+!backend/.env.example
+
+# OS
+.DS_Store
+Thumbs.db

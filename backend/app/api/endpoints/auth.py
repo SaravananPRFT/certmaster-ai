@@ -8,6 +8,21 @@ from app.schemas.auth import RegisterRequest, LoginRequest, AuthResponse
 
 router = APIRouter()
 
+GUEST_EMAIL = "guest@certmaster.local"
+GUEST_NAME = "Guest"
+
+
+@router.post("/guest", response_model=AuthResponse)
+def guest_login(db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == GUEST_EMAIL).first()
+    if not user:
+        user = User(id=str(uuid.uuid4()), email=GUEST_EMAIL, password_hash=hash_password(uuid.uuid4().hex), display_name=GUEST_NAME)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    token = create_access_token({"sub": user.id})
+    return AuthResponse(token=token, user_id=user.id, email=user.email, display_name=user.display_name)
+
 
 @router.post("/register", response_model=AuthResponse)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):

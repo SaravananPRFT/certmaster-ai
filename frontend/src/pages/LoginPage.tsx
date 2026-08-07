@@ -10,7 +10,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [guestLoading, setGuestLoading] = useState(false);
+  const { login, loginAsGuest } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +52,24 @@ export default function LoginPage() {
             {loading ? <><Loader2 className="h-4 w-4 animate-spin" />Signing in...</> : "Sign in"}
           </Button>
         </form>
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+          <div className="relative flex justify-center text-xs text-muted-foreground"><span className="bg-card px-2">or</span></div>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          disabled={guestLoading}
+          onClick={async () => {
+            setGuestLoading(true);
+            try { await loginAsGuest(); navigate("/dashboard"); }
+            catch { setError("Guest login failed."); }
+            finally { setGuestLoading(false); }
+          }}
+        >
+          {guestLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Loading...</> : "Continue as Guest"}
+        </Button>
+        <p className="text-center text-sm text-muted-foreground mt-4">
           Don&apos;t have an account?{" "}
           <Link to="/register" className="text-primary hover:underline">Create one</Link>
         </p>

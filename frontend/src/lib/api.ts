@@ -26,6 +26,8 @@ export const authApi = {
     api.post("/api/auth/register", d),
   login: (d: { email: string; password: string }) =>
     api.post("/api/auth/login", d),
+  guest: () =>
+    api.post("/api/auth/guest"),
 };
 
 export const certificationsApi = {

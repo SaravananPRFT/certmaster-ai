@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Brain, Zap, Target, BookOpen, BarChart2, MessageSquare, Shield } from "lucide-react";
+import { Brain, Zap, Target, BookOpen, BarChart2, MessageSquare, Shield, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const features = [
   { icon: Brain, title: "AI-Powered Questions", description: "Generate unlimited practice questions using Ollama running entirely on your machine." },
@@ -18,6 +20,17 @@ const certs = [
 ];
 
 export default function LandingPage() {
+  const { loginAsGuest } = useAuth();
+  const navigate = useNavigate();
+  const [guestLoading, setGuestLoading] = useState(false);
+
+  const handleGuest = async () => {
+    setGuestLoading(true);
+    try { await loginAsGuest(); navigate("/dashboard"); }
+    catch { /* ignore */ }
+    finally { setGuestLoading(false); }
+  };
+
   return (
     <div className="min-h-screen">
       <nav className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
@@ -48,6 +61,9 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/register"><Button size="lg" className="px-8">Start Practicing Free</Button></Link>
             <Link to="/login"><Button variant="outline" size="lg" className="px-8">Sign In</Button></Link>
+            <Button variant="ghost" size="lg" className="px-8" onClick={handleGuest} disabled={guestLoading}>
+              {guestLoading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Loading...</> : "Try as Guest"}
+            </Button>
           </div>
         </div>
       </section>

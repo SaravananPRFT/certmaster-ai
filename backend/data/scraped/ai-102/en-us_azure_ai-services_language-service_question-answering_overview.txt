@@ -1,0 +1,36 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is custom question answering?
+Custom question answering (CQA) retires from Azure Language on
+. To avoid production disruption, migrate existing workloads and direct all new projects to
+, which offers enhanced capabilities for natural language understanding and can be easily integrated into your applications. For guidance, see
+Transitioning from Azure Language features to Foundry models
+Custom question answering (CQA) is a cloud-based Natural Language Processing (NLP) service that creates conversational AI applications over your data. Build knowledge bases from FAQs, manuals, and documents to deliver accurate answers through chat bots, virtual assistants, and interactive interfaces.
+Custom question answering provides enterprise-grade features for building and maintaining conversational AI solutions:
+- Import content from URLs, files, and documents. The service automatically extracts question-answer pairs from structured and semi-structured sources.
+- Create guided conversation flows with follow-up prompts that navigate users through complex information.
+- Tag answers by content type, domain, or freshness to deliver contextually relevant responses.
+- Improve answer quality based on real-world usage patterns and user queries.
+- Multi-stage ranking architecture combines Azure AI Search with NLP reranking for optimal answer selection.
+The service follows a structured pipeline from project creation to production deployment:
+- Build a knowledge base by importing content sources or manually adding question-answer pairs in
+Microsoft Foundry (classic)
+- Use the test interface to validate responses and adjust answer quality before deployment.
+- Publish your project to create a REST API endpoint accessible by client applications.
+- Client applications send queries and receive JSON responses with answers, confidence scores, and follow-up prompts.
+Choose from multiple development approaches based on your technical requirements and expertise:
+Microsoft Foundry (classic)
+- Low-code authoring with automatic QA extraction, markdown support, and
+integration. Deploy directly to
+- Programmatic access for custom integrations and automated workflows. See the
+Azure Language REST API reference
+for endpoint documentation.
+- SDK packages for .NET and Python enable programmatic project management and query integration:
+- Runtime and authoring SDKs for C# applications
+- Runtime and authoring SDKs for Python applications
+For supported regions and availability, see
+Custom question answering regional support
+Quickstart: Create and deploy a CQA project
+Configure multi-turn conversations
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

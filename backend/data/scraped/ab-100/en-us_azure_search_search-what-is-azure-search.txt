@@ -1,0 +1,89 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Azure AI Search is available through the
+, the managed knowledge layer that transforms enterprise content into reusable, permission-aware knowledge bases for agents in the
+Azure AI Search is a fully managed, cloud-hosted service that connects your data to AI. The service unifies access to enterprise and web content so agents and large language models (LLMs) can use context, chat history, and multi-source signals to produce reliable, grounded answers.
+Azure AI Search is available in two pricing models:
+: Provisioned capacity with fixed pricing. You select a service tier and you're billed per hour based on Search Units (SUs). Best for steady, predictable, high-utilization workloads.
+: Consumption-based pricing measured by Compute Units per hour (CU/hr) and per-GB/month for indexed storage. Best for infrequent, bursty, or highly variable workloads.
+The Serverless Developer tier is currently in preview. This preview is provided without a service-level agreement and isn't recommended for production workloads. Certain features might not be supported or might have constrained capabilities. For more information, see
+Supplemental Terms of Use for Microsoft Azure Previews
+Billing for the Serverless Developer tier isn't yet enabled during the preview. Estimated costs for your usage are available in the Azure portal and telemetry, but that usage won't appear on your Azure bill during this initial period. Microsoft will provide at least 30 days notice before billing begins. The deferral of billing during this preview is temporary. Serverless Developer is a paid tier and you'll be responsible for any charges accrued once billing begins.
+The Serverless Developer tier doesn't support migration to or from other pricing tiers and some features available on other tiers aren't supported during Public Preview. Service limits, supported features, and pricing details may change before general availability.
+The preview is currently only available in West Central US, Switzerland North, and Japan East.
+and retrieval-augmented generation (RAG) using
+, where the service orchestrates query planning, retrieval, and response construction. These capabilities support scenarios ranging from traditional search experiences to AI-powered agents and chat applications suitable for both enterprise and consumer scenarios.
+When you create a search service, the following capabilities are included:
+for parallel, iterative, LLM-assisted search.
+queries over local (indexed) and remote content.
+AI enrichment to chunk, vectorize, and otherwise make raw content searchable.
+Relevance tuning to improve intent matching and result quality.
+Azure scale, security, monitoring, and compliance.
+Azure integrations with supported data platforms, Azure OpenAI, and Microsoft Foundry.
+Ground agents and chatbots in proprietary, enterprise, or web data for accurate, context-aware responses.
+Access data from Azure Blob Storage, Azure Cosmos DB, Microsoft SharePoint, Microsoft OneLake, and other supported data sources. Choose indexed or remote access based on your freshness, latency, and compliance needs.
+Enrich and structure content at indexing or query time with skills that perform chunking, embedding, and LLM-assisted transformations.
+Combine full-text search with vector search (hybrid search) to balance precision and recall.
+Query content containing both text and images in a single multimodal pipeline.
+Easily implement search-related features: relevance tuning, faceted navigation, filters (including geo-spatial search), synonym mapping, and autocomplete.
+Provide enterprise security, access control, and compliance through Microsoft Entra ID, Azure Private Link, document-level access control, and role-based access.
+Scale and operate in production with Azure reliability, monitoring and diagnostics (logs, metrics, and alerts), and REST API or SDK tooling for automation.
+In the Serverless pricing model, scaling is handled automatically by the service. Unlike Dedicated models where you configure replicas and partitions, Serverless uses consumption-based scaling and service-level limits to manage capacity. For more information, see
+Optimize costs with the Serverless pricing model
+For more information about specific functionality, see
+Features of Azure AI Search
+Classic search is an index-first retrieval model for predictable, low-latency queries. Each query targets a single, predefined search index and returns ranked documents in one requestâresponse cycle. No LLM-assisted planning, iteration, or synthesis occurs during retrieval.
+In this architecture, your search service sits between the data stores that contain your unprocessed content and your client app. The app is responsible for sending query requests to your search service and handling the response.
+This architecture has two primary workloads:
+loads content into an index and makes it searchable. Internally, inbound text is tokenized and stored in inverted indexes, while inbound vectors are stored in vector indexes. Azure AI Search can only index JSON documents. You can use the
+to upload JSON documents directly or the
+(indexer or logic app workflow) to retrieve and serialize data into JSON.
+During indexing, you can use
+to chunk text, generate vectors, and apply other transformations that create structure and content. Azure AI Search then serializes the enriched output into JSON documents and ingests them into the index.
+targets an index populated with searchable content. This step occurs when your client app sends a query request to your search service. In your code, set up a search client to handle requests for
+, fuzzy search, autocomplete, geo-search, and other query types.
+This diagram separates the indexing and query engines for clarity, but in Azure AI Search, they're the same component operating in read-write and read-only modes.
+What is agentic retrieval?
+is a multi-query pipeline designed for complex agent-to-agent workflows. Each query targets a
+that represents a complete domain of knowledge. Your agent references the knowledge base for
+to ground on, while the knowledge base handles
+A knowledge base consists of one or more
+, an optional LLM for query planning and answer synthesis, and parameters that govern retrieval behavior. Each query undergoes planning, decomposition into focused subqueries, parallel retrieval from knowledge sources, semantic reranking, and results merging. The three-pronged response is optimized for agent consumption.
+Under the hood, agentic retrieval builds on the classic search architecture by adding a context layer (knowledge base) that orchestrates multi-source retrieval. Knowledge sources can be indexed or remote: indexed sources use the same indexing and query engines as classic search, while remote sources bypass indexing and are queried live.
+Classic search and agentic retrieval are complementary modes of information retrieval. Both support
+search. However, they differ in how content is ingested and queried. The following table summarizes their key differences.
+One index defined by a schema
+A knowledge base pointing to one or more knowledge sources
+LLM-assisted or user-provided plan
+Search documents in an index
+Retrieve from knowledge sources
+Flattened search results based on schema
+LLM-formulated answer or raw source data, activity log, references
+Generally available, with some capabilities in preview
+Dedicated pricing model support
+Serverless pricing model support
+You can access Azure AI Search through the Azure portal,
+The portal is useful for service administration and content management, with tools for prototyping your knowledge bases, knowledge sources, indexes, indexers, skillsets, and data sources. REST APIs and SDKs are useful for production automation.
+Before you get started, use this checklist to make key decisions:
+Choose a pricing model and service tier
+for help with choosing the model that best fits your needs.
+Choose how you want to retrieve data:
+You can query directly from a search index for predictable, low-latency results, or use agentic retrieval to query across multiple indexes through a knowledge base. If youâre building a traditional app without an agent or chatbot, direct index queries can meet most needs with lower cost and complexity. If you want to work across multiple knowledge sources or support more advanced scenarios, consider agentic retrieval with minimal
+If you're using agentic retrieval, choose a
+. For classic search, choose a region that offers the features and capacity you need.
+Choose an ingestion method for index-bound content:
+to retrieve and serialize data into JSON. If you don't have a supported data source, or if your content and index must be synchronized in real time, the
+LLMs and agents don't require vectors. Only use them if you need similarity search or if you have content that can be homogenized into vectors. Azure AI Search offers
+Do you need user-based permission inheritance?
+Remote SharePoint is designed for this scenario, but you can also inherit user permissions attached to content in Azure Blob Storage or ADLS Gen2. For all other scenarios, you can use the
+Choose your learning resources
+These quickstarts and samples are available to help you get started.
+Quickstart: Agentic retrieval (
+Quickstart: Full-text search (
+Quickstart: Vector search (
+Microsoft maintains samples that use REST APIs and supported SDK programming languages:
+JavaScript/TypeScript samples
+For help with complex or custom solutions,
+with deep expertise in Azure AI Search.
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

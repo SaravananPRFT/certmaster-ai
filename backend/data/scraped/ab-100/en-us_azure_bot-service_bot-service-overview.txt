@@ -1,0 +1,66 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is the Bot Framework SDK?
+Microsoft Bot Framework and Azure AI Bot Service are a collection of libraries, tools, and services that let you build, test, deploy, and manage intelligent bots. The Bot Framework includes a modular and extensible SDK for building bots and connecting to AI services. With this framework, developers can create bots that use speech, understand natural language, answer questions, and more.
+The Bot Framework SDK and Bot Framework Emulator have been archived on GitHub. The project is no longer updated or maintained. Support tickets for the Bot Framework SDK will no longer be serviced as of December 31, 2025.
+To build agents with your choice of AI services, orchestration, and knowledge, consider using the Microsoft 365 Agents SDK. The Agents SDK has language support for C#, JavaScript or Python. You can learn more about the Agents SDK at
+If you have an existing bot built with the Bot Framework SDK, you can update your bot to the Agents SDK. Review the core changes and updates at
+Bot Framework SDK to Agents SDK migration guidance
+If you are building a collaborative agent designed to work within Microsoft Teams, consider using the Teams SDK. It provides Teams-specific APIs, adaptive card support, and built-in AI orchestration for agents that run in the Teams environment. You can learn more at
+Teams SDK (Teams AI Library)
+If you're looking for a SaaS-based agent platform, consider
+For historical release notes of each version, see the
+Bots provide an experience that feels less like using a computer and more like dealing with a personâor intelligent robot. You can use bots to shift simple, repetitive tasksâsuch as taking a dinner reservation or gathering profile informationâonto automated systems that may no longer require direct human intervention.
+Users converse with a bot using text, interactive cards, and speech.
+A bot interaction can be a quick answer to a question or an involved conversation that intelligently provides access to services.
+One way to think of a bot is as a web application that has a conversational interface.
+Your users connect to your bot through a channel, such as Facebook, Slack, Microsoft Teams, or a custom application.
+Depending on how the bot is configured and how it's registered with the channel, interactions can be in text or speech and can include images and video.
+The bot processes the user's input to interpret what the user has asked for or said.
+The bot evaluates input and performs relevant tasks, such as ask the user for additional information or access services on behalf of the user.
+The bot responds to the user to let them know what the bot is doing or has done.
+Bots are often implemented as a web application, hosted in Azure and using APIs to send and receive messages.
+What's in a bot varies widely depending on what kind of bot it is and what its purpose is.
+A bot can receive messages and echo them back to the user, with little code involved.
+A more complex bot can rely on various tools and services to deliver richer experiences on a wide variety of platforms.
+Bots can do the same things other types of software can doâread from and write to files, use databases and APIs, and do the regular computational tasks.
+What makes bots unique is their use of mechanisms used in human-to-human communication.
+Azure AI Bot Service and the Bot Framework include:
+Bot Framework SDKs for developing bots in C#, JavaScript, Python, or Java.
+(The Java SDK is retired with final long-term support ending in November 2023.)
+CLI tools for help with end-to-end bot development.
+Bot Connector Service, which relays messages and events between bots and channels.
+Azure resources for bot management and configuration.
+Additionally, bots may use other Azure services, such as:
+Azure AI services to build intelligent applications
+Azure Storage for cloud storage solution
+Azure AI Bot Service and Microsoft Bot Framework offer an integrated set of tools and services to help you design and build bots, through all stages of the bot life cycle.
+SDKs exist for C#, Java, JavaScript, TypeScript, and Python.
+Choose your favorite development environment or command line tools to create your bot.
+As with any type of software, having a thorough understanding of the goals, processes, and user needs is important to the process of creating a successful bot.
+You can create a simple bot or include more sophisticated capabilities such as speech, natural language understanding, and question answering.
+Before writing code, review the bot
+for best practices and to identify the needs for your bot.
+Typically, a bot is a web service hosted in Azure.
+In Azure, you can configure your bot to send and receive messages and events from various channels.
+You can create bots in any number of environments and languages. You can
+With Azure AI Bot Service and the Bot Framework, you can use other libraries and services to extend your bot's functionality. This table describes some of the features supported by the SDK.
+Persist user and conversation state
+Natural language understanding
+Interpret and extract information from user input
+Combine text and other media, such as images, audio, video, and buttons
+How to add media and cards
+Command line tools to help you to create, manage, and test bot assets.
+For complete code samples, see the
+Bot Framework Samples repo
+The samples demonstrate many capabilities of the SDK.
+Bots are complex apps with many different parts working together. Like any other complex app, this can lead to some interesting bugs or cause your bot to behave differently than expected. Before publishing, test your bot. We provide several ways to test bots before they're released for use:
+Test your bot locally with the
+. The Bot Framework Emulator is a stand-alone app that not only provides a chat interface but also debugging and interrogation tools to help understand how and why your bot does what it does. The Emulator can be run locally alongside your in-development bot application.
+. Once configured through the Azure portal your bot can also be reached through a web chat interface. The web chat interface is a great way to grant access to your bot to testers and other people who don't have direct access to the bot's running code.
+your bot with the current Bot Framework SDK.
+When you're ready for your bot to be available on the web,
+or deploy to your own web service or data center. Having an address on the public internet is the first step to your bot coming to life on your site, or inside chat channels.
+Connect your bot to channels, such as Facebook, Messenger, Slack, Microsoft Teams, Telegram, and SMS via Twilio. Bot Framework does most of the work necessary to send and receive messages from all of these different platformsâyour bot application receives a unified, normalized stream of messages regardless of the number and type of channels it's connected to. For information on adding channels, see
+Use the data collected in Azure portal to identify opportunities to improve the capabilities and performance of your bot. You can get service-level and instrumentation data like traffic, latency, and integrations. Analytics also provides conversation-level reporting on user, message, and channel data. For more information, see
+Create a Bot Framework bot

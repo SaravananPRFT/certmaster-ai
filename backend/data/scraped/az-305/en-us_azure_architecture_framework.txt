@@ -1,0 +1,22 @@
+Azure Well-Architected Framework
+The Azure Well-Architected Framework is a set of quality-driven tenets, architectural decision points, and review tools intended to help solution architects build a technical foundation for their workloads.
+Azure Well-Architected Framework
+Design workloads that achieve business value over time.
+As solution architects, you want to build reliable, secure, and performant workloads that maximize the value of investment in Azure infrastructure. Start with the Pillars, and align your design choices with the principles. Then, build a strong foundation for your workload based on technical design areas. Finally, use review tools to assess your readiness in deploying to production.
+Featured update - Build Well-Architected AI workloads by using proven architecture patterns
+Apply AI architecture patterns to design Well-Architected intelligent applications and custom AI models with greater confidence. Establish baseline knowledge of core components, their interactions, and key design characteristics (such as lifetime, scalability, security, and Responsible AI) to make informed design decisions. Evaluate and tailor these characteristics for your specific workload to build reliable, secure, and scalable AI solutions.
+Azure architecture pattern for AI workloads
+Ensures that the workload meets the uptime and recovery targets by building redundancy and resiliency at scale.
+Protect the workload from attacks by maintaining confidentiality and data integrity.
+Adopt an optimization mindset by at organizational, architectural, and tactical levels to keep your spending within budget.
+Reduce issues in production by building holistic observability and automated systems.
+Adjust to changes in demands placed on the workload by through horizontal scaling and testing changes before deploying to production.
+Build analytics workloads on Microsoft Fabric at-scale.
+Artificial Intelligence (AI)
+Incorporate discriminative or generative AI models in your workload for predictive analysis, generating content, and other AI use cases.
+Software as a service (SaaS)
+Key insights for Startups and mature independent software vendors (ISVs) to build scalable, performant, reliable, and secure SaaS solutions.
+Design and operationalize workloads that are expected to be always available and resilient to failures.
+Design strategies for all the characteristics of HPC workloads.
+Plan your path forward, improve your sustainability posture, and create new business value while reducing your operational footprint.
+See example workloads that apply Well-Architected tenets in the

@@ -1,0 +1,84 @@
+An overview of GitHub's security features.
+About GitHub's security features
+GitHub's security features help keep your code and secrets secure in repositories and across organizations.
+Some features are available for all GitHub plans.
+Additional features are available to organizations  on GitHub Team and GitHub Enterprise Cloud that purchase a GitHub Advanced Security product:
+In addition, a number of GitHub Secret Protection and GitHub Code Security features can be run on public repositories for free.
+Available for all GitHub plans
+The following security features are available for you to use, regardless of the GitHub plan you are on. You don't need to purchase GitHub Secret Protection or GitHub Code Security to use these features.
+Most of these features are available for public and private repositories.
+available for public repositories.
+Make it easy for your users to confidentially report security vulnerabilities they've found in your repository. For more information, see
+Adding a security policy to your repository
+The dependency graph allows you to explore the ecosystems and packages that your repository depends on and the repositories and packages that depend on your repository.
+You can find the dependency graph on the
+tab for your repository. For more information, see
+Software Bill of Materials (SBOM)
+You can export the dependency graph of your repository as an SPDX-compatible, Software Bill of Materials (SBOM). For more information, see
+Exporting a software bill of materials for your repository
+The GitHub Advisory Database contains a curated list of security vulnerabilities that you can view, search, and filter. For more information, see
+Browsing security advisories in the GitHub Advisory Database
+Dependabot alerts and security updates
+View alerts about dependencies that are known to contain security vulnerabilities, and choose whether to have pull requests generated automatically to update these dependencies. For more information, see
+Dependabot security updates
+You can also use default Dependabot auto-triage rules curated by GitHub to automatically filter out a substantial amount of false positives.
+For an overview of the different features offered by Dependabot and instructions on how to get started, see
+Dependabot quickstart guide
+On GitHub.com and GitHub Enterprise Server 3.22+, you can view alerts for malicious dependencies in your repository. See
+Dependabot version updates
+Use Dependabot to automatically raise pull requests to keep your dependencies up-to-date. This helps reduce your exposure to older versions of dependencies. Using newer versions makes it easier to apply patches if security vulnerabilities are discovered, and also makes it easier for Dependabot security updates to successfully raise pull requests to upgrade vulnerable dependencies. You can also customize Dependabot version updates to streamline their integration into your repositories. For more information, see
+Dependabot version updates
+Privately discuss and fix security vulnerabilities in your public repository's code. You can then publish a security advisory to alert your community to the vulnerability and encourage community members to upgrade. For more information, see
+Repository security advisories
+Enforce consistent code standards, security, and compliance across branches and tags. For more information, see
+Create unfalsifiable provenance and integrity guarantees for the software you build. For more information, see
+Using artifact attestations to establish provenance for builds
+If you are on a GitHub Free, GitHub Pro, or GitHub Team plan, artifact attestations are only available for public repositories. To use artifact attestations in private or internal repositories, you must be on a GitHub Enterprise Cloud plan.
+Secret scanning alerts for partners
+When GitHub detects a leaked secret in a public repository, or a public npm packages, GitHub informs the relevant service provider that the secret may be compromised. For details of the supported secrets and service providers, see
+Supported secret scanning patterns
+Push protection for users automatically protects you from accidentally committing secrets to public repositories, regardless of whether the repository itself has secret scanning enabled. Push protection for users is on by default, but you can disable the feature at any time through your personal account settings. For more information, see
+Managing push protection for users
+Available with GitHub Secret Protection
+For accounts on GitHub Team and GitHub Enterprise Cloud, you can access additional security features when you purchase
+GitHub Secret Protection includes features that help you detect and prevent credential leaks and secret sprawl, such as secret scanning for detecting hardcoded credentials and push protection for blocking them before they reach your repository.
+These features are available for all repository types. Some of these features are available for public repositories free of charge, meaning that you don't need to purchase GitHub Secret Protection to enable the feature on a public repository.
+Secret scanning alerts for users
+Automatically detect hardcoded credentials that have been checked into a repository. You can view alerts for any secrets that GitHub finds in your code, in the
+tab of your repository, so you can respond to credential leaks quickly. For more information, see
+Available for public repositories by default.
+AI-detected secrets's generic secret detection is an AI-powered expansion of secret scanning that identifies unstructured secrets (passwords) in your source code and then generates an alert. For more information, see
+Application card: GitHub security and quality AI features
+Push protection proactively scans your code, and any repository contributors' code, for hardcoded secrets during the push process and blocks the push if any credential leaks are detected. If a contributor bypasses the block, an alert is generated. For more information, see
+Available for public repositories by default.
+Delegated bypass for push protection
+Delegated bypass for push protection lets you control which individuals, roles, and teams:
+Can bypass push protection
+Are exempt from push protection
+Can review bypass requests from other contributors
+Delegated bypass for push protection
+You can define custom patterns to identify secrets that are not detected by the default patterns supported by secret scanning, such as patterns that are internal to your organization. For more information, see
+Defining custom patterns for secret scanning
+Security overview allows you to review the overall security landscape of your organization, view trends and other insights, and manage security configurations, making it easy to monitor your organization's security status and identify the repositories and organizations at greatest risk. For more information, see
+Available with GitHub Code Security
+For accounts on GitHub Team and GitHub Enterprise Cloud, you can access additional security features when you purchase
+GitHub Code Security includes features that help you find and fix vulnerabilities, like code scanning, premium Dependabot features, and dependency review.
+These features are available for all repository types. Some of these features are available for public repositories free of charge, meaning that you don't need to purchase GitHub Code Security to enable the feature on a public repository.
+Automatically detect security vulnerabilities and coding errors in new or modified code. Potential problems are highlighted, with detailed information, allowing you to fix the code before it's merged into your default branch. For more information, see
+Available for public repositories by default.
+Run CodeQL processes locally on software projects or to generate code scanning results for upload to GitHub. For more information, see
+Available for public repositories by default.
+Get automatically generated fixes for code scanning alerts. For more information, see
+Application card: GitHub security and quality AI features
+Available for public repositories by default.
+AI-powered security detections
+Find vulnerabilities in languages and frameworks not covered by CodeQL with an AI-based scanning engine that runs during pull request review. See
+AI-powered security detections in pull requests
+Custom auto-triage rules for Dependabot
+Help you manage your Dependabot alerts at scale. With custom auto-triage rules you have control over the alerts you want to ignore, snooze, or trigger a Dependabot security update for. For more information, see
+Customizing auto-triage rules to prioritize Dependabot alerts
+Show the full impact of changes to dependencies and see details of any vulnerable versions before you merge a pull request. For more information, see
+Available for public repositories by default.
+Fix security alerts at scale by creating security campaigns and collaborating with developers to reduce your security backlog. For more information, see
+Security overview allows you to review the overall security landscape of your organization, view trends and other insights, and manage security configurations, making it easy to monitor your organization's security status and identify the repositories and organizations at greatest risk. For more information, see
+About GitHub Advanced Security

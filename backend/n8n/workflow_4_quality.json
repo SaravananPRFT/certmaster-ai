@@ -1,0 +1,249 @@
+{
+  "name": "CertMasterAI — 4. Quality Verification",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule-4",
+      "name": "Daily Quality Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "notes": "Runs every day at 06:00"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/index/status",
+        "method": "GET",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "node-http-4a",
+      "name": "GET /admin/index/status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst stats = data.chroma_db_stats || {};\nconst total = data.total_chunks || 0;\nconst MIN_CHUNKS_PER_EXAM = 50;\n\nconst alerts = [];\nconst healthy = [];\n\nfor (const [exam, count] of Object.entries(stats)) {\n  if (count < MIN_CHUNKS_PER_EXAM) {\n    alerts.push({ exam, count, issue: count === 0 ? 'EMPTY' : 'BELOW_THRESHOLD' });\n  } else {\n    healthy.push({ exam, count });\n  }\n}\n\nreturn [{\n  json: {\n    total_chunks: total,\n    index_status: data.status,\n    alerts,\n    healthy,\n    has_alerts: alerts.length > 0,\n    checked_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "node-code-4",
+      "name": "Evaluate Quality",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [710, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-alerts",
+              "leftValue": "={{ $json.has_alerts }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "node-if-4",
+      "name": "Has Quality Alerts?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst alertSummary = data.alerts.map(a => `  - ${a.exam}: ${a.count} chunks (${a.issue})`).join('\\n');\nconst message = `[CertMasterAI] RAG Quality Alert\\n\\nThe following exams have insufficient ChromaDB coverage:\\n${alertSummary}\\n\\nTotal chunks: ${data.total_chunks}\\nChecked at: ${data.checked_at}\\n\\nAction: Auto re-index triggered.`;\nconsole.warn(message);\nreturn [{ json: { alert: true, message, alerts: data.alerts, total_chunks: data.total_chunks, checked_at: data.checked_at } }];"
+      },
+      "id": "node-alert-4",
+      "name": "Log Quality Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 220]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/content-alert",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ type: 'quality_degradation', source: 'wf4_quality_check', has_alerts: $json.has_alerts !== undefined ? $json.has_alerts : true, alerts: $json.alerts, total_chunks: $json.total_chunks, checked_at: $json.checked_at }) }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "node-notify-4",
+      "name": "Send Alert to FastAPI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1400, 220],
+      "notes": "POSTs the alert to /admin/content-alert — persisted to data/alerts.json on the FastAPI host"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconsole.log(`[CertMasterAI] Quality check PASSED — ${data.total_chunks} total chunks across ${data.healthy.length} exams.`);\nreturn [{ json: { alert: false, status: 'healthy', total_chunks: data.total_chunks } }];"
+      },
+      "id": "node-ok-4",
+      "name": "Log All Clear",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 400]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/index-documents",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "{\"exam_code\": \"all\", \"scraped_dir\": \"./data/scraped\", \"clear_first\": false}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "node-reindex-4",
+      "name": "Auto Re-index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1630, 220],
+      "notes": "Automatically triggers re-indexing when quality alerts are detected"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 4 — Quality Verification\n\nRuns daily at 06:00 to verify ChromaDB has sufficient content for all 6 exams.\n\n**Thresholds:**\n- < 50 chunks = alert (may produce poor-quality questions)\n- 0 chunks = EMPTY alert (will use hardcoded fallback)\n\n**On alert:**\n1. Logs warning to n8n console\n2. POSTs to FastAPI /admin/content-alert (saved to data/alerts.json)\n3. Automatically triggers re-indexing from data/scraped/\n\n**Backend must be running at:** http://localhost:8003\n(run: `cd backend && uvicorn app.main:app --port 8003 --reload`)",
+        "height": 230,
+        "width": 420
+      },
+      "id": "node-note-4",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 520]
+    }
+  ],
+  "connections": {
+    "Daily Quality Check": {
+      "main": [
+        [
+          {
+            "node": "GET /admin/index/status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /admin/index/status": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Quality": {
+      "main": [
+        [
+          {
+            "node": "Has Quality Alerts?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Quality Alerts?": {
+      "main": [
+        [
+          {
+            "node": "Log Quality Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log All Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Quality Alert": {
+      "main": [
+        [
+          {
+            "node": "Send Alert to FastAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert to FastAPI": {
+      "main": [
+        [
+          {
+            "node": "Auto Re-index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "certmasterai-wf-004",
+  "tags": [
+    {"id": "certmasterai", "name": "certmasterai"}
+  ]
+}

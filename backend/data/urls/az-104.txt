@@ -1,0 +1,33 @@
+# AZ-104 — Microsoft Azure Administrator
+# Microsoft Learn documentation URLs (~30 pages)
+
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/overview
+https://learn.microsoft.com/en-us/azure/role-based-access-control/overview
+https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles
+https://learn.microsoft.com/en-us/entra/fundamentals/whatis
+https://learn.microsoft.com/en-us/entra/identity/users/directory-overview-user-model
+https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview
+https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-overview
+https://learn.microsoft.com/en-us/azure/storage/files/storage-files-introduction
+https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy
+https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-overview
+https://learn.microsoft.com/en-us/azure/virtual-machines/overview
+https://learn.microsoft.com/en-us/azure/virtual-machines/availability
+https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview
+https://learn.microsoft.com/en-us/azure/app-service/overview
+https://learn.microsoft.com/en-us/azure/container-instances/container-instances-overview
+https://learn.microsoft.com/en-us/azure/aks/intro-kubernetes
+https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview
+https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview
+https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview
+https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview
+https://learn.microsoft.com/en-us/azure/application-gateway/overview
+https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways
+https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction
+https://learn.microsoft.com/en-us/azure/dns/dns-overview
+https://learn.microsoft.com/en-us/azure/monitor/overview
+https://learn.microsoft.com/en-us/azure/backup/backup-overview
+https://learn.microsoft.com/en-us/azure/site-recovery/site-recovery-overview

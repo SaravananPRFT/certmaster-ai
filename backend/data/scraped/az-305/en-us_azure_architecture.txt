@@ -1,0 +1,82 @@
+Design solutions on Azure by using established patterns and practices. Azure Architecture Center is a catalog of solution ideas, example workloads, reference architectures, technology decision guides, and architecture guides for Azure workloads.
+Browse Azure architectures
+Build by using application architecture fundamentals
+Learn cloud design patterns
+See what's new and updated
+Architect workloads on Azure
+Explore best practices and patterns for building workloads on Microsoft Azure.
+Learn fundamental architecture styles
+Use best practices in cloud applications
+Avoid performance antipatterns
+Use responsible engineering practices
+Choose the right technology
+Choose a container service
+Choose a messaging service
+Implement an Azure landing zone
+Deploy a platform landing zone
+Automate through subscription vending
+Application landing zone solutions
+Architecture for SaaS and multitenant applications
+Build mission-critical workloads
+Azure for AWS professionals
+Azure for Google Cloud professionals
+Explore architectures and guides by technology area.
+Microsoft Foundry chat baseline architecture
+Develop and optimize a RAG implementation
+AI agent orchestration patterns
+Hub-spoke network topology
+Choose your Azure compute service
+Microsoft Foundry chat baseline architecture
+Build a generative AI gateway
+AI agent orchestration patterns
+Develop and optimize a RAG implementation
+Analytics architecture design
+Choose a data analytics technology
+Choose a Microsoft Fabric deployment pattern
+Analytics end-to-end with Microsoft Fabric
+Enterprise BI with Microsoft Fabric
+Near real-time lakehouse data processing
+Stream processing with Azure Databricks
+Choose an Azure compute service
+Azure VM baseline architecture
+Understand multi-region compute balancing
+Build workloads on spot virtual machines
+Choose a container service
+Design for Azure Kubernetes Service
+Azure Kubernetes Service baseline cluster
+Plan Day-2 operations on AKS
+Deploy microservices with Azure Container Apps
+Deploy microservices with Azure Container Apps and Dapr
+Databases architecture design
+Migrate an Oracle database to Azure
+DataOps for a modern data warehouse
+Design a medallion lakehouse
+Polyglot persistence with relational and NoSQL
+Hybrid architecture design
+Connect a cross-premises network to Azure
+Azure Local baseline architecture
+Hybrid Kubernetes clusters
+Identity architecture design
+Identity in multitenant architectures
+Choose a hybrid network architecture
+ExpressRoute with VPN failover
+Implement a secure hybrid network
+Highly available network virtual appliances
+Security architecture design
+Azure Firewall and Application Gateway
+Securely managed web applications
+Storage architecture design
+Choose an Azure storage service
+Azure enterprise cloud file share
+Azure file shares in a hybrid environment
+Enterprise file shares with disaster recovery
+Baseline zone-redundant web application
+Protect APIs with Application Gateway and API Management
+Serverless event processing
+Write-through caching for web applications
+Cloud adoption and workload design
+Build a strong cloud adoption strategy and a consistent approach to workload design.
+Cloud Adoption Framework for Azure
+Azure Well-Architected Framework pillars
+Well-architected workloads
+Well-architected service guides

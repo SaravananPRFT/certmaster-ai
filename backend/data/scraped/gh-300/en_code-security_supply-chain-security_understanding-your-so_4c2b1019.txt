@@ -1,0 +1,28 @@
+Enabling the dependency graph
+You can allow users to identify their projects' dependencies by enabling the dependency graph.
+Repository owners, organization owners, security managers, and users with the
+The dependency graph is a summary of the manifest and lock files stored in a repository and any dependencies that are submitted for the repository using the dependency submission API. For more information, see
+When the dependency graph is first enabled, any manifest and lock files for supported ecosystems are parsed immediately. The graph is usually populated within minutes but this may take longer for repositories with many dependencies. Once enabled, the graph is automatically updated with every push to the repository and every push to other repositories in the graph.
+Enabling the dependency graph for a repository
+Enabling the dependency graph gives GitHub read-only access to the dependency manifest and lock files for a repository.
+On GitHub, navigate to the main page of the repository.
+Under your repository name, click
+. If you cannot see the "Settings" tab, select the
+In the "Security" section of the sidebar, click
+Read the message about granting GitHub read-only access to the repository data to enable the dependency graph, then next to "Dependency Graph", click
+You can disable the dependency graph at any time by clicking
+next to "Dependency Graph" on the settings page for "Advanced Security".
+Enabling the dependency graph for multiple repositories
+You can enable or disable the dependency graph for all repositories owned by your user account, regardless of their visibility. See
+Managing security and analysis features
+You can also enable the dependency graph for multiple repositories in an organization at the same time. For more information, see
+Configuring security features in your organization
+You can use the dependency submission API to submit dependencies from the package manager or ecosystem of your choice, even if the ecosystem is not supported by dependency graph for manifest or lock file analysis.
+Dependencies submitted to a project using the dependency submission API will show which detector was used for their submission and when they were submitted. For more information on the dependency submission API, see
+Using the dependency submission API
+For more information on viewing the dependency graph, see
+Exploring the dependencies of a repository
+Configuring automatic dependency submission for your repository
+Viewing insights for dependencies in your organization
+Viewing and updating Dependabot alerts
+Vulnerable dependency detection

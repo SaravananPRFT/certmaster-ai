@@ -1,0 +1,57 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Azure App Service is a platform that lets you run web applications, mobile back ends, and RESTful APIs without worrying about managing the underlying infrastructure. Think of it as a powerful web hosting service that takes care of all the heavy lifting for you, so you can focus on creating great applications.
+App Service supports a variety of web stacks: .NET, Java (in Java SE, Tomcat, and JBoss flavors), Node.js, Python, and PHP, and can run them on both Windows and Linux. Or, if your app is containerized, you can just deploy it as a custom container.
+Why Use Azure App Service?
+Whether you're a student, a small business, a startup, or an enterprise, App Service offers a wide range of features tailored to meet your needs.
+: In addition to the widely available
+, students can take advantage of the
+Azure for Students Starter
+: Purpose-built deployment tools are available for Visual Studio, Visual Studio Code, IntelliJ, and Eclipse.
+: Run your apps without needing experience in infrastructure management.
+: Plenty of tutorials and guides to help you get started.
+Small businesses and startups
+: Protect your brand and your customers quickly with an
+. Or, bring your domain and certificate to App Service.
+: Pay only for the resources you use, and scale
+: Deploy using command line tools you already use, such as Maven, Gradle, Azure Developer CLI, Azure CLI, and Azure PowerShell.
+: Automatically scale your applications based on demand.
+: Deploy your apps in data centers around the world.
+: Choose from an extensive list of application templates in the
+, such as WordPress, Joomla, Django , Node.js and Drupal.
+: Turn-key social sign-in with
+with GitHub Actions, Azure Pipelines, and more. Deploy predictably through
+High-density hosting savings
+: Run more applications on fewer VMs with the memory-optimized
+, and save up to 55% on predictable workloads with
+: Secure ingress and egress with
+Azure Virtual Network integration
+, or run fully isolated applications with
+, using dedicated networking and VMs.
+: Develop business applications easily with built-in authentication, Microsoft Graph, and
+to your line-of-business applications.
+and zone redundancy features help disaster-proof your application.
+ISO, SOC, and PCI compliance
+meet the strictest requirements of large enterprises.
+For information about which Azure compute services best fit your scenario, see
+Choose an Azure compute service
+Managed Instance on App Service (preview)
+Managed Instance (preview) adds customization with plan-scoped isolation for legacy or infrastructure-bound web apps requiring Component Object Model (COM), registry access, Windows/Microsoft Installers (MSI), drive mapping, or stricter network boundaries.
+Startup PowerShell install scripts enable COM, registry, IIS, ACL updates, MSI execution.
+Registry adapters: Plan-level registry key definitions with secret values stored in Azure Key Vault.
+Drive letter access: Configure access to SMB/UNC paths for legacy components (map or reference as supported).
+RDP (via Azure Bastion): Diagnostics onlyâscript persistent configuration.
+Supports: Windows workloads (.NET, Java), COM/registry/MSI, drive mapping, managed identity, VNet integration, MSMQ client, CI/CD, Entra ID auth.
+Not supported: Linux, containers, ASE, remote debugging (preview), non-PV4/PMV4 SKUs.
+Validate telemetry (Application Insights/logging), certificate automation, and operational processes before production adoption. Persistent changes must be scripted using configuration (install) scripts; Changes made during RDP sessions are not persisted.
+Quick decision guide snapshot
+Legacy dependencies (COM, registry, MSI, drive mapping) exist.
+Plan-level enforced network isolation needed for a focused set of apps.
+Diagnostics RDP access desired.
+You need Linux or container support.
+You want broad runtime flexibility with automatic OS/runtime management and patching.
+You require large-scale isolation for many apps rather than deep per-plan OS customization.
+Getting started with Azure App Service
+Managed Instance quickstart
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

@@ -1,0 +1,33 @@
+# AI-102 — Designing and Implementing a Microsoft Azure AI Solution
+# Microsoft Learn documentation URLs (~30 pages)
+
+https://learn.microsoft.com/en-us/azure/ai-services/overview
+https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/prompt-engineering
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/retrieval-augmented-generation
+https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning
+https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/function-calling
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/key-phrase-extraction/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/sentiment-opinion-mining/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/named-entity-recognition/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/conversational-language-understanding/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/question-answering/overview
+https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/overview
+https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-to-text
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-translation
+https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview
+https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview
+https://learn.microsoft.com/en-us/azure/ai-services/translator/overview
+https://learn.microsoft.com/en-us/azure/search/search-what-is-azure-search
+https://learn.microsoft.com/en-us/azure/search/semantic-search-overview
+https://learn.microsoft.com/en-us/azure/search/vector-search-overview
+https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview
+https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning
+https://learn.microsoft.com/en-us/azure/ai-services/face/overview
+https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/overview

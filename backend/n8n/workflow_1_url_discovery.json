@@ -1,0 +1,112 @@
+{
+  "name": "CertMasterAI — 1. URL Discovery",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 1 * * 0"
+            }
+          ]
+        }
+      },
+      "id": "node-schedule-1",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "notes": "Runs every Sunday at 01:00"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the list of exam codes and their URL list paths\nconst exams = ['ai-102', 'az-104', 'az-305', 'gh-300', 'ab-100', 'ai-103'];\nconst items = exams.map(code => ({\n  json: {\n    exam_code: code.toUpperCase(),\n    url_file: `/home/node/certmasterai/urls/${code}.txt`,\n    scraped_dir: `/home/node/certmasterai/scraped/${code}`\n  }\n}));\nreturn items;"
+      },
+      "id": "node-code-1",
+      "name": "Build Exam List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/index/status",
+        "method": "GET",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-http-status",
+      "name": "Check Index Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [710, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Identify which exams have zero chunks and need indexing\nconst status = $input.first().json;\nconst stats = status.chroma_db_stats || {};\nconst needsIndex = Object.entries(stats)\n  .filter(([code, count]) => count === 0)\n  .map(([code]) => ({ json: { exam_code: code, needs_index: true, current_chunks: 0 } }));\nconst healthy = Object.entries(stats)\n  .filter(([code, count]) => count > 0)\n  .map(([code, count]) => ({ json: { exam_code: code, needs_index: false, current_chunks: count } }));\nconsole.log(`Needs indexing: ${needsIndex.map(i => i.json.exam_code).join(', ') || 'none'}`);\nconsole.log(`Healthy: ${healthy.map(i => i.json.exam_code + '(' + i.json.current_chunks + ')').join(', ') || 'none'}`);\nreturn [...needsIndex, ...healthy];"
+      },
+      "id": "node-code-2",
+      "name": "Identify Gaps",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 1 — URL Discovery\n\nChecks the ChromaDB index status for all 6 exams and identifies which ones have zero chunks (need indexing).\n\n**Output:** List of exam codes with `needs_index` flag.\n\n**Next step:** Run Workflow 2 (Download) then Workflow 3 (Index) for any exam with `needs_index: true`.\n\n**Schedule:** Every Sunday at 01:00 AM.",
+        "height": 200,
+        "width": 350
+      },
+      "id": "node-note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 500]
+    }
+  ],
+  "connections": {
+    "Weekly Schedule": {
+      "main": [
+        [
+          {
+            "node": "Build Exam List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Exam List": {
+      "main": [
+        [
+          {
+            "node": "Check Index Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Index Status": {
+      "main": [
+        [
+          {
+            "node": "Identify Gaps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "certmasterai-wf-001",
+  "tags": [
+    {"id": "certmasterai", "name": "certmasterai"}
+  ]
+}

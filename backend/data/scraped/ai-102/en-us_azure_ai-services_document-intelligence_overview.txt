@@ -1,0 +1,251 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is Azure Document Intelligence in Foundry Tools?
+Azure Document Intelligence in Foundry Tools is a cloud-based
+service that you can use to build intelligent document processing solutions. Massive amounts of data, spanning various data types, are stored in forms and documents. You can use Azure Document Intelligence to effectively manage the speed at which data is collected and processed. Azure Document Intelligence is key to improved operations, informed data-driven decisions, and enlightened innovation. For information on region access, see
+Product availability by region
+Document Intelligence REST API v2.1
+Document Intelligence REST API 2022-08-31 v3.0
+To avoid production disruption, use
+Azure Document Intelligence 2024-11-30 v4.0
+for all new development, and migrate existing workloads to
+Azure Document Intelligence 2024-11-30 v4.0
+before these retirement dates. For more information, see
+Document Intelligence migration guide
+Azure Document Intelligence in Foundry Tools is a cloud-based
+service that you can use to build intelligent document processing solutions. Massive amounts of data, spanning various data types, are stored in forms and documents. You can use Azure Document Intelligence to effectively manage the speed at which data is collected and processed. Azure Document Intelligence is key to improved operations, informed data-driven decisions, and enlightened innovation. For information on region access, see
+Product availability by region
+As part of Azure Content Understanding capabilities, Azure Document Intelligence provides high-accuracy and reliable deterministic extraction from structured documents.
+Content Understanding also offers LLM-powered analyzers for complex, unstructured, and multimodal content.
+Together, they make it easier to prepare data for intelligent agents and applications that can read, analyze, and respond to real-world content with precision and speed.
+To compare both services and determine which best fits your scenario, see
+Choose the right Azure AI tool for document processing
+Document analysis (general extraction) models enable text extraction from forms and documents and return structured business-ready content for your organization's action, use, or development.
+Extract printed and handwritten text.
+Extract text, tables, and document structure.
+Extract printed and handwritten text.
+Extract text, tables, and document structure.
+Extract text, structure, and key-value pairs.
+You can use prebuilt models to add intelligent document processing to your apps and flows without having to train and build your own models.
+Financial services and legal
+Extract account information and details from bank statements.
+Extract relevant information from checks.
+Extract agreement and party details.
+Extract payment card information.
+Extract customer and vendor details.
+Extract sales transaction details.
+Extract from any US tax forms supported.
+Extract taxable compensation details.
+Extract 1098 variation details.
+Extract 1099 variation details.
+Extract 1040 variation details.
+Extract loan application details.
+Extract information from appraisal.
+Extract information from validation of employment.
+Extract loan transmittal details.
+Extract final closing loan terms.
+Extract insurance coverage details.
+Extract verification details.
+Extract certified marriage information.
+Extract customer and vendor details.
+Extract sales transaction details.
+Extract identification and verification details.
+Extract health insurance details.
+Extract business contact details.
+Extract agreement and party details.
+Extract taxable compensation details.
+Extract 1098 variation details.
+Custom models are trained by using your labeled datasets to extract distinct data from forms and documents that are specific to your use cases. You can combine standalone custom models to create composed models.
+Document field extraction models
+âï¸ Document field extraction models are trained to extract labeled fields from documents.
+Extract data from mixed-type documents.
+Extract data from static layouts.
+Extract data by using a collection of models.
+Custom classification models
+âï¸ Custom classifiers identify document types before invoking an extraction model.
+Identify designated document types (classes) before invoking an extraction model.
+Document Intelligence returns extracted field values as strongly typed data. Each field in the extraction response carries a value typeâsuch as
+âthat determines how the raw text is normalized and surfaced in the API response.
+: For prebuilt models such as
+, field schemas are defined and maintained by Microsoft. Common fields are mapped to specific typesâfor example,
+typeâso normalization happens automatically without any configuration.
+: When you train a custom extraction model, you define the field schema. For each labeled field, you explicitly assign a type (
+). The model then uses that type definition to auto-normalize extracted values during inference.
+For the full field schema reference, see
+Document Intelligence supported schema
+Document Intelligence supports optional features that you can enable or disable depending on the document extraction scenario:
+Read model support for searchable PDF
+prebuilt-healthInsuranceCard.us
+prebuilt-marriageCertificate.us
+prebuilt-mortgage.us.closingDisclosure
+* - Premium features incur extra costs
+Models and development options
+Use Document Intelligence to automate document processing in applications and workflows, enhance data-driven strategies, and enrich document search capabilities. Use the links in the table to learn more about each model and browse development options.
+â Extract text from documents.
+â Digitizing any document
+â Compliance and auditing
+â Processing handwritten notes before translation
+Document Intelligence Studio
+â Extract text and layout information from documents.
+â Document indexing and retrieval by structure
+â Financial and medical report analysis
+Document Intelligence Studio
+General document (deprecated in 2023-10-31-preview)
+â Extract text, layout, and key/value pairs from documents.
+â Key/value pair extraction
+â Survey data collection and analysis
+Document Intelligence Studio
+â Extract key information from invoices.
+â Accounts payable processing
+â Automated tax recording and reporting
+Document Intelligence Studio
+â Extract key information from receipts.
+â Receipt model v3.0 supports processing of single-page hotel receipts.
+â Consumer behavior data analysis
+â Customer loyalty program
+â Merchandise return processing
+â Automated tax recording and reporting
+Document Intelligence Studio
+â Extract key information from passports and ID cards.
+â Extract  endorsements, restrictions, and vehicle classifications from US driver's licenses.
+â Know your customer (KYC) financial services guidelines compliance
+â Medical account management
+â Identity checkpoints and gateways
+Document Intelligence Studio
+â Extract key information from checks.
+â Automated lender management
+Document Intelligence Studio
+â Extract key information from pay stubs.
+â Employee payroll detail verification
+â Fraud detection for employment
+â Automated tax processing
+Document Intelligence Studio
+â Extract key information from bank statements.
+â Tax processing use cases
+â Automated accounting management
+â Credit-debit management
+â Loan documentation processing
+Document Intelligence Studio
+prebuilt-healthInsuranceCard.us
+â Extract key information from US health insurance cards.
+â Coverage and eligibility verification
+Document Intelligence Studio
+â Extract contract agreement and party details.
+Document Intelligence Studio
+â Extract contract agreement and party details.
+Document Intelligence Studio
+Marriage certificate model
+prebuilt-marriageCertificate.us
+â Extract contract agreement and party details.
+Document Intelligence Studio
+â Extract key information from 1003 loan applications.
+Fannie Mae and Freddie Mac documentation requirements
+Document Intelligence Studio
+â Extract key information from 1004 appraisals.
+â Fannie Mae and Freddie Mac documentation requirements
+â Uniform Residential Appraisal report to help lender/client with the market value of the subject property
+Document Intelligence Studio
+â Extract key information from 1005 validation of employment.
+â Fannie Mae and Freddie Mac documentation requirements
+â Verification of employment document to determine the qualification as a prospective mortgagor
+Document Intelligence Studio
+â Extract key information from Uniform Underwriting and Transmittal Summary.
+. Loan underwriting processing by using summary data
+Document Intelligence Studio
+US mortgage disclosure form
+prebuilt-mortgage.us.closingDisclosure
+â Extract key information from Uniform Underwriting and Transmittal Summary.
+Mortgage loan final details requirements
+Document Intelligence Studio
+Extract key information from IRS US W2 tax forms (years 2018-2021).
+â Automated tax document management
+â Mortgage loan application processing
+Document Intelligence Studio
+US tax 1098 (and variations) forms
+Extract key information from 1098-form variations.
+Document Intelligence Studio
+US tax 1099 (and variations) forms
+Extract information from 1099-form variations.
+Document Intelligence Studio
+US tax 1040 (and variations) forms
+Extract information from 1040-form variations.
+Document Intelligence Studio
+Extract information from any of the supported US tax forms.
+Document Intelligence Studio
+â Extract key information from business cards.
+Sales lead and marketing management
+Document Intelligence Studio
+Extract information from forms and documents into structured data based on a model created from a set of representative training document sets.
+Extract distinct data from forms and documents specific to your business and use cases.
+Document Intelligence Studio
+Return to custom model types
+To train a custom neural model, set the
+. For more information, see
+Extract labeled data from structured (surveys, questionnaires), semistructured (invoices, purchase orders), and unstructured documents (contracts, letters).
+Extract text data, checkboxes, and tabular fields from structured and unstructured documents.
+Document Intelligence Studio
+Return to custom model types
+To train a custom template model, set the
+. For more information, see
+Extract labeled values and fields from structured and semistructured documents.
+Extract key data from highly structured documents with defined visual templates or common visual layouts and forms.
+Document Intelligence Studio
+Return to custom model types
+A composed model is created by taking a collection of custom models and assigning them to a single model built from your form types.
+Useful when you train several models and want to group them to analyze similar form types, like purchase orders
+Document Intelligence Studio
+Return to custom model types
+Custom classification model
+Composed classification model
+Custom classification models combine layout and language features to detect, identify, and classify documents within an input file.
+â A loan application package that contains application forms, pay slips, and bank statements
+â A collection of scanned invoices
+Document Intelligence Studio
+Return to custom model types
+Azure Document Intelligence is a cloud-based
+for developers to build intelligent document processing solutions. Azure Document Intelligence applies optical character recognition (OCR) based on machine learning along with document understanding technologies to extract text, tables, structure, and key/value pairs from documents. You can also label and train custom models to automate data extraction from structured, semistructured, and unstructured documents. To learn more about each model, see the concepts articles.
+Identity document (ID) model
+Document Intelligence models and development options
+For an enhanced experience and advanced model quality, try the
+Document Intelligence Studio
+The Studio supports any model trained with v2.1 labeled data.
+For more information about migrating from v2.1 to v4.0, see the
+Document Intelligence migration guide
+) reaches end of support on March 30, 2029. Migrate v3.0 workloads to v4.0 before that date.
+To learn more about each model and browse the API references, use the links in the following table.
+Extraction and analysis of text, selection marks, tables, and bounding box coordinates, from forms and documents
+Document Intelligence labeling tool
+Document Intelligence Docker container
+Extraction and analysis of data from forms and documents specific to distinct business data and use cases
+Document Intelligence labeling tool
+Document Intelligence Docker container
+Automated data processing and extraction of key information from sales invoices
+Document Intelligence labeling tool
+Document Intelligence Docker container
+Automated data processing and extraction of key information from sales receipts.
+Document Intelligence labeling tool
+Document Intelligence Docker container
+Identity document (ID) model
+Automated data processing and extraction of key information from US driver's licenses and international passports
+Document Intelligence labeling tool
+Document Intelligence Docker container
+Automated data processing and extraction of key information from business cards
+Document Intelligence labeling tool
+Document Intelligence Docker container
+As with all Foundry Tools, developers who use Document Intelligence should be aware of Microsoft policies on customer data. For more information, see
+Data, privacy, and security for Document Intelligence
+Version support and retirement
+The following table summarizes Document Intelligence API version support:
+To avoid production disruption, migrate to v4.0 before the retirement dates above. For migration guidance, see the
+Document Intelligence migration guide
+Choose a Document Intelligence model
+Process your own forms and documents with
+Document Intelligence Studio
+Document Intelligence quickstart
+, and then create a document processing app in the development language of your choice.
+Process your own forms and documents with the
+Document Intelligence Sample Labeling tool
+Document Intelligence quickstart
+, and then create a document processing app in the development language of your choice.
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

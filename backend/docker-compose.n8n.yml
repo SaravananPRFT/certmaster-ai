@@ -1,0 +1,63 @@
+# CertMasterAI — n8n automation stack
+# Usage:
+#   docker compose -f docker-compose.n8n.yml up -d
+#   Open http://localhost:5678 (admin / certmasterai2024)
+#
+# Import all workflows from backend/n8n/*.json via
+# Settings > Import workflow in the n8n UI.
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: certmasterai-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Server
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+
+      # Basic auth (change password before sharing access)
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=certmasterai2024
+
+      # Execution
+      - EXECUTIONS_PROCESS=main
+      - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+      - EXECUTIONS_DATA_SAVE_ON_SUCCESS=last
+      - EXECUTIONS_DATA_MAX_AGE=168
+
+      # Timezone
+      - GENERIC_TIMEZONE=America/New_York
+
+      # Encryption key (change before using in production)
+      - N8N_ENCRYPTION_KEY=certmasterai-n8n-key-change-in-prod
+
+    volumes:
+      # n8n internal data (workflows, credentials, executions)
+      - n8n_data:/home/node/.n8n
+
+      # Shared with FastAPI backend — scraped docs, URL lists
+      # The backend reads/writes these paths; n8n workflows reference them
+      - ./data/scraped:/home/node/certmasterai/scraped
+      - ./data/urls:/home/node/certmasterai/urls
+
+    # Allows n8n to reach the FastAPI backend at http://host.docker.internal:8003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    networks:
+      - certmasterai_net
+
+volumes:
+  n8n_data:
+    name: certmasterai_n8n_data
+
+networks:
+  certmasterai_net:
+    name: certmasterai_net
+    driver: bridge

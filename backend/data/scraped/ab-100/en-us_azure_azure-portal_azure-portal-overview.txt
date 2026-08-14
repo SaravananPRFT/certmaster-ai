@@ -1,0 +1,56 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+The Azure portal is a web-based, unified console that you can use to create and manage all your Azure resources. By using the Azure portal, you can manage your Azure subscription through a graphical user interface. You can build, manage, and monitor everything from simple web apps to complex cloud deployments in the portal. For example, you can set up a new database, increase the compute power of your virtual machines, and monitor your monthly costs. You can review all available resources and use guided wizards to create new ones.
+The Azure portal is designed for resiliency and continuous availability. It has a presence in every Azure datacenter. This configuration makes the Azure portal resilient to individual datacenter failures and helps avoid network slowdowns by being close to users. The Azure portal updates continuously and requires no downtime for maintenance activities. You can access the Azure portal by using
+If you don't have an Azure subscription and want to explore the Azure portal,
+In this article, you learn about the different parts of the Azure portal.
+By default, the first thing you see after you
+. This page compiles resources that help you get the most from your Azure subscription. Select
+to quickly create a new resource in the current subscription, or choose a service to start working in. For quick and easy access to work in progress, the portal shows a list of your most recently visited resources. It also includes links to free online courses, documentation, and other useful resources.
+Portal elements and controls
+and page header are global elements that always appear in the Azure portal. These persistent features form the "shell" for the user interface associated with each individual service or feature. The header provides access to global controls.
+The working pane for a resource or service might also have a
+with commands specific to that area.
+The following illustration labels the basic elements of the Azure portal. Each element is described in the following table. In this example, the current focus is a virtual machine (VM), but the same elements generally apply, no matter what type of resource or service you're working with.
+. Use this global element to navigate between services. Here, the portal menu is in flyout mode, so it's hidden until you select the menu icon.
+. Use the breadcrumb links to move back a level in your workflow.
+. Appears at the top of every portal page and holds global elements.
+. Use the search bar in the page header to quickly find a specific resource, a service, or documentation.
+. Provides quick access to
+. These controls for common tasks persist in the page header: Cloud Shell, Notifications, Settings, Support + Troubleshooting, and Feedback.
+. View information about your account, switch directories, sign out, or sign in with a different account.
+. A group of controls that are contextual to your current focus.
+. A menu with commands that are contextual to the service or resource that you're working with. Sometimes referred to as the resource menu.
+. Displays details about the resource or service that's currently in focus.
+The Azure portal menu lets you quickly get to key functionality and resource types. It's available from anywhere in the Azure portal.
+Useful commands in the portal menu include:
+. An easy way to get started creating a new resource in the current subscription.
+. Your list of favorite Azure services. To learn how to customize this list, see
+Add, remove, and sort favorites
+In your portal settings, you can
+choose a default mode for the portal menu
+When the portal menu is in flyout mode, it's hidden until you need it. Select the menu icon to open or close the menu.
+If you choose docked mode for the portal menu, it's always visible. You can select the arrows to manually collapse the menu if you want more working space.
+The service menu appears when you work with an Azure service or resource. The commands in this menu are contextual to the service or resource that you're working with. Use the search box at the top of the service menu to quickly find commands.
+By default, the portal displays menu items as collapsed within menu groups. If you prefer to have all menu items expanded by default, set
+When you work within a service, select any top-level menu item to expand it and see the available commands within that menu group. Select that top-level item again to collapse that menu group.
+To toggle all folders in a service menu between collapsed and expanded, select the expand/collapse icon near the service icon search box.
+If you frequently use certain service menu commands, save them as favorites for that service. To add a command to your favorites, hover over the command and then select the star icon.
+When you save a command as a favorite, it appears in a
+folder near the top of the service menu.
+The portal preserves your menu group selections throughout sessions by resource type. For example, if you add a favorite command while working with a VM, that command appears in your
+when you later work with a different VM. Specific menu groups also appear collapsed or expanded based on your previous selections.
+Dashboards provide a focused view of the resources in your subscription that matter most to you. The portal provides a default dashboard to get you started. You can customize this dashboard to bring resources you frequently use into a single view, or to display other information.
+You can create other dashboards for your own use, or publish customized dashboards and share them with other users in your organization. For more information, see
+Create and share dashboards in the Azure portal
+set your startup page to Dashboard
+if you want to see your most recently used dashboard when you sign in to the Azure portal.
+If you're a new subscriber, you need to create a resource before there's anything to manage. Select
+to view the services available in the Marketplace. You can find hundreds of applications and services from many providers, all certified to run on Azure.
+To view all available services, select
+Often, the quickest way to get to a resource, service, or documentation is to use
+For more help getting started with Azure, explore the
+Manage services with the Azure portal training module
+Stay connected on the go with the
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

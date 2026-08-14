@@ -1,0 +1,27 @@
+Set code scanning merge protection
+Secure your codebase by blocking pull requests that fail code scanning checks.
+Organization owners, security managers, and organization members with the
+Code scanning is available for the following repository types:
+Public repositories on GitHub.com
+Organization-owned repositories on GitHub Team, GitHub Enterprise Cloud, or GitHub Enterprise Server, with
+Creating a merge protection ruleset for a repository
+On GitHub, navigate to the main page of the repository.
+Under your repository name, click
+. If you cannot see the "Settings" tab, select the
+In the left sidebar, under "Code and automation," click
+To create a ruleset targeting branches, click
+Under "Ruleset name," type a name for the ruleset.
+Optionally, to change the default enforcement status, click
+and select an enforcement status.
+Under "Branch protections", select
+Require code scanning results
+Under "Required tools and alert thresholds", click
+and select a code scanning tool with the dropdown. For example, "CodeQL".
+Next to the name of a code scanning tool:
+For more information about alert severity and security severity levels, see
+For more information about managing rulesets in a repository, see
+Managing rulesets for a repository
+Creating a merge protection ruleset with the REST API
+You can use the REST API to create a ruleset with the
+rule, which allows you to define specific tools and set alert thresholds. For more information, see
+REST API endpoints for rules

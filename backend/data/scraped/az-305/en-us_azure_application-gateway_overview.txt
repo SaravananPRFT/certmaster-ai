@@ -1,0 +1,41 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is Azure Application Gateway?
+Azure Application Gateway is a web traffic load balancer that helps you manage traffic to your web applications. Unlike traditional load balancers that route traffic based on IP address and port, Application Gateway makes intelligent routing decisions based on HTTP request attributes like URL paths and host headers.
+For example, you can route requests with
+in the URL to servers optimized for images, while routing
+requests to servers optimized for video content. This application layer routing gives you more control over how traffic flows to your applications.
+Application Gateway operates at the application layer (OSI layer 7) and provides features like SSL/TLS termination, autoscaling, zone redundancy, and integration with Web Application Firewall for security.
+Azure provides a suite of fully managed load-balancing solutions for your scenarios.
+If you want to do DNS based global routing and don't need Transport Layer Security (TLS) protocol termination ("SSL offload"), per-HTTP/HTTPS request, or application-layer processing, review
+If you need to optimize global routing of your web traffic and optimize top-tier end-user performance and reliability through quick global failover, see
+To do transport layer load balancing, review
+Your end-to-end scenarios can benefit from combining these solutions as needed.
+For an overview of the load balancing and content delivery services in Azure, see
+Load Balancing and Content Delivery
+To learn about Application Gateway features, see
+Azure Application Gateway features
+To learn about Application Gateway infrastructure, see
+Azure Application Gateway infrastructure configuration
+Protect your applications against L7 layer DDoS protection by using WAF. For more information, see
+Application DDoS protection
+Protect your apps from malicious actors with Bot manager rules based on Microsoftâs own Threat Intelligence.
+Secure applications against L3 and L4 DDoS attacks with
+Privately connect to your backend behind Application Gateway with
+and embrace a zero-trust access model.
+Eliminate risk of data exfiltration and control privacy of communication from within the virtual network with a fully
+Private-only Application Gateway deployment
+Provide a centralized security experience for your application via Azure Policy, Azure Advisor, and Microsoft Sentinel integration that ensures consistent security features across apps.
+For Application Gateway pricing information, see
+Application Gateway pricing
+For Application Gateway SLA information, see
+To learn what's new with Azure Application Gateway, see
+Depending on your requirements and environment, you can create a test Application Gateway by using the Azure portal, Azure PowerShell, or Azure CLI.
+Quickstart: Direct web traffic with Azure Application Gateway - Azure portal
+Quickstart: Direct web traffic with Azure Application Gateway - Azure PowerShell
+Quickstart: Direct web traffic with Azure Application Gateway - Azure CLI
+Learn module: Introduction to Azure Application Gateway
+How an application gateway works
+Frequently asked questions about Azure Application Gateway
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

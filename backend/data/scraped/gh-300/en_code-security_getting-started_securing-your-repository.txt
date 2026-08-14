@@ -1,0 +1,87 @@
+Quickstart for securing your repository
+Manage access to your code. Find and fix vulnerable code and dependencies automatically.
+Repository owners, organization owners, security managers, and users with the
+This guide shows you how to configure security features for a repository.
+Your security needs are unique to your repository, so you may not need to enable every feature for your repository. For more information, see
+Some features are available for repositories on all plans. Additional features are available to organizations and enterprises that use GitHub Secret Protection, GitHub Code Security, or GitHub Advanced Security. GitHub Advanced Security features are also enabled for all public repositories on GitHub. For more information, see
+About GitHub Advanced Security
+Managing access to your repository
+The first step to securing a repository is to establish who can see and modify your code. For more information, see
+Managing your repository's settings and features
+From the main page of your repository, click
+, then scroll down to the "Danger Zone."
+To change who can view your repository, click
+. For more information, see
+Setting repository visibility
+To change who can access your repository and adjust permissions, click
+. For more information, see
+Managing teams and people with access to your repository
+Managing the dependency graph
+Repository administrators can enable or disable the dependency graph for repositories. The dependency graph interprets manifest and lock files in a repository to identify dependencies.
+From the main page of your repository, click
+Next to Dependency graph, click
+Enabling the dependency graph
+Managing Dependabot alerts
+Dependabot alerts are generated when GitHub identifies a dependency in the dependency graph with a vulnerability. You can enable Dependabot alerts for any repository.
+Additionally, you can use Dependabot auto-triage rules to manage your alerts at scale, so you can auto-dismiss or snooze alerts, and specify which alerts you want Dependabot to open pull requests for. For information about the different types of auto-triage rules, and whether your repositories are eligible, see
+Dependabot auto-triage rules
+For an overview of the different features offered by Dependabot and instructions on how to get started, see
+Dependabot quickstart guide
+Click your profile picture, then click
+next to Dependabot alerts.
+Managing security and analysis features
+Managing dependency review
+Dependency review lets you visualize dependency changes in pull requests before they are merged into your repositories. For more information, see
+Dependency review is a GitHub Code Security feature. Dependency review is enabled for all repositories with the dependency graph enabled. Organizations that use GitHub Team or GitHub Enterprise Cloud with GitHub Code Security can additionally enable dependency review for private and internal repositories.
+To enable dependency review for a repository, ensure that the dependency graph is enabled.
+From the main page of your repository, click
+To the right of Code Security, click
+Under Code Security, check that dependency graph is enabled for the repository.
+Managing Dependabot security updates
+For any repository that uses Dependabot alerts, you can enable Dependabot security updates to raise pull requests with security updates when vulnerabilities are detected.
+From the main page of your repository, click
+Next to Dependabot security updates, click
+Dependabot security updates
+Configuring Dependabot security updates
+Managing Dependabot version updates
+You can enable Dependabot to automatically raise pull requests to keep your dependencies up-to-date. For more information, see
+Dependabot version updates
+From the main page of your repository, click
+Next to Dependabot version updates, click
+Specify the dependencies to update and any associated configuration options, then commit the file to the repository. For more information, see
+Configuring Dependabot version updates
+Code Security features are available for all public repositories, and for private repositories owned by organizations that are part of a team or an enterprise that uses GitHub Code Security or GitHub Advanced Security.
+GitHub Code Security includes code scanning, CodeQL CLI and Copilot Autofix, as well as other features that find and fix vulnerabilities in your codebase.
+You can configure code scanning to automatically identify vulnerabilities and errors in the code stored in your repository by using a CodeQL analysis workflow or third-party tool. Depending on the programming languages in your repository, you can configure code scanning with CodeQL using default setup, in which GitHub automatically determines the languages to scan, query suites to run, and events that will trigger a new scan. For more information, see
+Configuring default setup for code scanning
+From the main page of your repository, click
+In the "Security" section of the sidebar, click
+If "Code Security" or "GitHub Advanced Security" is not already enabled, click
+To the right of "CodeQL analysis", select
+In the pop-up window that appears, review the default configuration settings for your repository, then click
+Choose whether you want to enable addition features, such as Copilot Autofix or AI-powered security detections.
+As an alternative to default setup, you can use advanced setup, which generates a workflow file you can edit to customize your code scanning with CodeQL. For more information, see
+Configuring advanced setup for code scanning
+Configuring Secret Protection
+Secret Protection features are available for all public repositories, and for private repositories owned by organizations that are part of a team or an enterprise that uses GitHub Secret Protection or GitHub Advanced Security.
+GitHub Secret Protection includes secret scanning and push protection, as well as other features that help you detect and prevent secret leaks in your repository.
+From the main page of your repository, click
+If "Secret Protection" or "GitHub Advanced Security" is not already enabled, click
+If the option "Secret scanning" is shown, click
+Choose whether you want to enable additional features, such as scanning for generic patterns and push protection.
+If you are a repository maintainer, it's good practice to specify a security policy for your repository by creating a file named
+in the repository. This file instructs users about how to best contact you and collaborate with you when they want to report security vulnerabilities in your repository. You can view the security policy of a repository from the repository’s
+From the main page of your repository, click
+In the left sidebar, under "Reporting", click
+Add information about supported versions of your project and how to report vulnerabilities.
+Adding a security policy to your repository
+You can view and manage alerts from security features to address dependencies and vulnerabilities in your code. For more information, see
+Viewing and updating Dependabot alerts
+Managing pull requests for dependency updates
+Assessing code scanning alerts for your repository
+Manage secret scanning alerts
+You can also use GitHub's tools to audit responses to security alerts. For more information, see
+If you have a security vulnerability in a public repository, you can create a security advisory to privately discuss and fix the vulnerability. For more information, see
+Repository security advisories
+Creating a repository security advisory
+If you use GitHub Actions, you can use GitHub's security features to increase the security of your workflows. For more information, see

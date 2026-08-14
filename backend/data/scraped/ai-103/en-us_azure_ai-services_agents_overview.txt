@@ -1,0 +1,114 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is Microsoft Foundry Agent Service?
+Foundry Agent Service is a managed platform for building, deploying, and scaling AI agents. Use any framework, any
+from the Foundry model catalog, and the Responses API as a single entry point.
+You choose how much of the platform you want:
+in the Foundry portal or define it with SDKs and REST, and Foundry runs it for you. No application code to maintain, no compute to pay for, and no containers or packages to optimize, scale, or patch.
+â write your agent code with
+, or your own code, package it as a container, and let Foundry run it with a managed endpoint, scaling, identity, and observability.
+Already have agent code running outside of Foundry? Call the
+from your existing process to get Foundry models and platform tools without moving your code.
+An agent is an AI application that uses a model from the Foundry model catalog to reason about user requests and take autonomous actions to fulfill them. Unlike a simple chatbot that only generates text, an agent can call tools, access external data, and make decisions across multiple steps to complete a task. In some cases, agents act without a chat interface at all â working autonomously in the background, triggered by system events, to accomplish tasks on a user's or organization's behalf.
+Every agent combines three core components:
+: A model from the Foundry model catalog that provides reasoning and language capabilities.
+: Define goals, constraints, and behavior. In Foundry, instructions can be prompt-based or code in a Hosted agent.
+: Provide access to data or actions, such as search, file operations, or API calls.
+Single entry point for every agent type. Gives any framework, process, or runtime access to Foundry models plus platform tools (file search, code interpreter, memory, web search, MCP servers).
+Hosts and scales prompt agents and Hosted agents. Manages conversations, tool calls, and agent lifecycle.
+Built-in tools including web search, file search, memory, code interpreter, MCP servers, and custom functions. Managed authentication includes service-managed credentials and On-Behalf-Of (OBO).
+Works with many models from the Foundry model catalog, such as GPT-4o, Llama, and DeepSeek. Swap models without changing your agent code.
+End-to-end tracing, metrics, and Application Insights integration. See every decision your agent makes.
+Microsoft Entra identity, RBAC, content filters, and virtual network isolation. Enterprise-grade trust built in.
+Version agents, create stable endpoints, and share through Microsoft Teams, Microsoft 365 Copilot, and the Entra Agent Registry.
+Choose your path based on what you're trying to do:
+â create an agent in the Foundry portal, pick a model, attach tools, then call it from code. No runtime code to write or maintain â Foundry runs the agent for you.
+Want to build a code-based agent in Foundry?
+â write your agent with Agent Framework, LangGraph, the OpenAI Agents SDK, or your own code, package it as a container, and let Foundry run it with a managed endpoint, scaling, and identity.
+Want to use Foundry models and tools from agent code you already run elsewhere?
+from your existing process to get Foundry models and platform tools without moving your code.
+There are two main agent types in Agent Service:
+â author in portal or code, fully managed runtime.
+â your agent code, run by Foundry.
+Prompt agents are defined entirely through configuration â instructions, model selection, and tools. You author them in the Foundry portal for a quick start, or define them programmatically with the SDKs or REST API to integrate with your CI/CD workflows. Either way, Foundry runs the agent for you â there's no application code to maintain, no compute to pay for, and no containers or packages to optimize, scale, or monitor for security.
+â create an agent interactively in the Foundry portal, test it in the playground, then call it from your application code.
+â define the agent using the SDK or REST API in your deployment pipeline, enabling version control, code review, and automated rollout.
+: Getting started fast, internal tools, production agents that don't need custom orchestration logic, and teams that want a managed runtime without infrastructure overhead.
+are code-based agents you build with
+, or your own code. Ship your agent as either a container image or a zip of your source code â Foundry builds the image for you when you bring a zip â and Foundry runs it with a managed endpoint, automatic scaling, a dedicated Microsoft Entra identity, session-level state persistence, and end-to-end observability.
+Under the hood, your agent code calls the
+on your Foundry project endpoint for model inference and tool orchestration, which gives you access to Foundry models from the catalog and a unified set of platform tools â standard OpenAI tools like file search, code interpreter, and web search, plus Foundry-exclusive tools like SharePoint, WorkIQ, and Fabric IQ.
+: Agents that call into your own custom code; secondarily, custom orchestration logic, multi-agent systems, and custom protocols (webhooks, voice, AG-UI) where you want full control over agent logic while letting Foundry handle hosting, scaling, and identity.
+If you'd rather keep running your agent code outside of Foundry â for example, embedded in an existing application â you can still get Foundry's models and platform tools by calling the
+directly from your process. See
+Use the Responses API from your own code
+Agent Framework, LangGraph, OpenAI Agents SDK, Anthropic Agent SDK, GitHub Copilot SDK, custom code
+Foundry models + platform tools
+Yes (via the Responses API on the Foundry project endpoint)
+Container compute, Foundry-managed
+Automatic, Foundry-managed; scales with request volume
+Automatic, Foundry-managed; scales container instances per session and request volume
+Automatic, dedicated per agent
+Per-call inference + tool usage
+Per-call inference + tool usage + container compute
+Fast start, production agents without custom orchestration
+Agents that call into custom code; secondarily, custom orchestration logic
+Use the Responses API from your own code
+The Responses API is the single model and tools endpoint behind every agent type. You can call it directly from your own code to get Foundry models and platform tools without creating an agent resource in Foundry. This pattern is additive to Hosted agents, not an alternative â the same Agent Framework code can call the Responses API from your own process today and be packaged as a container hosted agent later when you want a Foundry-managed endpoint.
+Quickstart: Use the Responses API
+for endpoint options and end-to-end samples.
+Agent Service works with many models available in the Foundry model catalog. For the full list, see
+Quotas, limits, and regional support
+Agent Service provides built-in tools and supports custom tools so your agents can take actions and access data. For a full list, see the
+. For advanced tool selection patterns, see
+Foundry supports remote MCP servers that you can add from the
+catalog in the Foundry portal. For example, the Azure DevOps MCP Server (public preview) can be added directly from the catalog. Connect your Azure DevOps organization to enable agent access, and configure a subset of available tools to control which actions agents can perform. You can also connect custom MCP servers hosted on Azure Functions using the Functions MCP webhook endpoint (
+) to expose custom tools to your agents.
+Supported authentication options for MCP servers and other tool connections include:
+Microsoft Entra (using the agent's managed identity or the project's managed identity)
+OAuth identity passthrough (On-Behalf-Of)
+Unauthenticated access, where appropriate
+These authentication options also apply when connecting remote MCP servers, with credentials and scopes managed in the tool configuration.
+lets you define a curated set of tools once, manage them centrally in Foundry, and expose them through a single MCP-compatible endpoint. Any MCP-compatible agent runtime or client can consume a toolbox, regardless of the framework you use. Toolbox versioning gives you explicit control over when changes take effect â create a new version, test it, and promote it to default when you're ready.
+Some tools, including memory and web search, are in preview. For availability by region and preview status, see
+tool support by region and model
+Agent Service supports the full build-test-deploy-monitor workflow:
+â Define a prompt agent in the portal or with the SDK, or write a Hosted agent that calls the Responses API.
+â Chat with your agent in the
+or run locally. MCP server integrations, including custom MCP servers hosted on Azure Functions, can be exercised directly in the playground to validate tool connectivity, permissions, and behavior before publishing.
+â Inspect every model call, tool invocation, and decision with
+â Run evaluations to measure quality and catch regressions.
+â Automatically improve your hosted agent's instructions using the
+to a managed resource with a stable endpoint.
+â Track performance and reliability with
+For a detailed walkthrough, see
+Agent development lifecycle
+Agent Service provides enterprise-grade infrastructure for every agent you deploy:
+â Each agent can have a dedicated Microsoft Entra identity, enabling secure, scoped access to resources and APIs without sharing credentials. Agent identities can authenticate to external MCP servers, including those hosted on Azure Functions, and OAuth On-Behalf-Of (OBO) passthrough is supported when configured.
+â Run agents within your Azure virtual network for full network isolation and compliance with data residency requirements. Private networking is available for prompt agents. Hosted agents support bring-your-own Azure Virtual Network (BYO VNet), where each session runs in a VM-isolated sandbox connected to your VNet.
+â Fine-grained permissions through Microsoft Entra and Azure RBAC. Control who can create, invoke, and manage agents.
+â Integrated content filters help mitigate prompt injection risks (including cross-prompt injection) and prevent unsafe outputs.
+For environment setup instructions, see
+Agent Service provides built-in versioning and publishing so your agents can move from development to production with confidence.
+â As you iterate on your agent, versions are automatically snapshotted. Roll back to any previous version or compare changes between versions.
+â Promote an agent to a managed resource with a stable endpoint. Published agents inherit the
+enterprise identity and access controls
+configured for your project and can be invoked programmatically.
+â Share published agents through
+Microsoft 365 Copilot and Teams
+and the Entra Agent Registry, putting your agents where your users already work. Foundry Agent Service supports the OpenResponses and Activity Protocols for Microsoft 365 publishing, an Invocations protocol for flexible endpoint integration with custom apps and services, and the
+for agent-to-agent communication.
+Security, privacy, and compliance
+Agent Service is designed for enterprise workloads where you need strong controls over identity, networking, data handling, and safety.
+to help reduce unsafe outputs and mitigate prompt injection risks, including cross-prompt injection attacks (XPIA).
+Network isolation and data residency controls
+and bring-your-own resources to meet your requirements.
+: Use your own Azure resources (for example, storage, Azure AI Search, and Azure Cosmos DB for conversation state) to meet compliance and operational needs. See
+: For a broader set of recommendations and governance resources, see
+Responsible AI for Microsoft Foundry
+Agent development lifecycle
+Deploy your first Hosted agent
+Quotas, limits, and regional support
+For help or to connect with the community, join the
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

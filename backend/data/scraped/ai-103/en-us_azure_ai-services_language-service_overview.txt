@@ -1,0 +1,109 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is Azure Language in Foundry Tools?
+Azure Language is a cloud-based service that provides Natural Language Processing (NLP) features for understanding and analyzing text. Use this service to help build intelligent applications using the web-based Microsoft Foundry, REST APIs, and client libraries. For AI agent development, the service capabilities are also available as tools in Azure Language
+, which is available both as a remote server in the
+Microsoft Foundry Tool Catalog
+and as a local server for self-hosted environments.
+Recommended for new development
+Core capabilities are the primary, actively evolving features of Azure Language. These features receive ongoing investment and feature updates, and are recommended for new development and long-term planning. If you are starting a new project or designing a future architecture, use core capabilities as the foundation for your natural language processing workflows.
+Named entity recognition (NER)
+Unsure which feature to use? See
+Which Azure Language core feature should I use
+enables you to use most of the following service features without the need to write code.
+Personally identifiable information (PII) detection
+The Azure Language in Foundry Tools text personally identifiable information (PII) detection anonymization feature (synthetic replacement) is currently available in
+and licensed to you as part of your Azure subscription. Your use of this feature is subject to the terms applicable to
+Supplemental Terms of Use for Microsoft Azure Previews
+Microsoft Products and Services Data Protection Addendum (DPA)
+Personally identifiable information (PII) detection
+identifies entities in text and conversations (chat or transcripts) that are associated with individuals.
+The Document PII playground in Microsoft Foundry is generally available. It ships with curated sample documents and expected outputs, so you can evaluate detection of common PII types - including names, addresses, financial IDs, and health identifiers - without uploading your own data. A single view lets you compare detection results across entity types before you transition to uploading real documents for live testing. The playground uses the same Document PII model and policies as the production API, so results align with production behavior. For more information, see
+Document-based PII overview
+evaluates text and detects a wide range of languages and variant dialects.
+Custom named entity recognition (CNER)
+enables you to build custom AI models to extract custom entity categories (labels for words or phrases), using unstructured text that you provide.
+Prebuilt named entity recognition (NER)
+identifies different entries in text and categorizes them into predefined types.
+extracts and labels relevant health information from unstructured text.
+Supported for existing implementations
+Legacy capabilities are established features that provide a stable, supported base for existing workloads and scenarios. These features are supported for existing implementations and established use cases.
+Conversational language understanding
+Custom text classification
+Sentiment analysis and opinion mining
+Conversational language understanding
+Conversational language understanding (CLU)
+enables users to build custom natural language understanding models to predict the overall intention of an incoming utterance and extract important information from it.
+Custom text classification
+Custom text classification
+enables you to build custom AI models to classify unstructured text documents into custom classes you define. Creating a custom text classification project typically involves several different steps:
+is a preconfigured feature that disambiguates the identity of entities (words or phrases) found in unstructured text and returns links to Wikipedia.
+is a preconfigured feature that evaluates and returns the main concepts in unstructured text, and returns them as a list.
+is a custom feature that enables you to connect
+conversational language understanding (CLU)
+custom question answering (CQA)
+is a custom feature that identifies the most suitable answer for user inputs. This feature is typically utilized to develop conversational client applications, including social media platforms, chat bots, and speech-enabled desktop applications.
+Sentiment analysis and opinion mining
+Sentiment analysis and opinion mining
+preconfigured features that help you understand public perception of your brand or topic. These features analyze text to identify positive or negative sentiments and can link them to specific elements within the text.
+condenses information for text and conversations (chat and transcripts).
+Conversation summarization
+Conversation summarization recaps and segments long meetings into timestamped chapters.
+Call center summarization summarizes customer issues and resolution.
+Text summarization generates a summary, supporting two approaches:
+creates a summary by selecting key sentences from the document and preserving their original positions.
+generates a summary by producing new, concise, and coherent sentences or phrases that aren't directly copied from the original document.
+Azure Language provides specialized tools that enable seamless integration between AI agents and language processing services through standardized protocols.
+The MCP (Model Context Protocol) server creates a standardized bridge that connects AI agents directly to Azure Language services through industry-standard protocols. This integration enables developers to build sophisticated conversational applications with reliable natural language processing capabilities while ensuring enterprise-grade compliance, data protection, and processing accuracy throughout their AI workflows.
+Azure Language provides both remote and local MCP server options:
+: Available through Foundry Tool Catalog for cloud-hosted deployments.
+: Available for developers who prefer to host the server in their own environment.
+Azure Language offers prebuilt agents that handle specific conversational AI scenarios with built-in governance, routing logic, and quality control mechanisms.
+Azure Language Intent Routing agent
+The Intent Routing agent intelligently manages conversation flows by understanding user intentions and delivering accurate responses in conversational AI applications. This agent uses predictable decision-making processes combined with controlled response generation to ensure consistent, reliable interactions that organizations can trust and monitor.
+Azure Language Intent Routing agent
+Azure Language Exact Question Answering agent
+The Exact Question Answering agent provides reliable, word-for-word responses to your most important business questions. This agent automates frequently asked questions while maintaining human oversight and quality control to ensure accuracy and compliance.
+Azure Language Exact Question Answering agent
+Which core Language feature should I use?
+This section helps you decide which core Language feature you should use for your application:
+Is this solution customizable?*
+Detect and redact sensitive information such as
+transcribed conversations,
+native documents (.pdf, .docx, .txt)
+Extract categories of information without creating a custom model.
+Extract categories of information using a model specific to your data.
+Extract medical information from clinical/medical documents, without building a model.
+* If a feature is customizable, you can train an AI model using our tools to fit your data specifically. Otherwise a feature is preconfigured, meaning the AI models it uses can't be changed. You just send your data, and use the feature's output in your applications.
+Which legacy Language feature should I use?
+This section helps you decide which legacy Language feature you should use for your application:
+Is this solution customizable?*
+Extract main topics and important phrases.
+Determine the sentiment and opinions expressed in text.
+Sentiment analysis and opinion mining
+Summarize long chunks of text or conversations.
+transcribed conversations.
+Disambiguate entities and get links to Wikipedia.
+Classify documents into one or more categories.
+Custom text classification
+Detect the language that a text was written in.
+Predict the intention of user inputs and extract information from them.
+Conversational language understanding
+Connect apps from conversational language understanding and custom question answering.
+Build a conversational application that responds to user inputs.
+* If a feature is customizable, you can train an AI model using our tools to fit your data specifically. Otherwise a feature is preconfigured, meaning the AI models it uses can't be changed. You just send your data, and use the feature's output in your applications.
+After you get started with Azure Language quickstarts, try our tutorials that show you how to solve various scenarios.
+Extract key phrases from text stored in Power BI
+Use Power Automate to sort information in Microsoft Excel
+Use Flask to translate text, analyze sentiment, and synthesize speech
+Use Foundry Tools in canvas apps
+You can find more code samples on GitHub for the following languages:
+Deploy on premises using Docker containers
+Use Language containers to deploy API features on-premises. These Docker containers enable you to bring the service closer to your data for compliance, security, or other operational reasons. The Language offers the following containers:
+Custom named entity recognition
+An AI system includes not only the technology, but also the people who use it, the people affected by it, and the deployment environment. Read the following articles to learn about responsible AI use and deployment in your systems:
+Transparency note for Azure Language
+Integration and responsible use
+Data, privacy, and security
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

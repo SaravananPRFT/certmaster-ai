@@ -1,0 +1,325 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Manage Azure Machine Learning workspaces in the portal or with the Python SDK (v2)
+In this article, you create, view, and delete
+Azure Machine Learning workspaces
+As your needs change or your automation requirements increase, you can manage workspaces
+via the Visual Studio Code extension
+An Azure subscription. If you don't have an Azure subscription, create a free account before you begin. Try the
+free or paid version of Azure Machine Learning
+pip install azure-identity
+. If in a notebook cell, use
+%pip install azure-identity
+Provide your subscription details:
+# Enter details of your subscription
+subscription_id = "<SUBSCRIPTION_ID>"
+resource_group = "<RESOURCE_GROUP>"
+Get a handle to the subscription. The Python code in this article uses
+# get a handle to the subscription
+from azure.ai.ml import MLClient
+from azure.identity import DefaultAzureCredential
+ml_client = MLClient(DefaultAzureCredential(), subscription_id, resource_group)
+(Optional) If you have multiple accounts, add the tenant ID of the Microsoft Entra ID you wish to use into the
+. Find your tenant ID from the
+Microsoft Entra ID, External Identities
+DefaultAzureCredential(interactive_browser_tenant_id="<TENANT_ID>")
+(Optional) If you're working in the
+regions, you need to specify the cloud into which you want to authenticate. You can specify these regions in
+from azure.identity import AzureAuthorityHosts
+DefaultAzureCredential(authority=AzureAuthorityHosts.AZURE_GOVERNMENT))
+When you create a new workspace, you can either automatically create services needed by the workspace or use existing services. If you want to use existing services from a
+different Azure subscription
+than the workspace, you must register the Azure Machine Learning namespace in the subscription that contains those services. For example, if you create a workspace in subscription A that uses a storage account in subscription B, the Azure Machine Learning namespace must be registered in subscription B before the workspace can use the storage account.
+The resource provider for Azure Machine Learning is
+Microsoft.MachineLearningServices
+. For information on seeing whether it's registered or registering it, see
+Azure resource providers and types
+This information applies only to resources provided during workspace creation: Azure Storage Accounts, Azure Container Registry, Azure Key Vault, and Application Insights.
+For network isolation with online endpoints, you can use workspace-associated resources (Azure Container Registry (ACR), Storage account, Key Vault, and Application Insights) from a resource group different from your workspace. However, these resources must belong to the same subscription and tenant as your workspace. For information about the limitations that apply to securing managed online endpoints, using a workspace's managed virtual network, see
+Network isolation with managed online endpoints
+Workspace creation also creates an Azure Container Registry (ACR) by default. Since ACR doesn't currently support Unicode characters in resource group names, use a resource group that avoids these characters.
+Azure Machine Learning doesn't support hierarchical namespace (Azure Data Lake Storage Gen2 feature) for the default storage account of the workspace.
+An Azure Application Insights instance is created when you create the workspace. You can delete the Application Insights instance after cluster creation if you want. Deleting it limits the information gathered from the workspace, and might make it more difficult to troubleshoot problems.
+If you delete the Application Insights instance created by the workspace, the only way to recreate it is to delete and recreate the workspace
+For more information on using the Application Insights instance, see
+Monitor and collect data from Machine Learning web service endpoints
+You can create a workspace
+directly in Azure Machine Learning studio
+, with limited options available. You can also use one of these methods for more control of options:
+Basic configuration for getting started
+. If you don't specify, the process automatically creates
+and the Azure resource group. This code creates a workspace named
+, dependent Azure resources (Storage account, Key Vault, Container Registry, Application Insights), and a resource group named
+# Creating a unique workspace name with current datetime to avoid conflicts
+from azure.ai.ml.entities import Workspace
+basic_workspace_name = "mlw-basic-prod-" + datetime.datetime.now().strftime(
+name=basic_workspace_name,
+display_name="Basic workspace-example",
+description="This example shows how to create a basic workspace",
+tags=dict(purpose="demo"),
+ws_basic = ml_client.workspaces.begin_create(ws_basic).result()
+Use existing Azure resources
+. To bring existing Azure resources, reference them by using the Azure resource ID format. Find the specific Azure resource IDs in the Azure portal, or with the SDK. This example assumes that the resource group, Storage account, Key Vault, Application Insights, and Container Registry already exist.
+# Creating a unique workspace name with current datetime to avoid conflicts
+from azure.ai.ml.entities import Workspace
+basic_ex_workspace_name = "mlw-basicex-prod-" + datetime.datetime.now().strftime(
+# Change the following variables to resource ids of your existing storage account, key vault, application insights
+# and container registry. Here we reuse the ones we just created for the basic workspace
+existing_storage_account = (
+# e.g. "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.Storage/storageAccounts/<STORAGE_ACCOUNT>"
+existing_container_registry = (
+# e.g. "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.ContainerRegistry/registries/<CONTAINER_REGISTRY>"
+ws_basic.container_registry
+# e.g. "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.KeyVault/vaults/<KEY_VAULT>"
+existing_application_insights = (
+# e.g. "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>/providers/Microsoft.insights/components/<APP_INSIGHTS>"
+ws_basic.application_insights
+ws_with_existing_resources = Workspace(
+name=basic_ex_workspace_name,
+display_name="Bring your own dependent resources-example",
+description="This sample specifies a workspace configuration with existing dependent resources",
+storage_account=existing_storage_account,
+container_registry=existing_container_registry,
+key_vault=existing_key_vault,
+application_insights=existing_application_insights,
+tags=dict(purpose="demonstration"),
+ws_with_existing_resources = ml_client.begin_create_or_update(
+ws_with_existing_resources
+print(ws_with_existing_resources)
+Use existing hub workspace
+. Instead of creating a default workspace with its own security settings and
+'s shared environment. Your new 'project' workspace obtains security settings and shared configurations from the hub including compute and connections. This example assumes that the hub workspace already exists.
+from azure.ai.ml.entities import Project
+my_project_name = "myexampleproject"
+my_display_name = "My Example Project"
+my_hub = Project(name=my_hub_name,
+display_name=my_display_name,
+created_project_workspace = ml_client.workspaces.begin_create(workspace=my_hub).result()
+If you have problems accessing your subscription, see
+Set up authentication for Azure Machine Learning resources and workflows
+Authentication in Azure Machine Learning
+by using the credentials for your Azure subscription.
+In the upper-left corner of Azure portal, select
+Use the search bar to find
+Provide the following information to configure your new workspace:
+Enter a unique name that identifies your workspace. This example uses
+. Names must be unique across the resource group. Use a name that's easy to recall and that differentiates from workspaces created by others. The workspace name is case-insensitive.
+Select the Azure subscription that you want to use.
+Use an existing resource group in your subscription. To create a new resource group, enter a name. A resource group holds related resources for an Azure solution. You need
+role to use an existing resource group. For more information about access, see
+Manage access to an Azure Machine Learning workspace
+Select the Azure region closest both to your users and the data resources.
+The default storage account for the workspace. By default, a new one is created.
+The Azure Key Vault used by the workspace. By default, a new one is created.
+The application insights instance for the workspace. By default, a new one is created.
+The Azure Container Registry for the workspace. By default, a new one isn't initially created for the workspace. Instead, creation of a Docker image during training or deployment additionally creates that Azure Container Registry for the workspace once you need it.
+When you finish the workspace configuration, select
+sections to configure more workspace settings.
+Review the settings and make any other changes or corrections. When you're satisfied with the settings, select
+It can take several minutes to create your workspace in the cloud.
+When the process completes, a deployment success message appears.
+To view the new workspace, select
+To start using the workspace, select the
+link on the top right. You can also select the workspace from the
+Azure Machine Learning studio
+Enter a name for the Azure Machine Learning workspace resource.
+Enter a friendly name to display your workspace in Studio.
+to host your workspace in a shared environment for your team. The hub workspace provides preconfigured security, access to company resources, and shared compute.
+For more information about using a private endpoint and virtual network with your workspace, see
+Network isolation and privacy
+# Creating a unique workspace name with current datetime to avoid conflicts
+from azure.ai.ml.entities import Workspace
+basic_private_link_workspace_name = (
+"mlw-privatelink-prod-" + datetime.datetime.now().strftime("%Y%m%d%H%M")
+name=basic_private_link_workspace_name,
+display_name="Private Link endpoint workspace-example",
+description="When using private link, you must set the image_build_compute property to a cluster name to use for Docker image environment building. You can also specify whether the workspace should be accessible over the internet.",
+image_build_compute="cpu-compute",
+public_network_access="Disabled",
+tags=dict(purpose="demonstration"),
+ml_client.workspaces.begin_create(ws_private).result()
+This class requires an existing virtual network.
+The default network configuration uses a
+, which is accessible on the public internet. However, you can select
+Private with Internet Outbound
+Private with Approved Outbound
+to limit access to your workspace to an Azure Virtual Network you created. Then, scroll down to configure the settings.
+form, set the location, name, and virtual network to use. To use the endpoint with a Private DNS Zone, select
+Integrate with private DNS zone
+and select the zone using the
+Private with Internet Outbound
+section to configure the network and outbound rules.
+Private with Approved Outbound
+section to add more rules to the required set.
+When you finish the network configuration, you can select
+, or advance to the optional
+To create a workspace with disabled internet connectivity via Studio, specify a hub workspace that has public network access disabled. Workspaces created without a hub in the
+have public internet access enabled. A private hub has a 'lock' icon.
+If you don't select a hub workspace at time of creation, the default network configuration uses a
+, which is accessible on the public internet.
+By default, an Azure Cosmos DB instance stores the workspace metadata. Microsoft maintains this Cosmos DB instance. Microsoft-managed keys encrypt this data.
+Use your own data encryption key
+You can provide your own key for data encryption. When you provide your own key, you create the Azure Cosmos DB instance that stores metadata in your Azure subscription. For more information, see
+Use these steps to provide your own key:
+Before you follow these steps, first perform these actions:
+Configure customer-managed keys
+Register the Azure Cosmos DB provider
+Create and configure an Azure Key Vault
+from azure.ai.ml.entities import Workspace, CustomerManagedKey
+# specify the workspace details
+display_name="My workspace",
+description="This example shows how to create a workspace",
+customer_managed_key=CustomerManagedKey(
+key_vault="/subscriptions/<SUBSCRIPTION_ID>/resourcegroups/<RESOURCE_GROUP>/providers/microsoft.keyvault/vaults/<VAULT_NAME>",
+key_uri="<KEY-IDENTIFIER>"
+ml_client.workspaces.begin_create(ws)
+Encrypt data using a customer-managed key
+. This configuration creates Azure resources used to encrypt data in your Azure subscription. Alternatively, select
+Use service-side encryption
+to use service-side resources for encryption. For more information, see
+Select key from Azure Key Vault
+form, select an existing Azure Key Vault, a key that it contains, and the key version. This key encrypts the data stored in Azure Cosmos DB. Finally, use the
+To create a workspace with customer-managed key encryption via Studio, specify a hub workspace that has customer-managed key encryption enabled. To verify the hub workspace configuration, view it in the Azure portal.
+If you don't select a hub workspace at time of creation, your workspace uses Microsoft-managed keys by default.
+page to configure managed identity, storage account access, and data impact. For the Python SDK, see the links in the following sections.
+You can assign either a system assigned identity or a user assigned identity to a workspace. Use this identity to access resources in your subscription. For more information, see
+Set up authentication between Azure Machine Learning and other services
+when connecting to the default storage account. For identity-based authentication, you must grant the Storage Blob Data Contributor role to the workspace managed identity on the storage account.
+To limit the data that Microsoft collects on your workspace, select
+High business impact workspace
+in Python. For more information on this setting, see
+You can select high business impact only when creating a workspace. You can't change this setting after workspace creation.
+Tags are name/value pairs that you use to categorize resources and view consolidated billing by applying the same tag to multiple resources and resource groups.
+Assign tags for the workspace by entering the name/value pairs. For more information, see
+Use tags to organize your Azure resources
+Download a configuration file
+, skip this step. The compute instance creates and stores a copy of this file for you.
+To use code on your local environment that references this workspace, download the file:
+At the top right, select the workspace name, then select
+Place the file in the directory structure that holds your Python scripts or Jupyter Notebooks. The same directory, a subdirectory named
+, or a parent directory can hold this file. When you create a compute instance, you add this file to the correct directory on the VM.
+Turn on or off these features for a workspace:
+Feedback opportunities in the workspace. Opportunities include occasional in-product surveys and the smile-frown feedback tool in the banner of the workspace.
+These features are on by default. To turn them off:
+When creating the workspace, turn off features from the
+Turn off feedback by adding the pair
+Turn off previews by adding the pair
+AZML_DISABLE_PREVIEW_FEATURE: TRUE
+For an existing workspace, turn off features from the
+Go to workspace resource in the
+Turn off feedback by adding the pair
+Turn off previews by adding the pair
+AZML_DISABLE_PREVIEW_FEATURE: TRUE
+You can turn off previews at a subscription level, ensuring that it's off for all workspaces in the subscription. In this case, users in the subscription also can't access the preview tool before selecting a workspace. This setting is useful for administrators who want to ensure that preview features aren't used in their organization.
+If the preview setting is disabled at the subscription level, setting it on individual workspaces is ignored.
+To disable preview features at the subscription level:
+Go to subscription resource in the
+Turn off previews for all workspaces in the subscription by adding the pair
+AZML_DISABLE_PREVIEW_FEATURE: TRUE
+When you run machine learning tasks by using the SDK, you need an
+object that specifies the connection to your workspace. You can create an
+object from parameters or by using a configuration file.
+By using a configuration file:
+This code reads the contents of the configuration file to find your workspace. It opens a prompt to sign in if you didn't already authenticate.
+from azure.ai.ml import MLClient
+# read the config from the current directory
+ws_from_config = MLClient.from_config(credential=DefaultAzureCredential())
+You don't need a config.json file if you use this approach.
+from azure.ai.ml import MLClient
+from azure.ai.ml.entities import Workspace
+from azure.identity import DefaultAzureCredential
+subscription_id="<SUBSCRIPTION_ID>",
+resource_group_name="<RESOURCE_GROUP>",
+workspace_name="<AML_WORKSPACE_NAME>",
+If you have problems accessing your subscription, see
+Set up authentication for Azure Machine Learning resources and workflows
+Authentication in Azure Machine Learning
+See a list of all the workspaces you have available. You can also search for a workspace inside Studio. See
+Search for Azure Machine Learning assets (preview)
+from azure.ai.ml import MLClient
+from azure.ai.ml.entities import Workspace
+from azure.identity import DefaultAzureCredential
+# Enter details of your subscription
+subscription_id = "<SUBSCRIPTION_ID>"
+resource_group = "<RESOURCE_GROUP>"
+my_ml_client = MLClient(DefaultAzureCredential(), subscription_id, resource_group)
+for ws in my_ml_client.workspaces.list():
+print(ws.name, ":", ws.location, ":", ws.description)
+To get specific workspace details:
+ws = my_ml_client.workspaces.get("<AML_WORKSPACE_NAME>")
+# uncomment this line after providing a workspace name above
+# print(ws.location,":", ws.resource_group)
+In the top search field, type
+Look through the list of the workspaces. You can filter based on subscription, resource groups, and locations.
+To display properties, select a workspace.
+Azure Machine Learning studio
+from the left side navigation. A list of recently used workspaces appears.
+To view all workspaces that you have access to, select
+from the left side navigation.
+When you no longer need a workspace, delete it.
+If soft-delete is enabled for the workspace, it can be recovered after deletion. If soft-delete isn't enabled, or you select the option to permanently delete the workspace, it can't be recovered. For more information, see
+Recover a deleted workspace
+The default behavior for Azure Machine Learning is to
+the workspace. This behavior means that the workspace isn't immediately deleted, but instead is marked for deletion. For more information, see
+ml_client.workspaces.begin_delete(name=ws_basic.name, delete_dependent_resources=True)
+The default action doesn't automatically delete resources associated with the workspace. Set
+delete_dependent_resources
+to True to delete these resources as well.
+at the top of the workspace you want to delete.
+You can't delete a workspace from studio. Instead, use the Azure portal or the Python SDK.
+The resources that you created can be used as prerequisites to other Azure Machine Learning tutorials and how-to articles.
+If you don't plan to use any of the resources that you created, delete them so you don't incur any charges:
+In the Azure portal, in the search box, enter
+and select it from the results.
+From the list, select the resource group that you created.
+Enter the resource group name. Then select
+Supported browsers in Azure Machine Learning studio
+: Use the most up-to-date browser that's compatible with your operating system. These browsers are supported:
+Microsoft Edge (The new Microsoft Edge, latest version. Note: Microsoft Edge legacy isn't supported)
+Safari (latest version, Mac only)
+If you go directly to your workspace from a share link from the SDK or the Azure portal, you can't view the standard
+page that has subscription information in the extension. Additionally, in this scenario, you can't switch to another workspace. To view another workspace, go directly to
+Azure Machine Learning studio
+and search for the workspace name.
+You can only access all assets (Data, Experiments, Computes, and so on) in
+Azure Machine Learning studio
+. The Azure portal doesn't offer them.
+Attempting to export a template for a workspace from the Azure portal might return an error similar to this text:
+Could not get resource of the type <type>. Resources of this type will not be exported.
+As a workaround, use one of the templates provided at
+https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts/microsoft.machinelearningservices
+as the basis for your template.
+You can run diagnostics on your workspace from Azure Machine Learning studio or the Python SDK. After diagnostics run, a list of any detected problems is returned. This list includes links to possible solutions. For more information, see
+How to use workspace diagnostics
+When creating an Azure Machine Learning workspace, or a resource used by the workspace, you might get an error that's similar to one of these:
+No registered resource provider found for location {location}
+The subscription is not registered to use namespace {resource-provider-namespace}
+Most resource providers are automatically registered, but not all of them. If you see this message, you need to register a provider.
+The following table contains a list of resource providers required by Azure Machine Learning:
+Microsoft.MachineLearningServices
+Creating the Azure Machine Learning workspace.
+An Azure Storage account is used as the default storage for the workspace.
+Microsoft.ContainerRegistry
+Azure Container Registry is used by the workspace to build Docker images.
+Azure Key Vault is used by the workspace to store secrets.
+An Azure Machine Learning compute instance uses integrated notebooks.
+Microsoft.ContainerService
+You want to deploy trained models to Azure Kubernetes Services.
+If you want to use a customer-managed key with Azure Machine Learning, you must register the following service providers:
+An Azure Cosmos DB instance logs metadata for the workspace.
+Azure Search provides indexing capabilities for the workspace.
+If you want to use a managed virtual network with Azure Machine Learning, you must register the
+resource provider. This resource provider is used by the workspace when private endpoints for the managed virtual network are created.
+For information on registering resource providers, see
+Resolve errors for resource provider registration
+Deleting the Azure Container Registry
+The Azure Machine Learning workspace uses the Azure Container Registry (ACR) for some operations. It automatically creates an ACR instance when it first needs one.
+After an Azure Container Registry is created for a workspace, don't delete it. Doing so makes your Azure Machine Learning workspace inoperative.
+Examples in this article come from
+After creating a workspace, learn how to
+To learn more about planning a workspace for your organization's requirements, visit
+Organize and set up Azure Machine Learning
+If you need to move a workspace to another Azure subscription, visit
+For information on how to keep your Azure Machine Learning up to date with the latest security updates, visit
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

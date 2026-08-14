@@ -1,0 +1,5 @@
+{
+  "url": "https://docs.github.com/en/actions/security-guides/automatic-token-authentication",
+  "title": "Use GITHUB_TOKEN for authentication in workflows",
+  "exam_code": "GH-300"
+}

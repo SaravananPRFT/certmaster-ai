@@ -1,0 +1,153 @@
+{
+  "name": "CertMasterAI — 2. Download & Scrape Docs",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "node-manual-2",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set the exam codes to download — edit this list as needed\nconst exams = ['AI-102', 'AZ-104', 'AZ-305', 'GH-300', 'AB-100', 'AI-103'];\nreturn exams.map(code => ({ json: { exam_code: code } }));"
+      },
+      "id": "node-code-2a",
+      "name": "Set Exam Targets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "node-split-2",
+      "name": "Process One Exam at a Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [710, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/index-documents",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"exam_code\": \"{{ $json.exam_code }}\",\n  \"scraped_dir\": \"./data/scraped\",\n  \"clear_first\": false\n}",
+        "options": {
+          "timeout": 300000,
+          "response": {
+            "response": {
+              "fullResponse": false
+            }
+          }
+        }
+      },
+      "id": "node-http-2",
+      "name": "Trigger Download + Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [940, 300],
+      "notes": "Calls the backend to index scraped docs already on disk.\nRun download_docs.py first to populate data/scraped/."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log the result for each exam\nconst result = $input.first().json;\nconst exam = $('Process One Exam at a Time').first().json.exam_code;\nconst examResult = result.results?.[exam] || {};\nreturn [{\n  json: {\n    exam_code: exam,\n    status: examResult.status || 'unknown',\n    chunks_indexed: examResult.chunks_indexed || 0,\n    files: examResult.files || 0,\n    reason: examResult.reason || null\n  }\n}];"
+      },
+      "id": "node-code-2b",
+      "name": "Parse Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 2 — Download & Index\n\nTriggers per-exam indexing into ChromaDB.\n\n**Pre-requisite:** Run the download script first:\n```\ncd backend\npython scripts/download_docs.py --all\n```\n\n**What this does:** Calls POST /admin/index-documents for each exam, which reads scraped .txt files, chunks them, embeds them, and stores them in ChromaDB.\n\n**Tip:** Set `clear_first: true` in the HTTP body to wipe and rebuild the collection.",
+        "height": 230,
+        "width": 380
+      },
+      "id": "node-note-2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 520]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Exam Targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Exam Targets": {
+      "main": [
+        [
+          {
+            "node": "Process One Exam at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process One Exam at a Time": {
+      "main": [
+        [
+          {
+            "node": "Trigger Download + Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Download + Index": {
+      "main": [
+        [
+          {
+            "node": "Parse Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Result": {
+      "main": [
+        [
+          {
+            "node": "Process One Exam at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "certmasterai-wf-002",
+  "tags": [
+    {"id": "certmasterai", "name": "certmasterai"}
+  ]
+}

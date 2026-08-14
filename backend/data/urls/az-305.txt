@@ -1,0 +1,33 @@
+# AZ-305 — Designing Microsoft Azure Infrastructure Solutions
+# Microsoft Learn documentation URLs (~30 pages)
+
+https://learn.microsoft.com/en-us/azure/architecture/
+https://learn.microsoft.com/en-us/azure/architecture/guide/
+https://learn.microsoft.com/en-us/azure/architecture/patterns/
+https://learn.microsoft.com/en-us/azure/architecture/framework/
+https://learn.microsoft.com/en-us/azure/architecture/framework/reliability/reliability-overview
+https://learn.microsoft.com/en-us/azure/architecture/framework/security/security-overview
+https://learn.microsoft.com/en-us/azure/architecture/framework/cost/cost-overview
+https://learn.microsoft.com/en-us/azure/governance/policy/overview
+https://learn.microsoft.com/en-us/azure/governance/management-groups/overview
+https://learn.microsoft.com/en-us/azure/active-directory/governance/identity-governance-overview
+https://learn.microsoft.com/en-us/azure/key-vault/general/overview
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/lock-resources
+https://learn.microsoft.com/en-us/azure/sql-database/sql-database-paas-overview
+https://learn.microsoft.com/en-us/azure/cosmos-db/introduction
+https://learn.microsoft.com/en-us/azure/cosmos-db/consistency-levels
+https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy
+https://learn.microsoft.com/en-us/azure/data-factory/introduction
+https://learn.microsoft.com/en-us/azure/synapse-analytics/overview-what-is
+https://learn.microsoft.com/en-us/azure/backup/backup-architecture
+https://learn.microsoft.com/en-us/azure/site-recovery/site-recovery-overview
+https://learn.microsoft.com/en-us/azure/virtual-machines/availability
+https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview
+https://learn.microsoft.com/en-us/azure/application-gateway/overview
+https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview
+https://learn.microsoft.com/en-us/azure/frontdoor/front-door-overview
+https://learn.microsoft.com/en-us/azure/cdn/cdn-overview
+https://learn.microsoft.com/en-us/azure/private-link/private-link-overview
+https://learn.microsoft.com/en-us/azure/migrate/migrate-services-overview
+https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about
+https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-monitoring-overview

@@ -1,0 +1,76 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Azure Speech in Foundry Tools service offers advanced speech to text capabilities. This feature supports both real-time and batch transcription, providing versatile solutions for converting audio streams into text.
+Core features of speech to text
+The speech to text service offers the following core features:
+: Instant transcription with intermediate results for live audio inputs.
+: Fastest synchronous output for situations with predictable latency.
+: Efficient processing for large volumes of prerecorded audio.
+: Models with enhanced accuracy for specific domains and conditions.
+Real-time speech to text transcribes audio as it's recognized from a microphone or file. It's ideal for applications requiring immediate transcription, such as:
+Real-time audio transcription for accessibility and record-keeping.
+Evaluating and providing feedback on pronunciation accuracy.
+Providing real-time transcription to assist customer service representatives.
+Transcribing spoken words into written text for documentation purposes.
+Enabling interactive voice response systems to transcribe user queries and commands.
+Real-time speech to text is available via the
+Speech to text REST API for short audio
+Multichannel transcription (preview)
+Real-time speech to text can transcribe up to two audio channels independently and tag each result with its source channel. This capability is useful for stereo sources in which each channel carries a distinct speaker, such as the two sides of a customer support call. For more information, see
+How to transcribe multichannel audio in real time
+Use the fast transcription API to transcribe audio files and return results synchronously and faster than real-time audio. Use fast transcription in scenarios where you need the transcript of an audio recording as quickly as possible with predictable latency, such as:
+Quick audio file transcription, captions, and edit
+use the fast transcription API
+Diarization is the process of distinguishing and separating different speakers in an audio recording. This feature is particularly useful for transcribing conversations, meetings, or any multi-speaker audio content. The Speech service can identify up to 35 different speakers in an audio recording (if the service recognizes more than 35 speakers, it throws an error).
+The phrase lists feature allows you to provide the speech recognition model with a list of specific words or phrases that are likely to be spoken in the audio. This helps improve the accuracy of transcription, especially for domain-specific terminology, proper nouns, or uncommon words. By using phrase lists, you can guide the model to better recognize and transcribe these terms correctly.
+Language detection enables the speech recognition model to automatically identify the language being spoken in the audio input. This is useful in scenarios where the language of the audio is not known beforehand or when you have multilingual audio content. By detecting the language, the model can apply the appropriate language-specific recognition algorithms, which can significantly improve transcription accuracy.
+is designed for transcribing large amounts of audio stored in files. This method processes audio asynchronously and is suited for:
+Transcriptions, captions, or subtitles for large volumes of audio files
+Analyzing call center recorded calls to extract valuable insights.
+You can access batch transcription through:
+: Facilitates batch processing with the flexibility of RESTful calls. To get started, see
+How to use batch transcription
+Batch transcription samples
+: Supports both real-time and batch transcription, making it easy to manage transcription tasks. For Speech CLI help with batch transcriptions, run the following command:
+spx help batch transcription
+, you can evaluate and improve the accuracy of speech recognition for your applications and products. Use a custom speech model for
+To use custom speech with the
+hosted deployment endpoint
+for batch transcription, you can conserve resources. For more information, see
+Out of the box, speech recognition uses a Universal Language Model as a base model. Microsoft trains the base model with data it owns, so it reflects commonly used spoken language. The base model is pretrained with dialects and phonetics that represent various common domains. When you make a speech recognition request, the most recent base model for each
+is used by default. The base model works well in most speech recognition scenarios.
+By using custom speech, you can tailor the speech recognition model to better suit your application's specific needs. This tailoring is particularly useful for:
+Improving recognition of domain-specific vocabulary
+: Train the model with text data relevant to your field.
+Enhancing accuracy for specific audio conditions
+: Use audio data with reference transcriptions to refine the model.
+For more information about custom speech, see the
+For details about customization options per language and locale, see the
+language and voice support for the Speech service
+Here are some practical examples of how you can utilize Azure Speech to text:
+Live meeting transcriptions and captions
+A virtual event platform needs to provide real-time captions for webinars.
+Integrate real-time speech to text using the Speech SDK to transcribe spoken content into captions displayed live during the event.
+Customer service enhancement
+A call center wants to assist agents by providing real-time transcriptions of customer calls.
+Use real-time speech to text via the Speech CLI to transcribe calls, enabling agents to better understand and respond to customer queries.
+A video-hosting platform wants to quickly generate a set of subtitles for a video.
+Use fast transcription to quickly get a set of subtitles for the entire video.
+An e-learning platform aims to provide transcriptions for video lectures.
+Apply batch transcription through the speech to text REST API to process prerecorded lecture videos, generating text transcripts for students.
+A healthcare provider needs to document patient consultations.
+Use real-time speech to text for dictation, allowing healthcare professionals to speak their notes and have them transcribed instantly. Use a custom model to enhance recognition of specific medical terms.
+A media company wants to create subtitles for a large archive of videos.
+Use batch transcription to process the video files in bulk, generating accurate subtitles for each video.
+A market research firm needs to analyze customer feedback from audio recordings.
+Employ batch transcription to convert audio feedback into text, enabling easier analysis and insights extraction.
+An AI system includes not only the technology, but also the people who use it, the people who are affected by it, and the environment where it's deployed. Read the transparency notes to learn about responsible AI use and deployment in your systems.
+Transparency note and use cases
+Characteristics and limitations
+Integration and responsible use
+Data, privacy, and security
+Get started with speech to text
+Create a batch transcription
+For detailed pricing information, visit the
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

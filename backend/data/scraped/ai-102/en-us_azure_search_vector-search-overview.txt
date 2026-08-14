@@ -1,0 +1,74 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Vector search in Azure AI Search
+Azure AI Search is available through the
+, the managed knowledge layer that transforms enterprise content into reusable, permission-aware knowledge bases for agents in the
+Vector search is an information retrieval approach that supports indexing and querying over numeric representations of content. Because the content is numeric rather than plain text, matching is based on vectors that are most similar to the query vector. This approach enables matching across:
+Semantic or conceptual likeness. For example, "dog" and "canine" are conceptually similar but linguistically distinct.
+Multilingual content, such as "dog" in English and "hund" in German.
+Multiple content types, such as "dog" in plain text and an image of a dog.
+This article provides an overview of vector search in Azure AI Search, including supported scenarios, availability, and integration with other Azure services.
+Want to get started right away? Follow these steps:
+What scenarios can vector search support?
+Vector search supports the following scenarios:
+. Encode text using embedding models or open-source models, such as OpenAI embeddings or SBERT, respectively. You then retrieve documents using queries that are also encoded as vectors.
+. Azure AI Search defines hybrid search as the execution of vector search and
+in the same request. Vector support is implemented at the field level. If an index contains vector and nonvector fields, you can write a query that targets both. The queries execute in parallel, and the results are merged into a single response and ranked accordingly.
+. Encode text and images using multimodal embeddings, such as
+in Azure OpenAI, and then query an embedding space composed of vectors from both content types.
+. Azure AI Search is designed for extensibility. If you have embedding models and chat models trained in multiple languages, you can call them through custom or built-in skills on the indexing side or vectorizers on the query side. For more control over text translation, use the
+multi-language capabilities
+supported by Azure AI Search for nonvector content in hybrid search scenarios.
+. A query request can include a vector query and a
+. Filters apply to text and numeric fields. They're useful for metadata filters and for including or excluding search results based on filter criteria. Although a vector field isn't filterable, you can set up a filterable text or numeric field. The search engine can process the filter before or after executing the vector query.
+. Azure AI Search stores the data that you query over. Use it as a
+when you need long-term memory or a knowledge base, grounding data for the
+retrieval-augmented generation (RAG)
+architecture, or an app that uses vectors.
+How does vector search work?
+Azure AI Search supports indexing, storing, and querying vector embeddings from a search index. The following diagram shows the indexing and query workflows for vector search.
+On the indexing side, Azure AI Search uses a
+nearest neighbors algorithm
+to place similar vectors close together in an index. Internally, it creates
+How you get embeddings from your source content into Azure AI Search depends on your processing approach:
+For internal processing, Azure AI Search offers
+integrated data chunking and vectorization
+in an indexer pipeline. You provide the necessary resources, such as endpoints and connection information for Azure OpenAI. Azure AI Search then makes the calls and handles the transitions. This approach requires an indexer, a supported data source, and a skillset that drives chunking and embedding.
+For external processing, you can
+outside of Azure AI Search and push the prevectorized content directly into
+On the query side, your client app collects user input, typically through a prompt. You can add an encoding step to vectorize the input and then send the vector query to your Azure AI Search index for similarity search. As with indexing, you can use
+to encode the query. For either approach, Azure AI Search returns documents with the requested
+nearest neighbors (kNN) in the results.
+that run vector and keyword search in parallel and return a unified result set, which often provides better results than vector or keyword search alone. For hybrid search, both vector and nonvector content are ingested into the same index for queries that run simultaneously.
+Vector search is available in
+at no extra charge. However, generating embeddings or using AI enrichment for vectorization might incur charges from the model provider.
+For portal and programmatic access to vector search, you can use:
+, such as Microsoft Foundry.
+Some search services created before January 1, 2019 don't support vector workloads. If you try to add a vector field to a schema and get an error, it's a result of outdated services. In this situation, you must create a new search service to try out the vector feature.
+Search services created after April 3, 2024 offer
+higher quotas for vector indexes
+. If you have an older service, you might be able to
+Azure integration and related services
+Azure AI Search is deeply integrated across the Azure AI platform. The following table lists products that are useful in vector workloads.
+Azure OpenAI provides embedding models and chat models. Demos and samples target the
+model. We recommend Azure OpenAI for generating embeddings for text.
+Image Retrieval Vectorize Image API
+supports vectorization of image content. We recommend this API for generating embeddings for images.
+In Azure AI Search, you can create an
+that points to a search index containing vector fields and a vectorizer. You can then parent the knowledge source to a
+connect the knowledge base to Foundry Agent Service
+, providing your agents with vector search results for enhanced knowledge retrieval.
+Azure data platforms: Azure Blob Storage, Azure Cosmos DB, Azure SQL, Microsoft OneLake
+to automate data ingestion, and then use
+to generate embeddings. Azure AI Search can automatically index vector data from
+Azure Cosmos DB for NoSQL indexers
+Azure Data Lake Storage Gen2
+. For more information, see
+Add vector fields to a search index
+Azure AI Search is also commonly used in open-source frameworks like
+Create a vector index in Azure AI Search
+Create a vector query in Azure AI Search
+azure-vector-search-samples
+Azure AI Search and LangChain: A seamless integration for enhanced vector search capabilities
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

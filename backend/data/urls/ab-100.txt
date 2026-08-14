@@ -1,0 +1,33 @@
+# AB-100 — Azure AI Fundamentals / Azure Basics
+# Microsoft Learn documentation URLs (~30 pages)
+
+https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview
+https://learn.microsoft.com/en-us/azure/architecture/guide/
+https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning
+https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-machine-learning-studio
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-responsible-ai
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-fairness-ml
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-model-interpretability
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-automated-ml
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-data
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-train-model
+https://learn.microsoft.com/en-us/azure/ai-services/overview
+https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview
+https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
+https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview
+https://learn.microsoft.com/en-us/azure/ai-services/translator/overview
+https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/overview
+https://learn.microsoft.com/en-us/azure/ai-services/face/overview
+https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-and-machine-learning
+https://learn.microsoft.com/en-us/azure/search/search-what-is-azure-search
+https://learn.microsoft.com/en-us/azure/bot-service/bot-service-overview
+https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-workspace
+https://learn.microsoft.com/en-us/azure/machine-learning/how-to-create-component-pipeline-and-submit
+https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-mlflow-models
+https://learn.microsoft.com/en-us/azure/cognitive-services/create-account

@@ -1,0 +1,42 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Azure Files provides fully managed file shares in the cloud that you can access through the
+Server Message Block (SMB) protocol
+Network File System (NFS) protocol
+. You can mount Azure file shares concurrently from cloud or on-premises deployments. You can access SMB Azure file shares from Windows, Linux, and macOS clients. You can access NFS Azure file shares from Linux clients. You can also cache SMB Azure file shares on Windows servers by using
+for fast access near where the data is being used.
+The following table summarizes protocol and client support:
+The following are some common scenarios for using Azure Files.
+Replace or supplement on-premises file servers
+Use Azure Files to replace or supplement traditional on-premises file servers or network-attached storage (NAS) devices. Popular operating systems such as Windows, macOS, and Linux can directly mount Azure file shares wherever they are in the world. You can also use Azure File Sync to replicate SMB Azure file shares to Windows servers, either on-premises or in the cloud, for performance and distributed caching of the data. By using
+identity-based authentication
+, SMB Azure file shares can work with on-premises Active Directory Domain Services (AD DS) for access control.
+Replace your file server with a serverless Azure file share
+Lift and shift applications
+Azure Files makes it easy to "lift and shift" applications to the cloud that expect a file share to store file application or user data. Azure Files enables both a full lift and shift scenario, where you move both the application and its data to Azure, and a hybrid lift and shift scenario, where you move the application data to Azure Files while the application continues to run on-premises.
+For a walkthrough on using Azure Files for FSLogix profile containers with Azure Virtual Desktop, see
+Getting started with FSLogix profile containers on Azure Files
+Simplify cloud development
+Use Azure Files to simplify new cloud development projects. For example:
+Shared application settings
+A common pattern for distributed applications is to have configuration files in a centralized location where many application instances can access them. Application instances can load their configuration through the
+, and users can access them by mounting the share locally.
+An Azure file share is a convenient place for cloud applications to write their logs, metrics, and crash dumps. Application instances can write logs by using the Azure Files REST API, and developers can access them by mounting the file share on their local machine. This approach provides flexibility, as developers can embrace cloud development without having to abandon existing tooling.
+When developers or administrators work on VMs in the cloud, they often need a set of tools or utilities. Copying such utilities and tools to each VM can be time-consuming. By mounting an Azure file share locally on the VMs, developers and administrators can quickly access their tools and utilities, no copying required.
+You can use Azure file shares as persistent volumes for stateful containers. Containers deliver "build once, run anywhere" capabilities that enable developers to accelerate innovation. Containers that access raw data at every start require a shared file system, regardless of which instance they run on.
+Key benefits of Azure Files
+Azure Files offers the following benefits.
+Azure file shares mount as native network drives on Windows, Linux, and macOS without additional software. NFS Azure file shares mount on Linux by using the built-in
+command. Once mounted, you use the same tools and file paths you already use.
+Azure Files supports the industry-standard SMB and NFS protocols. You can seamlessly replace your on-premises file shares with Azure Files without worrying about application compatibility. Sharing a file system across multiple machines, applications, and application instances is a significant advantage for applications that need shareability.
+You can create Azure file shares without managing hardware or an OS. This means you don't have to deal with patching the server OS with critical security upgrades or replacing faulty hard disks.
+Use PowerShell cmdlets and Azure CLI to create, mount, and manage Azure file shares as part of the Azure application admin workflow. Create and manage Azure file shares by using the Azure portal and Azure Storage Explorer.
+Azure Files supports zone-redundant storage (ZRS) and geo-redundant storage (GRS) options to protect your data from hardware failures and datacenter outages. When you replace on-premises file shares with Azure Files, you don't need to worry about local power outages or network issues.
+Applications running in Azure can access data in the share via file
+. Developers can use their existing code and skills to migrate applications. In addition to system I/O APIs, you can use
+Azure Storage Client Libraries
+Plan for an Azure Files deployment
+Create an Azure file share
+Migrate to Azure file shares
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CertMasterAI — Product Strategy & Feature Innovation</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azure:        #0078d4;
+      --azure-light:  #50aaf7;
+      --azure-dim:    rgba(0,120,212,0.10);
+      --azure-border: rgba(0,120,212,0.25);
+      --bg:           #0f1117;
+      --surface:      #161b27;
+      --surface-2:    #1e2534;
+      --border:       rgba(255,255,255,0.07);
+      --text:         #e8ecf1;
+      --muted:        #8b95a8;
+      --green:        #22c55e;
+      --yellow:       #f59e0b;
+      --red:          #ef4444;
+      --purple:       #a855f7;
+      --teal:         #14b8a6;
+      --radius:       12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────────── */
+    .page-wrap   { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+    .section-gap { margin-top: 72px; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--azure-dim); border: 1px solid var(--azure-border);
+      color: var(--azure-light); font-size: 12px; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 20px;
+    }
+    .hero-badge svg { width: 14px; height: 14px; }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800; letter-spacing: -.03em; line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--azure); }
+    .hero-sub {
+      color: var(--muted); font-size: 16px; max-width: 620px; line-height: 1.7;
+    }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; gap: 20px; margin-top: 28px;
+    }
+    .hero-meta-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--muted);
+    }
+    .hero-meta-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--azure);
+    }
+    .hero-meta-item strong { color: var(--text); }
+
+    /* ── Section headings ─────────────────────────────────────────────────── */
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--azure);
+      margin-bottom: 10px;
+    }
+    .section-label::before {
+      content: ""; display: block; width: 24px; height: 2px;
+      background: var(--azure); border-radius: 1px;
+    }
+    .section-title {
+      font-size: clamp(20px, 3vw, 28px); font-weight: 700;
+      letter-spacing: -.02em; margin-bottom: 8px;
+    }
+    .section-desc { color: var(--muted); max-width: 580px; line-height: 1.7; }
+
+    /* ── Pain points grid ─────────────────────────────────────────────────── */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px; margin-top: 28px;
+    }
+    .pain-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .pain-num {
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px;
+      background: var(--azure-dim); border: 1px solid var(--azure-border);
+      color: var(--azure); font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pain-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .pain-card p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Feature cards ────────────────────────────────────────────────────── */
+    .features { display: flex; flex-direction: column; gap: 32px; margin-top: 32px; }
+
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      transition: border-color .2s;
+    }
+    .feature-card:hover { border-color: rgba(255,255,255,0.14); }
+
+    .feature-header {
+      padding: 22px 24px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    }
+    .feature-header-left { flex: 1; }
+    .feature-number {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      color: var(--azure); text-transform: uppercase; margin-bottom: 6px;
+    }
+    .feature-name {
+      font-size: 19px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px;
+    }
+    .feature-tagline { font-size: 13px; color: var(--muted); }
+
+    .feature-badges {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 100px; white-space: nowrap;
+    }
+    .badge-score   { background: rgba(0,120,212,.15); color: var(--azure-light); border: 1px solid var(--azure-border); }
+    .badge-low     { background: rgba(34,197,94,.10); color: #4ade80;  border: 1px solid rgba(34,197,94,.25); }
+    .badge-medium  { background: rgba(245,158,11,.10); color: #fbbf24; border: 1px solid rgba(245,158,11,.25); }
+    .badge-high    { background: rgba(239,68,68,.10);  color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+
+    .feature-body { padding: 18px 24px 24px; }
+
+    .feature-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .feature-cell {
+      padding: 14px 16px; border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .feature-cell:nth-child(2n) { border-right: none; }
+    .feature-cell:nth-last-child(-n+2) { border-bottom: none; }
+    @media (max-width: 580px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .feature-cell { border-right: none !important; }
+      .feature-cell:last-child { border-bottom: none; }
+      .feature-cell:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+      .feature-cell:last-child { border-bottom: none !important; }
+    }
+    .feature-cell-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+    }
+    .feature-cell-text { font-size: 13px; color: var(--text); line-height: 1.55; }
+    .feature-cell-text.accent { color: var(--azure-light); }
+
+    .impact-bar-wrap { margin-top: 12px; }
+    .impact-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--muted); margin-bottom: 5px;
+    }
+    .impact-bar-track {
+      height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden;
+    }
+    .impact-bar-fill {
+      height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azure), var(--azure-light));
+    }
+
+    .competitor-diff {
+      background: var(--surface-2); border-radius: 8px;
+      padding: 12px 16px; margin-top: 14px;
+      font-size: 12px; line-height: 1.55;
+      border-left: 3px solid var(--azure);
+    }
+    .competitor-diff strong { color: var(--azure-light); }
+
+    /* ── Priority matrix ──────────────────────────────────────────────────── */
+    .matrix-wrap {
+      overflow-x: auto; margin-top: 28px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    table {
+      width: 100%; border-collapse: collapse; white-space: nowrap;
+      font-size: 13px;
+    }
+    thead tr { background: var(--surface-2); }
+    thead th {
+      padding: 12px 16px; text-align: left;
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-2); }
+    td { padding: 11px 16px; color: var(--text); }
+    td:first-child { font-weight: 600; }
+    .td-feature { min-width: 220px; white-space: normal; }
+
+    .score-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 7px;
+      font-size: 12px; font-weight: 700;
+    }
+    .score-10 { background: rgba(0,120,212,.2); color: var(--azure-light); }
+    .score-9  { background: rgba(0,120,212,.15); color: var(--azure-light); }
+    .score-8  { background: rgba(20,184,166,.15); color: #2dd4bf; }
+    .score-7  { background: rgba(168,85,247,.15); color: #c084fc; }
+
+    .priority-chip {
+      display: inline-block; padding: 2px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .p-now   { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    .p-core  { background: rgba(0,120,212,.12); color: var(--azure-light); border: 1px solid var(--azure-border); }
+    .p-later { background: rgba(245,158,11,.10); color: #fbbf24; border: 1px solid rgba(245,158,11,.25); }
+
+    /* ── Roadmap phases ───────────────────────────────────────────────────── */
+    .phases { display: flex; flex-direction: column; gap: 20px; margin-top: 28px; }
+
+    .phase-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+    }
+    .phase-header {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+    }
+    .phase-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; flex-shrink: 0;
+    }
+    .phase-1 .phase-num { background: rgba(34,197,94,.12);  color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    .phase-2 .phase-num { background: rgba(0,120,212,.12);  color: var(--azure-light); border: 1px solid var(--azure-border); }
+    .phase-3 .phase-num { background: rgba(168,85,247,.12); color: #c084fc; border: 1px solid rgba(168,85,247,.25); }
+
+    .phase-title { font-size: 16px; font-weight: 700; }
+    .phase-subtitle { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    .phase-items { display: flex; flex-direction: column; gap: 10px; }
+    .phase-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--surface-2); border-radius: 8px; padding: 12px 14px;
+    }
+    .phase-item-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+    }
+    .phase-1 .phase-item-dot { background: #4ade80; }
+    .phase-2 .phase-item-dot { background: var(--azure-light); }
+    .phase-3 .phase-item-dot { background: #c084fc; }
+
+    .phase-item-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .phase-item-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Positioning ──────────────────────────────────────────────────────── */
+    .positioning {
+      background: linear-gradient(135deg, rgba(0,120,212,.12) 0%, rgba(0,120,212,.04) 100%);
+      border: 1px solid var(--azure-border); border-radius: var(--radius);
+      padding: 32px 36px; margin-top: 32px; text-align: center;
+    }
+    .positioning-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--azure); margin-bottom: 16px;
+    }
+    .positioning blockquote {
+      font-size: clamp(16px, 2.5vw, 21px); font-weight: 600;
+      line-height: 1.5; color: var(--text); max-width: 680px; margin: 0 auto 16px;
+    }
+    .positioning blockquote em { color: var(--azure-light); font-style: normal; }
+    .positioning-note { font-size: 13px; color: var(--muted); }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--border); padding: 28px 0; margin-top: 64px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: gap;
+      font-size: 12px; color: var(--muted);
+    }
+    .footer strong { color: var(--text); }
+    .footer-logo {
+      display: flex; align-items: center; gap: 8px; font-weight: 700;
+      font-size: 14px; color: var(--text);
+    }
+    .footer-logo-dot {
+      width: 24px; height: 24px; border-radius: 7px;
+      background: var(--azure); display: flex; align-items: center; justify-content: center;
+    }
+    .footer-logo span { color: var(--azure); }
+
+    /* ── Callout ──────────────────────────────────────────────────────────── */
+    .callout {
+      background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.2);
+      border-radius: 10px; padding: 14px 18px; margin-top: 20px;
+      font-size: 13px; color: var(--muted); line-height: 1.6;
+    }
+    .callout strong { color: #fbbf24; }
+
+    /* ── Scrollbar ────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* ── Print ────────────────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; color: #111; }
+      .feature-card, .phase-card, .pain-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────── -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+      </svg>
+      Product Strategy · Feature Innovation
+    </div>
+    <h1>CertMasterAI<br/><span>Differentiation Roadmap</span></h1>
+    <p class="hero-sub">
+      A strategic analysis of high-value features that go beyond standard practice platforms —
+      solving the problems that actually cause certification candidates to fail.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><div class="hero-meta-dot"></div><strong>10</strong>&nbsp;Proposed Features</div>
+      <div class="hero-meta-item"><div class="hero-meta-dot"></div><strong>3</strong>&nbsp;Implementation Phases</div>
+      <div class="hero-meta-item"><div class="hero-meta-dot"></div>Target: <strong>&nbsp;Microsoft Certification Candidates</strong></div>
+      <div class="hero-meta-item"><div class="hero-meta-dot"></div>Authored: <strong>&nbsp;August 2026</strong></div>
+    </div>
+  </div>
+
+  <!-- ── Pain Points ───────────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <div class="section-label">Root Cause Analysis</div>
+    <h2 class="section-title">Why Candidates Fail (Even With Practice Questions)</h2>
+    <p class="section-desc">
+      Most platforms solve <strong>content access</strong>. They don't solve the actual causes of failure.
+      These are the 8 real problems we need to address.
+    </p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-num">01</div>
+        <div>
+          <h4>False Confidence</h4>
+          <p>Scoring 75% on practice tests and failing the real exam. Practice scores are poor predictors without calibration.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">02</div>
+        <div>
+          <h4>"I Don't Know What I Don't Know"</h4>
+          <p>Drilling questions while silently missing systematic blind spots across 500+ attempts.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">03</div>
+        <div>
+          <h4>Retention Decay</h4>
+          <p>Studying a domain in week 2, forgetting 40% by exam day in week 8. No platform models this.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">04</div>
+        <div>
+          <h4>Poor Prioritization</h4>
+          <p>Spending equal time on all domains when 70% of exam weight comes from just 3 domains.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">05</div>
+        <div>
+          <h4>Test-Taking Psychology</h4>
+          <p>Knowing material but freezing under pressure, second-guessing correct answers, poor elimination strategy.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">06</div>
+        <div>
+          <h4>Abstract Knowledge</h4>
+          <p>Understanding a service in isolation but failing scenario-based questions requiring real-world judgment.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">07</div>
+        <div>
+          <h4>Habit Discontinuity</h4>
+          <p>Studying intensely for 3 days, disappearing for 10. Inconsistent practice yields poor retention.</p>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">08</div>
+        <div>
+          <h4>No Readiness Signal</h4>
+          <p>No objective measure of "am I ready to book the exam?" — leading to premature or delayed attempts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Feature Cards ─────────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <div class="section-label">Feature Proposals</div>
+    <h2 class="section-title">10 Differentiating Features</h2>
+    <p class="section-desc">
+      Each feature is designed to solve a specific, documented failure mode — not to add to a checkbox list.
+    </p>
+
+    <div class="features">
+
+      <!-- 1. Exam Readiness Score -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 01</div>
+            <div class="feature-name">Exam Readiness Score (ERS)</div>
+            <div class="feature-tagline">A calibrated, forward-looking probability of passing — not a raw practice score</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 9/10</div>
+            <div class="badge badge-high">Complexity: High</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Candidates have no reliable signal of whether they will actually pass. Raw practice scores don't account for question difficulty, knowledge recency, domain gaps, or time pressure.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">A multi-factor prediction — <em>"Predicted score: 748/1000 · 71% probability of passing · Confidence interval: ±40 points"</em> — gives candidates a real framework for deciding when to book the exam.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Competitors show what happened. ERS tells you what will happen — factoring in domain weighting, difficulty adjustment, knowledge recency decay, and response consistency.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Transforms exam-booking decisions. Reduces costly retakes. Reduces over-studying. Creates a clear, motivating finish line.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Very High</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:92%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> No certification platform calculates a forward-looking pass probability. This is a genuinely new category of feature in the cert-prep space.
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Confidence Calibration -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 02</div>
+            <div class="feature-name">Confidence Calibration System</div>
+            <div class="feature-tagline">Train metacognitive accuracy — know what you know, and know what you don't</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 10/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Two silent failure modes: overconfident candidates choose wrong answers with certainty. Underconfident candidates change correct first answers to wrong ones — estimated to cost 5–8 points per exam.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">After each answer, the user rates confidence: Guessed / Likely / Certain. The system tracks calibration accuracy: <em>"When you say Certain, you're right 61% of the time — you're dangerously overconfident in Networking."</em></div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Zero competitors in the Azure cert space have built confidence calibration. It's standard in medical licensing (USMLE) and academic testing — never applied to cloud certifications.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Research shows calibrated test-takers score 10–15% higher than equally-knowledgeable but poorly-calibrated peers. Directly prevents the two most common score-destroying behaviors.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Exceptional</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:98%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> No cert platform distinguishes between "I got this right" and "I knew I'd get this right." Confidence metadata turns practice sessions into metacognitive training.
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Forgetting Curve Engine -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 03</div>
+            <div class="feature-name">Forgetting Curve Engine</div>
+            <div class="feature-tagline">Domain-aware spaced repetition — review exactly when you're about to forget</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 8/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Candidates study a domain, move on, and silently forget it. By exam day, knowledge from 5 weeks ago is significantly degraded. No platform models this for each individual user.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Tracks when each concept was last practiced, models each user's individual forgetting rate, and schedules AI-generated review questions at the optimal moment — just before predicted decay threshold. A visual "Memory Map" shows each domain fading in real time.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Anki has spaced repetition but no exam context. Cert platforms have question banks but no memory modeling. This merges both: AI-generated, exam-aligned questions scheduled by a retention algorithm.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Candidates using spaced repetition report 20–40% better retention at exam time. For a 10-week plan this is often the difference between passing on attempt 1 vs. scheduling a $165 retake.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Very High</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:88%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> All study plans treat domains as equal at all times. No platform adapts review scheduling to individual retention decay.
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Mistake Pattern Analyzer -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 04</div>
+            <div class="feature-name">Mistake Pattern Analyzer — "Your Personal Traps"</div>
+            <div class="feature-tagline">Pattern recognition across all your errors — not just per-question explanations</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 9/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Candidates see explanations for individual wrong answers but never see the pattern across 50 wrong answers. They keep making the same mistake, framed differently, without recognizing it.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Each wrong answer is classified by failure mode: <em>Conceptual Gap · Distractor Trap · Keyword Misread · Overthinking · Knowledge Gap · Time Pressure.</em> After 30+ questions, the AI generates a "Your Personal Traps" report with statistical pattern evidence.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Competitors react to each question. This is diagnostic across an entire learning history. The insight "You changed your first answer to wrong 18 times — in 14 cases your first answer was correct" cannot be surfaced by any current competitor.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Catches systematic errors that no amount of additional practice would surface without intervention. Particularly powerful for "plateau" candidates stuck at the same score despite continued practice.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Exceptional</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:93%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> No platform classifies errors by failure mode or surfaces cross-session patterns. This feature turns historical data into actionable behavioral insight.
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. AI Scenario Simulator -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 05</div>
+            <div class="feature-name">AI Scenario Simulator — "Real Job Situations"</div>
+            <div class="feature-tagline">Multi-turn interactive decision simulations grounded in real Azure architecture trade-offs</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 9/10</div>
+            <div class="badge badge-high">Complexity: High</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Microsoft's hardest exam questions are scenario-based. Candidates who study services in isolation routinely fail these — not because they don't know the services, but because they can't apply judgment to realistic multi-constraint trade-offs.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">A multi-turn simulation where the AI acts as a colleague: presents a realistic work scenario, asks follow-up questions, reveals additional constraints, and evaluates reasoning quality — not just answer selection. There's no single "correct" answer; the AI maps your reasoning to exam concepts.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Every competitor uses static Q&A with a fixed correct answer. The AI Scenario Simulator builds judgment, not pattern-matching. It also creates a powerful "job prep" narrative beyond the exam itself.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Directly addresses the hardest exam question type. Candidates who use this mode approach scenario questions with frameworks rather than guesses. Also highly marketable as a differentiator demo.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Exceptional</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:95%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> No cert platform has moved beyond static Q&A to interactive decision simulations. This is a category-defining feature that becomes a flagship for marketing and demos.
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Study Effectiveness Index -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 06</div>
+            <div class="feature-name">Study Effectiveness Index (SEI)</div>
+            <div class="feature-tagline">Measure learning quality per session — not just hours logged</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 8/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Candidates feel productive when studying for 2 hours but productivity ≠ learning effectiveness. Grinding easy questions, passive re-reading, and distracted sessions all feel like "studying" but yield poor retention.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Scores each session on: active recall ratio, difficulty gradient, focus consistency (response-time variance), time-of-day accuracy correlation, and spacing quality. Generates insights like <em>"You study 23% better in evening sessions"</em> or <em>"Your ERS dropped 12 points this week despite 6 hours of study."</em></div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">All competitors measure quantity (hours, question count). SEI makes quality visible. "Hours studied" as a success metric encourages the wrong behavior.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Eliminates the "I studied all week and feel no progress" frustration. Redirects effort to high-leverage activities. Gives candidates insight into their personal optimal study habits.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>High</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:82%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> No platform distinguishes between productive and unproductive study time. Hours logged is a vanity metric — SEI makes it honest.
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Answer Elimination Training -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 07</div>
+            <div class="feature-name">Answer Elimination Training — "The Process Coach"</div>
+            <div class="feature-tagline">Teach the test-taking skill of systematic elimination as a separately trainable ability</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 8/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Microsoft exams use sophisticated distractors. Many candidates have strong knowledge but lose points because they don't eliminate systematically — especially on questions with two highly plausible options.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">After answering, shows expert elimination reasoning for each answer choice. Highlights linguistic patterns: absolute language ("always," "never"), hedging, specific vs. general. Teaches Microsoft question design philosophy — when is "cheapest" the answer? When is "most secure"?</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Competitors explain why the correct answer is right. This teaches how an expert would reason through all four choices — test-taking intelligence, not just content delivery.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">For candidates scoring 650–700 (just below passing), this alone can close the gap. The content knowledge is there; the exam technique isn't. Highly actionable for that specific cohort.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>High</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:80%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> Test-taking strategy is entirely absent from competing platforms. This makes test-taking skill a first-class feature alongside content knowledge.
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Daily Micro-Sessions -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 08</div>
+            <div class="feature-name">Daily Micro-Learning Sessions — "5-Minute Precision"</div>
+            <div class="feature-tagline">AI-curated 5-question sessions targeting your highest-priority gaps — completable on a commute</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 7/10</div>
+            <div class="badge badge-low">Complexity: Low</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Habit discontinuity. Candidates study hard for a few days, then skip for a week. "I'll study for 2 hours tomorrow" becomes "next week." Long sessions without consistency produce worse outcomes than short, daily sessions.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Exactly 5 questions, AI-selected based on the forgetting curve + ERS priority gaps. A genuine push notification: <em>"Your memory of Conditional Access is about to decay — 5 questions, 5 minutes."</em> The "minimum viable dose" philosophy makes "I don't have time" invalid.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Competitors show streaks but don't curate content. Their daily sessions are random or user-selected. This session is precision-targeted and timed to the individual's forgetting curve.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Transforms occasional users into daily users. Compounding daily practice is the most evidence-backed learning strategy. Extends the platform relationship from "pre-exam cramming" to "daily learning habit."</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>High (via consistency)</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:75%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> Daily features exist but aren't AI-personalized or retention-triggered. This is the lowest-complexity feature with the highest engagement multiplier.
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Peer Accountability Circles -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 09</div>
+            <div class="feature-name">Peer Accountability Circles</div>
+            <div class="feature-tagline">AI-matched cohorts of 3–5 candidates studying for the same exam and target date</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 7/10</div>
+            <div class="badge badge-high">Complexity: High</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Certification prep is lonely and easy to deprioritize. Candidates frequently want to study with others targeting the same exam but there's no structured, platform-native way to do this.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Small AI-matched cohorts with shared leaderboards, question duels, and AI-mediated milestone acknowledgments. People are 65% more likely to complete goals when committed to a peer group, and 95% more likely with a specific accountability partner.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Discord study groups are informal and self-organized. No cert platform has structured, AI-matched, goal-oriented accountability cohorts with in-platform activity and competitive elements.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Dramatically improves completion rates and exam pass rates. Also creates strong word-of-mouth growth as cohort members recruit each other. High emotional engagement and retention.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>High</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:78%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> Social/accountability is a blind spot in every cert prep platform. This becomes both a learning amplifier and a growth engine.
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Career Compass -->
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-header-left">
+            <div class="feature-number">Feature 10</div>
+            <div class="feature-name">Post-Certification Career Compass</div>
+            <div class="feature-tagline">Career guidance that activates after passing — roles, salary, next cert path, interview prep</div>
+          </div>
+          <div class="feature-badges">
+            <div class="badge badge-score">Innovation 7/10</div>
+            <div class="badge badge-medium">Complexity: Medium</div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-grid">
+            <div class="feature-cell">
+              <div class="feature-cell-label">Problem it solves</div>
+              <div class="feature-cell-text">Candidates often don't know what the certification actually unlocks. "I passed AZ-104 — now what?" There's no contextual career guidance, no visibility into what roles become available, no clear next step.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Why it is valuable</div>
+              <div class="feature-cell-text">Activated after passing: role salary data by region, curated hiring examples, recommended next certs based on career goal (Cloud Architect, Security Engineer, DevOps Lead), 20 most common interview questions for roles requiring this cert, and a visual cert path: AZ-104 → AZ-305 → AZ-500.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">How it differs from competitors</div>
+              <div class="feature-cell-text accent">Competitors end their engagement at exam results. Career Compass extends the relationship into career development and creates a powerful reason to return for the next certification.</div>
+            </div>
+            <div class="feature-cell">
+              <div class="feature-cell-label">Potential user impact</div>
+              <div class="feature-cell-text">Creates a motivational "why" that goes beyond passing the exam — deeply resonant for career-changers. Drives long-term retention: users return for each successive cert on their path.</div>
+            </div>
+          </div>
+          <div class="impact-bar-wrap">
+            <div class="impact-bar-label"><span>Learning Impact</span><span>Medium (High on retention)</span></div>
+            <div class="impact-bar-track"><div class="impact-bar-fill" style="width:70%"></div></div>
+          </div>
+          <div class="competitor-diff">
+            <strong>Competitor gap:</strong> Career guidance post-certification is an untouched surface for every existing platform. This transforms CertMasterAI from an exam tool into a career companion.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Priority Matrix ───────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <div class="section-label">Prioritization</div>
+    <h2 class="section-title">Priority Matrix</h2>
+    <p class="section-desc">Ranked by combined innovation score, learning impact, and implementation feasibility.</p>
+
+    <div class="matrix-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="td-feature">Feature</th>
+            <th>Innovation</th>
+            <th>Impact</th>
+            <th>Complexity</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2</td>
+            <td class="td-feature">Confidence Calibration System</td>
+            <td><span class="score-pill score-10">10</span></td>
+            <td>Very High</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-now">Ship First</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td class="td-feature">Mistake Pattern Analyzer</td>
+            <td><span class="score-pill score-9">9</span></td>
+            <td>Very High</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-now">Ship First</span></td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td class="td-feature">Daily Micro-Learning Sessions</td>
+            <td><span class="score-pill score-7">7</span></td>
+            <td>High</td>
+            <td><span class="badge badge-low">Low</span></td>
+            <td><span class="priority-chip p-now">Ship First</span></td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td class="td-feature">Exam Readiness Score (ERS)</td>
+            <td><span class="score-pill score-9">9</span></td>
+            <td>Very High</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="priority-chip p-core">Core Differentiator</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td class="td-feature">Forgetting Curve Engine</td>
+            <td><span class="score-pill score-8">8</span></td>
+            <td>Very High</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-core">Core Differentiator</span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td class="td-feature">Study Effectiveness Index (SEI)</td>
+            <td><span class="score-pill score-8">8</span></td>
+            <td>High</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-core">Core Differentiator</span></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td class="td-feature">Answer Elimination Training</td>
+            <td><span class="score-pill score-8">8</span></td>
+            <td>High</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-core">Core Differentiator</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td class="td-feature">AI Scenario Simulator</td>
+            <td><span class="score-pill score-9">9</span></td>
+            <td>Very High</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="priority-chip p-later">Flagship / Phase 3</span></td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td class="td-feature">Peer Accountability Circles</td>
+            <td><span class="score-pill score-7">7</span></td>
+            <td>High</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="priority-chip p-later">Flagship / Phase 3</span></td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td class="td-feature">Post-Certification Career Compass</td>
+            <td><span class="score-pill score-7">7</span></td>
+            <td>Medium</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="priority-chip p-later">Phase 3</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>Note on scoring:</strong> Innovation scores rate uniqueness in the cert-prep space specifically — not general software originality.
+      A score of 10 means no current competitor has anything comparable.
+      Impact scores reflect demonstrated learning-outcome research, not feature appeal.
+    </div>
+  </div>
+
+  <!-- ── Phases ────────────────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <div class="section-label">Implementation Roadmap</div>
+    <h2 class="section-title">Recommended Sequencing</h2>
+    <p class="section-desc">Ordered by the combination of competitive impact and time-to-ship — early phases build on the existing AI infrastructure already in place.</p>
+
+    <div class="phases">
+
+      <div class="phase-card phase-1">
+        <div class="phase-header">
+          <div class="phase-num">1</div>
+          <div>
+            <div class="phase-title">Phase 1 — Immediate Differentiators</div>
+            <div class="phase-subtitle">Build on existing infrastructure · No new AI models required · Ships fastest</div>
+          </div>
+        </div>
+        <div class="phase-items">
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Confidence Calibration</div>
+              <div class="phase-item-desc">Add a 3-button confidence rating after each answer. The analytics and calibration score build themselves from existing question data. Zero new infrastructure required.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Mistake Pattern Analyzer</div>
+              <div class="phase-item-desc">Classify errors by failure mode using the LLM (already integrated). Surface cross-session patterns in the results screen and dashboard. Builds on the existing question and answer store.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Daily Micro-Learning Sessions</div>
+              <div class="phase-item-desc">Use existing ERS data and question generation to produce a daily 5-question targeted session. Push notifications via PWA. Lowest complexity, highest engagement multiplier in the set.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card phase-2">
+        <div class="phase-header">
+          <div class="phase-num">2</div>
+          <div>
+            <div class="phase-title">Phase 2 — Core Platform Identity</div>
+            <div class="phase-subtitle">Transforms the dashboard from static to a live, motivating intelligence layer</div>
+          </div>
+        </div>
+        <div class="phase-items">
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Exam Readiness Score (ERS)</div>
+              <div class="phase-item-desc">Multi-factor predictive model replacing the static mock dashboard. Becomes the platform's central metric — the number every user checks daily.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Forgetting Curve Engine</div>
+              <div class="phase-item-desc">Makes the Study Planner dynamic: plans adapt as retention decays. Adds the "Memory Map" visualization showing each domain's current retention level in real time.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Study Effectiveness Index + Answer Elimination Training</div>
+              <div class="phase-item-desc">SEI adds quality metrics to session analytics. Elimination Training adds test-taking skill as a separate training mode alongside content modes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card phase-3">
+        <div class="phase-header">
+          <div class="phase-num">3</div>
+          <div>
+            <div class="phase-title">Phase 3 — Flagship & Growth Features</div>
+            <div class="phase-subtitle">Category-defining capabilities for marketing, demos, and long-term retention</div>
+          </div>
+        </div>
+        <div class="phase-items">
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">AI Scenario Simulator</div>
+              <div class="phase-item-desc">The platform's marquee feature — multi-turn interactive decision simulations grounded in real Azure architecture scenarios. Becomes the centerpiece of product demos and marketing. No competitor can replicate quickly.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Peer Accountability Circles</div>
+              <div class="phase-item-desc">AI-matched study cohorts with in-platform activity. Drives both completion rates and word-of-mouth growth. Becomes the primary user acquisition engine over time.</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-item-dot"></div>
+            <div>
+              <div class="phase-item-title">Post-Certification Career Compass</div>
+              <div class="phase-item-desc">Activates after passing. Extends the platform relationship from exam tool to career companion. Drives users back for their next certification on their path.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Positioning ───────────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <div class="positioning">
+      <div class="positioning-label">Positioning Statement</div>
+      <blockquote>
+        "CertMasterAI is the only certification platform that tells you
+        <em>when you're ready</em>, <em>why you're not</em>, and
+        <em>exactly what to practice today</em> — not just more questions."
+      </blockquote>
+      <p class="positioning-note">
+        The combination of Exam Readiness Score, Confidence Calibration, and Mistake Pattern Analyzer
+        creates a genuinely novel category: <strong style="color:var(--text)">intelligent exam readiness coaching</strong>,
+        not question delivery. No current competitor can make this claim.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────── -->
+  <div class="footer">
+    <div class="footer-logo">
+      <div class="footer-logo-dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      CertMaster<span>AI</span>
+    </div>
+    <div>Product Strategy Document · August 2026 · <strong>Perficient</strong></div>
+  </div>
+
+</div>
+</body>
+</html>

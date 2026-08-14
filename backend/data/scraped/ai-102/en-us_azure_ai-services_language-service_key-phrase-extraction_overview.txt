@@ -1,0 +1,43 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is key phrase extraction in Azure Language in Foundry Tools?
+Key phrase extraction retires from Azure Language on
+. To avoid production disruption, migrate existing workloads and direct all new projects to
+, which offers enhanced capabilities for natural language understanding and can be easily integrated into your applications. For guidance, see
+Transitioning from Azure Language features to Foundry models
+Key phrase extraction is one of the features offered by
+Azure Language in Foundry Tools
+. This capability is part of a suite of cloud-based machine learning and AI tools designed for building intelligent applications that process written language. Use key phrase extraction to quickly identify the main concepts in text. For example, in the text "
+The food was delicious and the staff were wonderful.
+", key phrase extraction returns the main topics: "
+This documentation contains the following types of articles:
+are getting-started instructions to guide you through making requests to the service.
+contain instructions for using the service in more specific or customized ways.
+To use this feature, you submit data for analysis and handle the API output in your application. Analysis is performed as-is, with no added customization to the model used on your data.
+Create an Azure Language in Foundry Tools resource, which grants you access to the features offered by Language. It generates a password (called a key) and an endpoint URL that you use to authenticate API requests.
+Create a request using either the REST API or the client library for C#, Java, JavaScript, and Python. You can also send asynchronous calls with a batch request to combine API requests for multiple features into a single call.
+Send the request containing your text data. Your key and endpoint are used for authentication.
+Stream or store the response locally.
+Get started with Key phrase extraction
+To use key phrase extraction, you submit raw unstructured text for analysis and handle the API output in your application. Analysis is performed as-is, with no additional customization to the model used on your data. There are two ways to use key phrase extraction:
+Foundry is a web-based platform that lets you use entity linking with text examples with your own data when you sign up. For more information, see the
+REST API or Client library (Azure SDK)
+Integrate key phrase extraction into your applications using the REST API, or the client library available in a variety of languages. For more information, see the
+key phrase extraction quickstart
+Use the available Docker container to
+deploy this feature on-premises
+. These docker containers enable you to bring the service closer to your data for compliance, security, or other operational reasons.
+Reference documentation and code samples
+As you use this feature in your applications, see the following reference documentation and samples for Azure Language in Foundry Tools:
+Development option / language
+An AI system includes the technology, the individuals who operate the system, the people who experience its effects, and the broader environment where the system functions all play a role. Read the
+transparency note for key phrase extraction
+to learn about responsible AI use and deployment in your systems. For more information, see the following articles:
+Transparency note for Azure Language in Foundry Tools
+Integration and responsible use
+Data, privacy, and security
+There are two ways to get started using the entity linking feature:
+is a web-based platform that lets you use several Language features without needing to write code.
+for instructions on making requests to the service using the REST API and client library SDK.
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

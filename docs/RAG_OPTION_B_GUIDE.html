@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CertMasterAI — Option B: Local ChromaDB RAG Strategy</title>
+<style>
+  @media print {
+    body { background: #fff; color: #000; }
+    .no-print { display: none; }
+    .page-break { page-break-before: always; }
+    .card { border: 1px solid #ccc; box-shadow: none; }
+    a { color: #0078d4; }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 40px 32px;
+    line-height: 1.7;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Print button */
+  .print-bar {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #0078d4; color: #fff; }
+  .btn-secondary { background: #21262d; color: #e6edf3; border: 1px solid #30363d; }
+
+  /* Header */
+  .page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #21262d;
+  }
+  .page-header .tag {
+    display: inline-block;
+    background: #0078d420;
+    border: 1px solid #0078d440;
+    color: #60a5fa;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-header p {
+    color: #8b949e;
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 0.8rem;
+    color: #8b949e;
+  }
+  .meta-row span { display: flex; align-items: center; gap: 6px; }
+
+  /* TOC */
+  .toc {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+  .toc h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8b949e; margin-bottom: 14px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { padding: 5px 0; }
+  .toc a { color: #58a6ff; text-decoration: none; font-size: 0.9rem; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Sections */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: #0078d420;
+    border: 1px solid #0078d440;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; color: #60a5fa;
+    flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+  .section-header p { font-size: 0.85rem; color: #8b949e; margin-top: 3px; }
+
+  /* Cards */
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 12px; }
+  .card h4 { font-size: 0.85rem; font-weight: 700; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 16px; }
+  .card p { font-size: 0.9rem; color: #c9d1d9; margin-bottom: 10px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Flow diagram */
+  .flow-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: #c9d1d9;
+    white-space: pre;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  /* Callouts */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout-icon { flex-shrink: 0; font-size: 1.1rem; margin-top: 1px; }
+  .callout-blue  { background: #0078d415; border: 1px solid #0078d435; color: #79c0ff; }
+  .callout-green { background: #22c55e15; border: 1px solid #22c55e35; color: #4ade80; }
+  .callout-yellow{ background: #f59e0b15; border: 1px solid #f59e0b35; color: #fbbf24; }
+  .callout-purple{ background: #a855f715; border: 1px solid #a855f735; color: #c084fc; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 16px; }
+  th {
+    text-align: left; padding: 10px 14px;
+    background: #0d1117; color: #8b949e;
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid #30363d;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid #21262d; color: #c9d1d9; }
+  tr:last-child td { border-bottom: none; }
+  td strong { color: #e6edf3; }
+
+  /* Step list */
+  .step-list { list-style: none; padding: 0; }
+  .step-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #21262d;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #0078d4;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content h4 { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .step-content p { font-size: 0.85rem; color: #8b949e; margin: 0; }
+
+  /* Effort table highlight */
+  .highlight-row td { background: #0078d410; }
+
+  /* Comparison */
+  .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .vs-grid { grid-template-columns: 1fr; } }
+  .vs-card { background: #161b22; border-radius: 12px; padding: 20px; }
+  .vs-card.left { border: 1px solid #30363d; }
+  .vs-card.right { border: 1px solid #0078d440; }
+  .vs-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; }
+  .vs-card.left h3 { color: #8b949e; }
+  .vs-card.right h3 { color: #60a5fa; }
+  .vs-item { display: flex; gap: 8px; font-size: 0.83rem; padding: 5px 0; color: #c9d1d9; }
+  .check { color: #4ade80; flex-shrink: 0; }
+  .cross { color: #f87171; flex-shrink: 0; }
+  .neutral { color: #fbbf24; flex-shrink: 0; }
+
+  code {
+    font-family: 'Cascadia Code', 'JetBrains Mono', monospace;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.82em;
+    color: #79c0ff;
+  }
+
+  /* Phase roadmap */
+  .roadmap { display: flex; flex-direction: column; gap: 0; }
+  .phase {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid #21262d;
+    align-items: flex-start;
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    min-width: 90px;
+    text-align: center;
+    margin-top: 2px;
+  }
+  .phase-now { background: #22c55e20; color: #4ade80; border: 1px solid #22c55e40; }
+  .phase-next { background: #0078d420; color: #60a5fa; border: 1px solid #0078d440; }
+  .phase-prod { background: #a855f720; color: #c084fc; border: 1px solid #a855f740; }
+  .phase-content h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .phase-content p { font-size: 0.85rem; color: #8b949e; }
+
+  footer {
+    text-align: center;
+    padding: 32px 0 0;
+    border-top: 1px solid #21262d;
+    margin-top: 48px;
+    color: #8b949e;
+    font-size: 0.78rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar no-print">
+  <button class="btn btn-secondary" onclick="window.print()">🖨 Print / Save as PDF</button>
+</div>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="tag">Architecture Guide</div>
+  <h1>Option B: Local ChromaDB RAG Strategy</h1>
+  <p>A practical, zero-cost RAG implementation for the CertMasterAI POC — no Azure approval required</p>
+  <div class="meta-row">
+    <span>📅 August 2026</span>
+    <span>🏗 POC Phase</span>
+    <span>💰 Zero Additional Cost</span>
+    <span>⏱ ~4 hrs one-time setup</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#s1">What is RAG? — Simple Explanation</a></li>
+    <li><a href="#s2">How Option B Works End-to-End</a></li>
+    <li><a href="#s3">Human Effort Required — Step by Step</a></li>
+    <li><a href="#s4">How Questions Are Grounded</a></li>
+    <li><a href="#s5">How to Keep Content Current and Accurate</a></li>
+    <li><a href="#s6">Option A vs Option B — Full Comparison</a></li>
+    <li><a href="#s7">Recommended Phased Roadmap</a></li>
+  </ol>
+</div>
+
+
+<!-- SECTION 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <h2>What is RAG? — Simple Explanation</h2>
+      <p>Retrieval Augmented Generation in plain terms</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Think of RAG like an <strong>open-book exam for Claude.</strong></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
+      <div style="background:#7f1d1d20;border:1px solid #ef444430;border-radius:8px;padding:16px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Without RAG (Option A — current)</div>
+        <p style="font-size:0.85rem;color:#c9d1d9;">You ask Claude a question → Claude answers entirely from its training memory → May be imprecise, difficult to verify, no source citation</p>
+      </div>
+      <div style="background:#14532d20;border:1px solid #22c55e30;border-radius:8px;padding:16px;">
+        <div style="font-size:0.75rem;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">With RAG (Option B)</div>
+        <p style="font-size:0.85rem;color:#c9d1d9;">You ask Claude + hand it the exact Microsoft Learn pages → Claude answers from those pages → Grounded, citable, traceable to source</p>
+      </div>
+    </div>
+    <p style="margin-top:16px;">The "book" Claude reads is your <strong>local ChromaDB database</strong>. The "pages" are Microsoft Learn articles you have loaded into it. ChromaDB finds the most relevant pages for each question topic and hands them to Claude automatically.</p>
+  </div>
+
+  <div class="callout callout-blue">
+    <div class="callout-icon">💡</div>
+    <div><strong>Key insight:</strong> ChromaDB is not an AI service. It is a fast searchable filing cabinet that stores text chunks alongside their mathematical vector representations. You load documents into it once; it serves them on demand for every question generation request.</div>
+  </div>
+</div>
+
+
+<!-- SECTION 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <h2>How Option B Works End-to-End</h2>
+      <p>Two distinct phases: one-time setup and per-request runtime</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Phase 1 — Setup (done once by you)</h3>
+<div class="flow-box">┌─────────────────────────────────────────────────────────────────┐
+│  STEP 1: You collect Microsoft Learn URLs for each exam         │
+│          e.g. https://learn.microsoft.com/azure/ai-services/... │
+│          ~30-50 URLs per exam, saved in a text file             │
+│                                                                 │
+│  STEP 2: Download script visits each URL                        │
+│          → Extracts clean text, strips navigation/HTML         │
+│          → Saves as .txt files on your machine                  │
+│                                                                 │
+│  STEP 3: Indexing script reads each text file                   │
+│          → Splits into chunks (~500 words each)                 │
+│          → Converts each chunk to a vector (384 numbers         │
+│             that represent the meaning of that text)            │
+│          → Stores chunk + vector in ChromaDB on disk            │
+│                                                                 │
+│  RESULT: ChromaDB folder on disk (~200MB for all 6 exams)       │
+│          Survives restarts, searchable in milliseconds          │
+└─────────────────────────────────────────────────────────────────┘</div>
+  </div>
+
+  <div class="card">
+    <h3>Phase 2 — Runtime (every time a question is generated)</h3>
+<div class="flow-box">User starts exam: AB-100, Practice mode, 20 questions
+        │
+        ▼
+Backend picks objective (weighted random from blueprint)
+  e.g. "Describe Features of NLP Workloads on Azure"
+        │
+        ▼
+Query = "AB-100 NLP Workloads Azure features Medium question"
+        │
+        ▼
+Sentence-transformer converts query → vector (384 numbers)
+        │
+        ▼
+ChromaDB compares query vector against ALL stored chunk vectors
+  → Returns top 5 most similar chunks (cosine similarity)
+  → Each chunk is actual text from a Microsoft Learn page
+        │
+        ▼
+Those 5 chunks injected into Claude prompt:
+  "Using ONLY the following text, write a question..."
+  [SOURCE: NLP Overview | learn.microsoft.com/...]
+  Azure AI Language supports key phrase extraction,
+  sentiment analysis, NER across 80+ languages...
+        │
+        ▼
+Claude generates question grounded in those specific chunks
+  → Correct answer traceable to the source text
+  → Citation URL included in question's references field
+  → Grounding score computed against retrieved chunks</div>
+  </div>
+</div>
+
+
+<!-- SECTION 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <h2>Human Effort Required — Step by Step</h2>
+      <p>What you personally need to do vs. what runs automatically</p>
+    </div>
+  </div>
+
+  <ul class="step-list">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Collect Microsoft Learn URLs for each exam &nbsp;<span style="font-weight:400;color:#8b949e;font-size:0.8rem;">~2–3 hours · one time</span></h4>
+        <p>Go to <code>learn.microsoft.com</code> and find the official documentation pages for each exam's domains and objectives. Aim for 30–50 pages per exam (180–300 total). Paste URLs into a plain text file, one per line. Stick to official Microsoft Learn pages — not blog posts or third-party tutorials. This is the most important human judgment task in the entire setup because the quality of your URL list determines the quality of every question generated.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Run the download script &nbsp;<span style="font-weight:400;color:#8b949e;font-size:0.8rem;">~15 min · automated</span></h4>
+        <p>One command. The script visits each URL, extracts article text, saves clean <code>.txt</code> files. No manual reading. For 300 pages this takes about 15 minutes. The script logs any 404s (deleted pages) so you can replace them.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Run the indexing script &nbsp;<span style="font-weight:400;color:#8b949e;font-size:0.8rem;">~5 min · automated</span></h4>
+        <p>One command. The script chunks all text files, generates vectors using a local model (downloads once, ~90MB), and loads everything into ChromaDB on disk. Result: a <code>./chroma_db/</code> folder your backend reads from.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Spot-check quality &nbsp;<span style="font-weight:400;color:#8b949e;font-size:0.8rem;">~30 min · one time</span></h4>
+        <p>Run a few test queries and confirm the top results make sense. Example: query "Azure AI Language key phrase extraction" should return the key phrase extraction overview page. If it doesn't, the URL list may be missing that topic.</p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="card" style="margin-top:24px;">
+    <h3>Effort Summary</h3>
+    <table>
+      <thead><tr><th>Task</th><th>Who Does It</th><th>Time</th><th>Frequency</th></tr></thead>
+      <tbody>
+        <tr class="highlight-row"><td><strong>Compile URL list per exam</strong></td><td>You (human judgment)</td><td>2–3 hours</td><td>Once + when exam objectives change</td></tr>
+        <tr><td>Run download script</td><td>Machine</td><td>15 min</td><td>Once per update cycle</td></tr>
+        <tr><td>Run indexing script</td><td>Machine</td><td>5 min</td><td>Once per update cycle</td></tr>
+        <tr><td>Spot-check quality</td><td>You</td><td>30 min</td><td>Once per update cycle</td></tr>
+        <tr style="background:#0078d410;"><td><strong>Total one-time setup</strong></td><td></td><td><strong>~4 hours</strong></td><td></td></tr>
+        <tr style="background:#22c55e10;"><td><strong>Ongoing maintenance</strong></td><td></td><td><strong>~1 hour</strong></td><td>When Microsoft updates exam content</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- SECTION 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <h2>How Questions Are Grounded</h2>
+      <p>The mechanism that ensures Claude cannot invent facts</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Concrete Example</h3>
+    <p><strong>The chunk retrieved from ChromaDB:</strong></p>
+<div class="flow-box" style="color:#79c0ff;">[SOURCE: Key Phrase Extraction Overview | learn.microsoft.com/azure/ai-services/language-service/...]
+
+Key phrase extraction is a feature of Azure AI Language that identifies the
+main concepts in text. It does not require training data. It supports 80+ languages
+and returns key phrases as a list of strings. It is available via REST API and
+the Azure SDK for Python, .NET, Java, and JavaScript.</div>
+    <p style="margin-top:12px;"><strong>What Claude is instructed:</strong></p>
+<div class="flow-box" style="color:#fbbf24;">"Using ONLY the text above, generate a Medium difficulty MultipleChoiceSingle question
+for the AB-100 exam on the objective 'Features of NLP Workloads on Azure'.
+Set blocked=false, grounding_score=0.92, citation_coverage=0.88."</div>
+    <p style="margin-top:12px;"><strong>What Claude produces:</strong></p>
+<div class="flow-box" style="color:#4ade80;">{
+  "question": "A developer needs to extract the main topics from customer feedback
+               text without building a custom model. Which Azure AI Language
+               capability should they use?",
+  "options": [
+    {"id": "A", "text": "Custom text classification"},
+    {"id": "B", "text": "Key phrase extraction"},      ← correct
+    {"id": "C", "text": "Conversational Language Understanding"},
+    {"id": "D", "text": "Named entity recognition"}
+  ],
+  "correct_answer": ["B"],
+  "explanation": "Key phrase extraction identifies main concepts without training data...",
+  "references": [{"title": "Key Phrase Extraction Overview",
+                  "url": "learn.microsoft.com/azure/ai-services/language-service/..."}]
+}</div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-icon">✅</div>
+    <div><strong>Why this is reliable:</strong> The fact "does not require training data" comes directly from the Microsoft Learn page. The URL in the question's references field points to the exact source. A reviewer can click that link and verify the answer. Claude cannot invent a fact that isn't in the chunk — and the grounding score gate rejects questions where it tries.</div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-icon">⚠</div>
+    <div><strong>Limitation:</strong> Claude can only ask questions about topics that are in your indexed pages. If you did not include the Azure AI Translator documentation, no questions about translation will be generated for AI-102 (or they will fall back to Claude's knowledge). This is why your URL list quality is the critical human input.</div>
+  </div>
+</div>
+
+
+<!-- SECTION 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <h2>How to Keep Content Current and Accurate</h2>
+      <p>Managing the knowledge base over time</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>When Does Content Go Stale?</h3>
+    <table>
+      <thead><tr><th>Risk</th><th>Reality</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr><td>Microsoft updates a service feature</td><td>Your indexed docs reflect the old behaviour</td><td>Re-download + re-index that exam's pages</td></tr>
+        <tr><td>Exam objectives change</td><td>Questions misaligned to new domains</td><td>Update URL list + re-index when MS revises exam guide</td></tr>
+        <tr><td>A page is removed from MS Learn</td><td>Download script logs a 404</td><td>Replace with the current equivalent URL</td></tr>
+        <tr><td>New Azure service launched</td><td>No questions about it</td><td>Add new service pages to URL list + re-index</td></tr>
+        <tr><td>Claude ignores the context</td><td>Prompt says "ONLY use this text"</td><td>Grounding score gate blocks low-grounded answers</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Staying Current — Practical Workflow</h3>
+    <p>Microsoft typically revises exam content <strong>2–4 times per year</strong>. The signal is the "Skills measured" section on the official exam page (e.g. <code>learn.microsoft.com/certifications/exams/ai-102</code>).</p>
+    <p style="margin-top:12px;"><strong>When that page changes, the refresh process is:</strong></p>
+    <ul style="padding-left:20px;margin-top:8px;font-size:0.88rem;color:#c9d1d9;line-height:2;">
+      <li>Update your URL list if new topics are added</li>
+      <li>Run: <code>python scripts/download_docs.py</code></li>
+      <li>Run: <code>python scripts/index_docs.py</code></li>
+      <li>ChromaDB is refreshed — new questions reflect updated content</li>
+    </ul>
+    <p style="margin-top:12px;">Total time to refresh after a Microsoft exam update: <strong>approximately 1 hour.</strong></p>
+  </div>
+
+  <div class="callout callout-purple">
+    <div class="callout-icon">🔔</div>
+    <div><strong>Recommended monitoring:</strong> Subscribe to the RSS feed or "Watch" the exam skills outline pages on Microsoft Learn. You will receive a notification when the page is updated, which is your cue to refresh the index.</div>
+  </div>
+</div>
+
+
+<!-- SECTION 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div>
+      <h2>Option A vs Option B — Full Comparison</h2>
+      <p>Side-by-side across all dimensions</p>
+    </div>
+  </div>
+
+  <div class="vs-grid">
+    <div class="vs-card left">
+      <h3>Option A — Knowledge Only (current)</h3>
+      <div class="vs-item"><span class="check">✓</span> Working right now, zero setup</div>
+      <div class="vs-item"><span class="check">✓</span> High question diversity</div>
+      <div class="vs-item"><span class="check">✓</span> Covers all 6 exams immediately</div>
+      <div class="vs-item"><span class="check">✓</span> Zero cost</div>
+      <div class="vs-item"><span class="cross">✗</span> No verifiable source citations</div>
+      <div class="vs-item"><span class="cross">✗</span> Claude may hallucinate specific facts</div>
+      <div class="vs-item"><span class="cross">✗</span> Knowledge cutoff applies</div>
+      <div class="vs-item"><span class="cross">✗</span> Weak story for stakeholder approval</div>
+      <div class="vs-item"><span class="neutral">~</span> Suitable for internal testing</div>
+    </div>
+    <div class="vs-card right">
+      <h3>Option B — ChromaDB RAG</h3>
+      <div class="vs-item"><span class="check">✓</span> Real Microsoft Learn grounding</div>
+      <div class="vs-item"><span class="check">✓</span> Every answer has a verifiable source URL</div>
+      <div class="vs-item"><span class="check">✓</span> Strong stakeholder demo story</div>
+      <div class="vs-item"><span class="check">✓</span> Zero cost (local)</div>
+      <div class="vs-item"><span class="check">✓</span> Clean migration path to Azure AI Search</div>
+      <div class="vs-item"><span class="cross">✗</span> ~4 hours one-time setup needed</div>
+      <div class="vs-item"><span class="cross">✗</span> Limited to topics in your URL list</div>
+      <div class="vs-item"><span class="cross">✗</span> Lower embedding quality vs Azure OpenAI</div>
+      <div class="vs-item"><span class="neutral">~</span> Suitable for POC + stakeholder demos</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Decision Matrix</h3>
+    <table>
+      <thead><tr><th>Dimension</th><th>Option A</th><th>Option B</th></tr></thead>
+      <tbody>
+        <tr><td>Setup effort</td><td>Zero</td><td>~4 hours</td></tr>
+        <tr><td>Question source</td><td>Claude training memory</td><td>Actual Microsoft Learn pages</td></tr>
+        <tr><td>Citation URLs</td><td>May be hallucinated</td><td>Real, verified MS Learn URLs</td></tr>
+        <tr><td>Fact accuracy</td><td>Good but unverifiable</td><td>Traceable to source document</td></tr>
+        <tr><td>Update process</td><td>Nothing required</td><td>Re-index when MS updates docs (~1 hr)</td></tr>
+        <tr><td>Cost</td><td>Zero</td><td>Zero</td></tr>
+        <tr><td>Stakeholder demo quality</td><td>Adequate</td><td><strong>Strong</strong></td></tr>
+        <tr><td>Migration to Azure AI Search</td><td>Full rewrite needed</td><td><strong>Config change only</strong></td></tr>
+        <tr><td>Requires Azure approval</td><td>No</td><td>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- SECTION 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div>
+      <h2>Recommended Phased Roadmap</h2>
+      <p>From POC today to production-grade RAG when Azure is approved</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="roadmap">
+      <div class="phase">
+        <div class="phase-badge phase-now">Now</div>
+        <div class="phase-content">
+          <h4>Option A — Knowledge-based generation</h4>
+          <p>Portkey + Claude generating questions from training knowledge. Already working. Use for internal development and initial demos. No further setup needed.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-badge phase-next">Next Step</div>
+        <div class="phase-content">
+          <h4>Option B — Local ChromaDB + Microsoft Learn docs</h4>
+          <p>~4 hours setup. Introduces real grounding, verifiable citations, and a compelling stakeholder story. Recommended before any formal POC presentation. The retriever interface stays identical — switching to Azure AI Search later requires only changing the backend of <code>retriever.py</code>, with zero frontend or API contract changes.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-badge phase-prod">Production</div>
+        <div class="phase-content">
+          <h4>Azure AI Search + Azure OpenAI (when approved)</h4>
+          <p>Replace ChromaDB with Azure AI Search and local embeddings with Azure OpenAI <code>text-embedding-3-large</code>. Adds semantic ranking, enterprise scale, managed indexing pipelines, and monitoring. Migration from Option B is a configuration-level change, not a rewrite.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-icon">✅</div>
+    <div><strong>Bottom line:</strong> Option B is worth the 4-hour investment if you need to demonstrate the product to stakeholders or get Azure resource approval. The ability to point to a question and say "this answer comes from this exact Microsoft Learn page, here is the URL" is a significantly stronger proof-of-concept than "Claude remembered this." Option A is sufficient for ongoing development work.</div>
+  </div>
+</div>
+
+
+<footer>
+  <p>CertMasterAI POC · RAG Strategy Guide · Generated August 2026</p>
+  <p style="margin-top:6px;">To save as PDF: use the Print button above and select "Save as PDF" as the destination</p>
+</footer>
+
+</body>
+</html>

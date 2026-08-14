@@ -1,0 +1,86 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Data concepts in Azure Machine Learning
+With Azure Machine Learning, you can import data from a local machine or an existing cloud-based storage resource. This article describes key Azure Machine Learning data concepts.
+Azure Machine Learning resources do not support data imports from Synapse SQL data resources.
+An Azure Machine Learning datastore serves as a
+Azure storage account. An Azure Machine Learning datastore offers these benefits:
+A common, easy-to-use API that interacts with different storage types (Blob/Files/ADLS).
+Easier discovery of useful datastores in team operations.
+For credential-based access (service principal/SAS/key), an Azure Machine Learning datastore secures connection information. This way, you don't need to place that information in your scripts.
+When you create a datastore with an existing Azure storage account, you have two different authentication method options:
+- authenticate data access with a service principal, shared access signature (SAS) token, or account key. Users with
+workspace access can access the credentials.
+- use your Microsoft Entra identity or managed identity to authenticate data access.
+This table summarizes the Azure cloud-based storage services that an Azure Machine Learning datastore can create. Additionally, the table summarizes the authentication types that can access those services:
+Credential-based authentication
+Identity-based authentication
+For more information about datastores, visit
+Each Azure Machine Learning workspace has a default storage account (Azure storage account) that contains these datastores:
+To find the ID for your workspace, go to the workspace in the
+azureml-blobstore-{workspace-id}
+Stores data uploads, job code snapshots, and pipeline data cache.
+Stores data for notebooks, compute instances, and prompt flow.
+azureml-filestore-{workspace-id}
+Alternative container for data upload.
+Storage for assets such as metrics, models, and components.
+A URI (storage location) can reference a file, a folder, or a data table. A machine learning job input and output definition requires one of these three data types:
+Read/write a single file - the file can have any format.
+A type new to V2 APIs. In V1 APIs, files always mapped to a folder on the compute target filesystem; this mapping required an
+. In V2 APIs, the single file is mapped. This way, you can refer to that location in your code.
+You must read/write a folder of parquet/CSV files into Pandas/Spark.
+Deep-learning with images, text, audio, video files located in a folder.
+had an associated engine that could take a file sample from a folder. In V2 APIs, a folder is a simple mapping to the compute target filesystem.
+You have a complex schema subject to frequent changes, or you need a subset of large tabular data.
+In V1 APIs, the Azure Machine Learning back-end stored the data materialization blueprint. As a result,
+only worked if you had an Azure Machine Learning workspace.
+stores the data materialization blueprint in
+storage. This storage location means you can use it
+disconnected to Azure Machine Learning
+- for example, locally and on-premises. In V2 APIs, it's easier to transition from local to remote jobs. For more information, visit
+Working with tables in Azure Machine Learning
+A Uniform Resource Identifier (URI) represents a storage location on your local computer, Azure storage, or a publicly available http(s) location. These examples show URIs for different storage options:
+azureml://datastores/<data_store_name>/paths/<folder1>/<folder2>/<folder3>/<file>.parquet
+./home/username/data/my_data
+https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/titanic.csv
+wasbs://<containername>@<accountname>.blob.core.windows.net/<folder>/
+abfss://<file_system>@<account_name>.dfs.core.windows.net/<folder>/<file>.csv
+adl://<accountname>.azuredatalakestore.net/<folder1>/<folder2>
+An Azure Machine Learning job maps URIs to the compute target filesystem. This mapping means that for a command that consumes or produces a URI, that URI works like a file or a folder. A URI uses
+identity-based authentication
+to connect to storage services, with either your Microsoft Entra ID (default) or Managed Identity. Azure Machine Learning
+URIs can apply either identity-based authentication, or
+(for example, Service Principal, SAS token, account key) authentication, without exposure of secrets.
+to an Azure Machine Learning job, and it can map to the compute target filesystem with one of four different
+: The URI represents a storage location that is
+to the compute target filesystem. The mounted data location exclusively supports read-only output.
+: The URI represents a storage location that is
+to the compute target filesystem. The mounted data location supports both read output from it
+: The URI represents a storage location containing data that is
+to the compute target filesystem.
+: All data written to a compute target location is
+to the storage location represented by the URI.
+Additionally, you can pass in the URI as a job input string with the
+mode. This table summarizes the combination of modes available for inputs and outputs:
+For more information, visit
+Azure Machine Learning uses its own
+for one of three purposes:
+for mounts/uploads/downloads
+to map storage URIs to the compute target filesystem
+to materialize tabular data into pandas/spark with Azure Machine Learning tables (
+The Azure Machine Learning data runtime is designed for
+high speed and high efficiency
+of machine learning tasks. It offers these key benefits:
+language architecture. The Rust language is known for high speed and high memory efficiency.
+Light weight; the Azure Machine Learning data runtime has
+dependencies on other technologies - JVM, for example - so the runtime installs quickly on compute targets.
+Multi-process (parallel) data loading.
+Data pre-fetches operate as background task on the CPU(s), to enhance utilization of the GPU(s) in deep-learning operations.
+Seamless authentication to cloud storage.
+An Azure Machine Learning data asset resembles web browser bookmarks (favorites). Instead of remembering long storage paths (URIs) that point to your most frequently used data, you can create a data asset, and then access that asset with a friendly name.
+Data asset creation also creates a
+to the data source location, along with a copy of its metadata. Because the data remains in its existing location, you incur no extra storage cost, and you don't risk data source integrity. You can create Data assets from Azure Machine Learning datastores, Azure Storage, public URLs, or local files.
+For more information about data assets, visit
+Install and set up the CLI (v2)
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

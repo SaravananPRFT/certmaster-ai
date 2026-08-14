@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CertMasterAI — Architecture & Flow Diagrams</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 32px 24px;
+    line-height: 1.6;
+  }
+  .page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #21262d;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .page-header p {
+    color: #8b949e;
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 2px;
+  }
+  .badge-blue   { background: #0078d420; color: #60a5fa; border: 1px solid #0078d440; }
+  .badge-green  { background: #22c55e20; color: #4ade80; border: 1px solid #22c55e40; }
+  .badge-yellow { background: #f59e0b20; color: #fbbf24; border: 1px solid #f59e0b40; }
+  .badge-red    { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
+  .badge-purple { background: #a855f720; color: #c084fc; border: 1px solid #a855f740; }
+
+  .toc {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 48px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .toc h3 { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { padding: 4px 0; }
+  .toc a { color: #58a6ff; text-decoration: none; font-size: 0.9rem; }
+  .toc a:hover { text-decoration: underline; }
+
+  .diagram-section {
+    margin-bottom: 64px;
+  }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #21262d;
+  }
+  .section-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #0078d420;
+    border: 1px solid #0078d440;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #60a5fa;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .section-title p {
+    font-size: 0.85rem;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+
+  .diagram-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .diagram-card .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  .callout {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .callout-warn  { background: #f59e0b10; border: 1px solid #f59e0b30; color: #fbbf24; }
+  .callout-info  { background: #0078d410; border: 1px solid #0078d430; color: #60a5fa; }
+  .callout-error { background: #ef444410; border: 1px solid #ef444430; color: #f87171; }
+  .callout-ok    { background: #22c55e10; border: 1px solid #22c55e30; color: #4ade80; }
+  .callout-icon  { flex-shrink: 0; font-size: 1rem; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #0d1117;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #8b949e;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 0.85rem;
+  }
+  .status-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: #0d1117;
+    color: #8b949e;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #30363d;
+  }
+  .status-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #21262d;
+    color: #e6edf3;
+  }
+  .status-table tr:last-child td { border-bottom: none; }
+  code {
+    font-family: 'Cascadia Code', 'JetBrains Mono', monospace;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82em;
+    color: #79c0ff;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>CertMasterAI — Architecture & Flow Diagrams</h1>
+  <p>Complete visual reference for question generation, exam flow, RAG pipeline, and system architecture</p>
+  <div style="margin-top:12px;">
+    <span class="badge badge-blue">Next.js 15</span>
+    <span class="badge badge-blue">FastAPI</span>
+    <span class="badge badge-purple">Azure OpenAI GPT-4o</span>
+    <span class="badge badge-purple">Azure AI Search</span>
+    <span class="badge badge-green">RAG Pipeline</span>
+    <span class="badge badge-yellow">Demo Mode Active</span>
+    <span class="badge badge-red">n8n — Not Running</span>
+  </div>
+</div>
+
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#s1">Current State — What Actually Runs Today</a></li>
+    <li><a href="#s2">Question Generation Pipeline (Backend)</a></li>
+    <li><a href="#s3">RAG Retrieval Pipeline</a></li>
+    <li><a href="#s4">Exam Session Lifecycle — All Three Modes</a></li>
+    <li><a href="#s5">Study vs Practice vs Certification — Mode Differences</a></li>
+    <li><a href="#s6">Full System Architecture (Intended)</a></li>
+    <li><a href="#s7">Data Storage Architecture</a></li>
+    <li><a href="#s8">Question Count Flow — Root Cause</a></li>
+    <li><a href="#s9">Known Gaps & Fix Priority</a></li>
+    <li><a href="#s10">Content Refresh Automation — n8n Workflows</a></li>
+  </ol>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 1: CURRENT STATE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">
+      <h2>Current State — What Actually Runs Today</h2>
+      <p>The frontend is in demo mode. The backend exists but is not wired to the exam player.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart LR
+    subgraph BROWSER["🌐  Browser (Frontend)"]
+        direction TB
+        A1["User opens exam"] --> A2["getMockSession()"]
+        A2 --> A3["Hardcoded JSON questions\n21 questions total\nacross 6 exams"]
+        A3 --> A4["Exam plays\nAnswers stored in Zustand\nNo API calls made"]
+        A4 --> A5["Score computed\nclient-side\nResults shown"]
+    end
+
+    subgraph BACKEND["🖥️  FastAPI Backend (Running but not connected)"]
+        direction TB
+        B1["POST /questions/generate"]
+        B2["Azure OpenAI GPT-4o"]
+        B3["Azure AI Search"]
+        B4["Grounding Validator"]
+        B1 --> B2 --> B4
+        B1 --> B3 --> B2
+    end
+
+    BROWSER -. "❌ No connection\n(examApi methods defined\nbut never called)" .-> BACKEND
+
+    style BROWSER fill:#0d2137,stroke:#0078d4,color:#e6edf3
+    style BACKEND fill:#1a1a1a,stroke:#444,color:#8b949e,stroke-dasharray: 6 4
+    </div>
+  </div>
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Key finding:</strong> In <code>exam/[examCode]/page.tsx</code> both the <code>try</code> and <code>catch</code> blocks call <code>getMockSession()</code>. <code>examApi.startSession()</code>, <code>saveAnswer()</code>, and <code>submitSession()</code> are defined but never called anywhere in the exam flow.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 2: QUESTION GENERATION PIPELINE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">
+      <h2>Question Generation Pipeline (Backend)</h2>
+      <p>How one question is generated — from API call to validated output.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart TD
+    START(["📥 POST /api/v1/questions/generate\ncount=N, exam=AI-102, difficulty=Medium"])
+    START --> BATCH["generate_batch()\nasyncio.gather — runs N tasks in parallel"]
+
+    BATCH --> OBJ["1️⃣  Select Objective\nWeighted random sampling\nfrom exam blueprint domains\ne.g. 'Implement Generative AI Solutions'"]
+
+    OBJ --> EMBED["2️⃣  Create Embedding\nAzure OpenAI\ntext-embedding-3-large\n3072 dimensions"]
+
+    EMBED --> RETRIEVE["3️⃣  Retrieve Chunks\nAzure AI Search\nHybrid: Keyword + Vector\nTop 5 chunks returned"]
+
+    RETRIEVE --> CONTEXT["4️⃣  Build Context\nSort chunks by relevance score\nFormat: SOURCE: title  url\nCap at 4096 tokens"]
+
+    CONTEXT --> PROMPT["5️⃣  Build Prompt\nSystem: strict grounding rules\nUser: context + type instructions\n+ output JSON schema"]
+
+    PROMPT --> LLM{"6️⃣  Call LLM"}
+
+    LLM -->|"✅ Azure key present"| GPT["Azure OpenAI\nGPT-4o\ntemp=0.7, max_tokens=4096\njson_object mode"]
+    LLM -->|"❌ No Azure key\n✅ Anthropic key present"| CLAUDE["Anthropic\nclaude-sonnet-4-6\ntemp=0.7, max_tokens=4096"]
+    LLM -->|"❌ No keys at all"| MOCK["⚠️  Mock Response\nSame hardcoded\nAI-102 question every time"]
+
+    GPT --> PARSE["7️⃣  Parse & Validate"]
+    CLAUDE --> PARSE
+    MOCK --> PARSE
+
+    PARSE --> CHK1{"LLM set\nblocked=true?"}
+    CHK1 -->|"Yes"| DISCARD1["❌ Discard\nlog block_reason"]
+    CHK1 -->|"No"| CHK2{"grounding_score\n≥ 0.75?"}
+    CHK2 -->|"No"| DISCARD2["❌ Discard"]
+    CHK2 -->|"Yes"| CHK3{"citation_coverage\n≥ 0.60?"}
+    CHK3 -->|"No"| DISCARD3["❌ Discard"]
+    CHK3 -->|"Yes"| QUALITY["8️⃣  Quality Score\nvalidator.score_quality()\nInformational only — does NOT block"]
+
+    QUALITY --> RETURN(["✅ Return Question\nto caller"])
+
+    DISCARD1 --> EMPTY{"Any questions\nsurvived?"}
+    DISCARD2 --> EMPTY
+    DISCARD3 --> EMPTY
+    EMPTY -->|"None survived"| HTTP422["HTTP 422\nAll questions blocked"]
+    EMPTY -->|"Some survived"| RETURN
+
+    style START fill:#0078d4,stroke:#0078d4,color:#fff
+    style RETURN fill:#22c55e,stroke:#22c55e,color:#fff
+    style HTTP422 fill:#ef4444,stroke:#ef4444,color:#fff
+    style DISCARD1 fill:#7f1d1d,stroke:#ef4444,color:#f87171
+    style DISCARD2 fill:#7f1d1d,stroke:#ef4444,color:#f87171
+    style DISCARD3 fill:#7f1d1d,stroke:#ef4444,color:#f87171
+    style MOCK fill:#78350f,stroke:#f59e0b,color:#fbbf24
+    </div>
+  </div>
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Grounding trust gap:</strong> Both <code>grounding_score</code> and <code>citation_coverage</code> are values the LLM writes into its own JSON output. The application trusts them without independent verification. A model that inflates its confidence will always pass the gates.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 3: RAG PIPELINE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">
+      <h2>RAG Retrieval Pipeline</h2>
+      <p>How Azure AI Search retrieves relevant documentation chunks for each question.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart LR
+    subgraph INPUT["Input"]
+        Q["Query text\n'AI-102 Generative AI\nHard question'"]
+        EXAM["exam_code = AI-102\nobjective = Implement\nGenerative AI Solutions"]
+    end
+
+    subgraph EMBED_STEP["Step 1 — Embed"]
+        E["Azure OpenAI\ntext-embedding-3-large\n→ 3072-dim vector"]
+    end
+
+    subgraph SEARCH["Step 2 — Search Azure AI Search"]
+        direction TB
+        FILT["OData Filter\nexam_code eq 'AI-102'\nAND objective eq 'Implement...'"]
+        KW["BM25 Keyword Search\nfull-text on content field"]
+        VEC["Vector Search\nHNSW on content_vector\nk_nearest_neighbors = 5"]
+        SEM["Azure Semantic Ranker\nL2 reranking\non merged results"]
+        FILT --> KW
+        FILT --> VEC
+        KW --> SEM
+        VEC --> SEM
+    end
+
+    subgraph RESULT["Step 3 — Build Context"]
+        SORT["Sort by relevance score\n(descending)"]
+        TRUNC["Token-budget truncation\nMax 4096 tokens\n~1.3 tokens per word"]
+        FORMAT["Format each chunk:\nSOURCE: title  url\ncontent text"]
+        SORT --> TRUNC --> FORMAT
+    end
+
+    subgraph FALLBACK["⚠️ Fallback"]
+        FB["If ANY exception occurs\nreturn 1 hardcoded chunk\ndoc-id: fallback-001"]
+    end
+
+    Q --> E
+    EXAM --> FILT
+    E --> VEC
+    Q --> KW
+    SEARCH -->|"Top 5 chunks"| RESULT
+    SEARCH -->|"Exception"| FALLBACK
+    RESULT --> OUT(["Context string + doc_ids\nto prompt builder"])
+    FALLBACK --> OUT
+
+    style OUT fill:#22c55e,stroke:#22c55e,color:#fff
+    style FALLBACK fill:#78350f,stroke:#f59e0b,color:#fbbf24
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> BM25 keyword: finds exact term matches</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c084fc"></div> HNSW vector: finds semantically similar content</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div> Semantic ranker: re-scores combined results by relevance</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Fallback: used when Azure AI Search is unavailable</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 4: EXAM SESSION LIFECYCLE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">
+      <h2>Exam Session Lifecycle — Today (Demo Mode)</h2>
+      <p>Complete flow from selecting an exam to seeing results.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant Setup as /exams/[code] Page
+    participant Player as /exam/[code] Page
+    participant Mock as getMockSession()
+    participant Zustand as Zustand Store
+    participant Results as ResultScreen
+
+    User->>Setup: Select exam (AB-100)
+    User->>Setup: Choose mode, count, difficulty
+    User->>Setup: Click "Start Practice"
+    Setup->>Player: router.push(/exam/AB-100?mode=practice&count=20)
+
+    Note over Player: Page mounts, loading=true
+    Player->>Mock: getMockSession("AB-100", "practice", 20)
+    Note over Mock: Filter MOCK_QUESTIONS by exam="AB-100"<br/>Found: 6 questions (less than 20 requested)
+    Mock-->>Player: ExamSession { questions: [6 items] }
+    Player->>Zustand: setSession(session)
+    Note over Zustand: Persists to localStorage<br/>timeRemaining = 65*60 = 3900s
+
+    Note over Player: loading=false, show exam
+    Player->>User: ⚠️ Yellow banner: "6 questions available (requested 20)"
+
+    loop For each question
+        User->>Player: Select answer
+        Player->>Zustand: setAnswer(questionId, selectedOptions)
+        Note over Zustand: No API call — stored locally only
+    end
+
+    User->>Player: Click Submit (on last question)
+    Player->>Player: score = Math.round(correct/total * 1000)
+    Note over Player: Pass if score >= 700 (hardcoded)<br/>No API call to backend
+    Player->>Results: Show ResultScreen(score, domainBreakdown)
+    Results->>User: Score card + radar chart + domain bars
+    </div>
+  </div>
+  <div class="callout callout-error">
+    <div class="callout-icon">❌</div>
+    <div><strong>Three missing API calls:</strong> <code>examApi.startSession()</code>, <code>examApi.saveAnswer()</code>, and <code>examApi.submitSession()</code> are all defined in <code>lib/api.ts</code> but never invoked. The entire exam runs offline in the browser.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 5: MODE DIFFERENCES -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">
+      <h2>Study vs Practice vs Certification — Mode Differences</h2>
+      <p>How the three modes behave differently inside the exam player.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart TD
+    START(["User Answers a Question"])
+
+    START --> SM["📗 STUDY MODE"]
+    START --> PM["📙 PRACTICE MODE"]
+    START --> CM["📘 CERTIFICATION MODE"]
+
+    SM --> SM1["✅ Explanation shown\nautomatically"]
+    SM --> SM2["✅ Correct option\nhighlighted green"]
+    SM --> SM3["✅ Wrong options\nhighlighted red"]
+    SM --> SM4["❌ No timer shown"]
+    SM --> SM5["❌ No hint button"]
+
+    PM --> PM1["⏱️ Timer visible\nbut STATIC — bug!\nnever counts down"]
+    PM --> PM2["💡 Hint button\nshows first 150 chars\nof explanation"]
+    PM --> PM3["👁️ Explain button\nonly works AFTER\nanswering"]
+    PM --> PM4["❌ No auto-explanation"]
+    PM --> PM5["❌ No answer highlighting"]
+
+    CM --> CM1["⏱️ Timer counts DOWN\nauto-submits at 0"]
+    CM --> CM2["🔴 Timer turns red\nat 5 minutes remaining"]
+    CM --> CM3["❌ No hints"]
+    CM --> CM4["❌ No explanations"]
+    CM --> CM5["❌ No answer highlighting"]
+
+    style SM fill:#14532d,stroke:#22c55e,color:#e6edf3
+    style PM fill:#78350f,stroke:#f59e0b,color:#e6edf3
+    style CM fill:#1e3a5f,stroke:#0078d4,color:#e6edf3
+    style SM1 fill:#166534,stroke:#22c55e,color:#4ade80
+    style SM2 fill:#166534,stroke:#22c55e,color:#4ade80
+    style SM3 fill:#166534,stroke:#22c55e,color:#4ade80
+    style PM1 fill:#92400e,stroke:#f59e0b,color:#fbbf24
+    style CM1 fill:#1e3a5f,stroke:#0078d4,color:#60a5fa
+    style CM2 fill:#7f1d1d,stroke:#ef4444,color:#f87171
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <table class="status-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Study</th>
+          <th>Practice</th>
+          <th>Certification</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Timer</td><td>❌ Hidden</td><td>⚠️ Shows but frozen (bug)</td><td>✅ Active countdown</td></tr>
+        <tr><td>Explanation</td><td>✅ Auto after answer</td><td>✅ On-demand button</td><td>❌ None</td></tr>
+        <tr><td>Answer highlighting</td><td>✅ Green/red</td><td>❌ None</td><td>❌ None</td></tr>
+        <tr><td>Hint</td><td>❌ None</td><td>✅ First 150 chars</td><td>❌ None</td></tr>
+        <tr><td>Auto-submit on time</td><td>N/A</td><td>N/A</td><td>✅ Yes</td></tr>
+        <tr><td>Duration shown in setup</td><td>∞ (cosmetic)</td><td>∞ (cosmetic)</td><td>Actual minutes</td></tr>
+        <tr><td>Question source</td><td colspan="3" style="text-align:center">getMockSession() for all three (no API)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Practice mode timer bug</strong> — <code>ExamTimer.tsx:16</code>: <code>if (mode === "practice" || timeRemaining &lt;= 0) return;</code> exits the interval early. The timer shows the start value but never decrements.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 6: FULL SYSTEM ARCHITECTURE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">
+      <h2>Full System Architecture — Intended Design</h2>
+      <p>What the system should look like when all components are connected.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+graph TD
+    subgraph FE["🌐 Frontend — Next.js 15"]
+        direction LR
+        AUTH["AuthContext\nguest / student / admin"]
+        STORE["Zustand Store\nsession + answers"]
+        PAGES["Pages\n/ exams/ exam/ dashboard"]
+    end
+
+    subgraph BE["🖥️ Backend — FastAPI"]
+        direction TB
+        QAPI["Questions API\nPOST /generate\nGET /questions"]
+        SAPI["Sessions API\nPOST /sessions\nPATCH /answers\nPOST /submit"]
+        AAPI["Admin API\nreview / approve / metrics"]
+    end
+
+    subgraph AI["🤖 AI Layer"]
+        GPT["Azure OpenAI\nGPT-4o\nQuestion Generation"]
+        EMB["text-embedding-3-large\n3072 dim Embeddings"]
+        FALL["Anthropic\nclaude-sonnet-4-6\nFallback LLM"]
+    end
+
+    subgraph SEARCH["🔍 Azure AI Search"]
+        IDX["certmaster-docs index\nHNSW + BM25 + Semantic Ranker"]
+        FILT["OData filter\nexam_code + objective"]
+    end
+
+    subgraph STORAGE["💾 Storage Layer"]
+        direction LR
+        DB["PostgreSQL / CosmosDB\n⚠️ NOT YET BUILT\nSessions, Questions, Users"]
+        REDIS["Redis Cache\n🔧 Configured, not wired\nQuestion cache TTL 24h"]
+        BLOB["Azure Blob Storage\n🔧 Configured, not wired\nSource documents"]
+    end
+
+    subgraph N8N["⚙️ n8n Automation (Defined — NOT Running)"]
+        direction TB
+        WF1["WF1: URL Discovery\ndiscover MS Learn pages"]
+        WF2["WF2: Download\nscrape + save HTML"]
+        WF3["WF3: Index\nchunk + embed + push to Search"]
+        WF4["WF4: Quality\nvalidate indexed content"]
+        WF5["WF5: Monitor\nweekly HEAD checks\nalert on 404/moved"]
+        WF1 --> WF2 --> WF3 --> WF4
+        WF5 -. "triggers manual\nre-download+re-index" .-> WF2
+    end
+
+    subgraph MSLEARN["🌐 MS Learn / GitHub Docs"]
+        DOCS["Documentation Pages\nlearn.microsoft.com\ndocs.github.com"]
+    end
+
+    PAGES -->|"Axios calls\n(currently not wired)"| QAPI
+    PAGES -->|"Axios calls\n(currently not wired)"| SAPI
+    AUTH -->|"Bearer token\n⚠️ token key mismatch"| BE
+    QAPI --> GPT
+    QAPI --> EMB
+    GPT -.->|"fallback"| FALL
+    EMB --> FILT
+    QAPI --> FILT
+    FILT --> IDX
+    BE -.->|"planned"| DB
+    BE -.->|"planned"| REDIS
+    AAPI -.->|"planned"| BLOB
+    WF2 -->|"scraped HTML\n→ data/scraped/"| BLOB
+    WF3 -->|"chunks + vectors"| IDX
+    WF5 -->|"monitors"| DOCS
+    DOCS -->|"source pages\ndownloaded by"| WF2
+
+    style DB fill:#1a0a00,stroke:#f59e0b,color:#fbbf24,stroke-dasharray:5 3
+    style REDIS fill:#1a0a00,stroke:#f59e0b,color:#fbbf24,stroke-dasharray:5 3
+    style BLOB fill:#1a0a00,stroke:#f59e0b,color:#fbbf24,stroke-dasharray:5 3
+    style IDX fill:#0d2137,stroke:#0078d4,color:#60a5fa
+    style GPT fill:#1a0d2e,stroke:#a855f7,color:#c084fc
+    style EMB fill:#1a0d2e,stroke:#a855f7,color:#c084fc
+    style FALL fill:#1a0d2e,stroke:#a855f7,color:#c084fc
+    style N8N fill:#1a0a1a,stroke:#ef4444,color:#e6edf3,stroke-dasharray:6 3
+    style WF5 fill:#1a1200,stroke:#f59e0b,color:#fbbf24
+    style MSLEARN fill:#0d1117,stroke:#30363d,color:#8b949e
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Active &amp; wired</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Configured only — code not wired</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Not yet built</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8b949e; border: 2px dashed #555;"></div> Planned connection (dashed)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444; border: 2px dashed #ef4444;"></div> n8n block — defined but container not running</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 7: DATA STORAGE -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">
+      <h2>Data Storage Architecture</h2>
+      <p>Where data lives today — and what resets on server restart.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart LR
+    subgraph VOLATILE["💥 Volatile — Lost on Restart"]
+        direction TB
+        QS["_question_store\ndict in questions.py\nGenerated questions\nvia /generate API"]
+        SS["_sessions\ndict in sessions.py\nAll active exam sessions\nAnswers + scores"]
+        FS["_feedback_store\nlist in questions.py\nUser feedback"]
+        AS["_admin_question_store\ndict in admin.py\nAdmin-reviewed questions\n⚠️ ISOLATED from _question_store"]
+    end
+
+    subgraph DURABLE["✅ Durable — Survives Restart"]
+        AIS["Azure AI Search\ncertmaster-docs index\nDocument chunks + embeddings\nONLY persistent store"]
+        LS["Browser localStorage\ncertmaster-exam — session + index\ncertmaster-user — auth user\ncertmaster-app — sidebar state"]
+        SS2["Browser sessionStorage\ncertmaster-guest — guest flag\nLost on tab close"]
+    end
+
+    subgraph CONFIGURED["🔧 Configured — Not Wired"]
+        REDIS2["Redis\nredis://localhost:6379\nLibrary installed\nZero client code exists"]
+        BLOB2["Azure Blob Storage\nConnection string in config\nZero client code exists"]
+        DB2["PostgreSQL / CosmosDB\nNot in requirements.txt\nNot mentioned in code"]
+    end
+
+    style VOLATILE fill:#1a0000,stroke:#ef4444,color:#e6edf3
+    style DURABLE fill:#001a0a,stroke:#22c55e,color:#e6edf3
+    style CONFIGURED fill:#1a1200,stroke:#f59e0b,color:#e6edf3
+    </div>
+  </div>
+  <div class="callout callout-error">
+    <div class="callout-icon">❌</div>
+    <div><strong>Critical:</strong> Every generated question, exam session, and user answer is stored in Python process memory. A server restart (deploy, crash, scale-out) loses all data. There is no database.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 8: QUESTION COUNT FLOW -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">
+      <h2>Question Count Flow — Root Cause of Mismatch</h2>
+      <p>Why selecting 40 questions delivers fewer than 40.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart TD
+    U["User selects\nAB-100 · 40 questions"]
+    U --> URL["URL: /exam/AB-100?count=40"]
+    URL --> READ["exam/page.tsx line 26\ncount = Number('40') = 40"]
+    READ --> MOCK["getMockSession('AB-100', 'practice', 40)"]
+    MOCK --> FILTER["Filter MOCK_QUESTIONS\nwhere q.exam === 'AB-100'"]
+    FILTER --> FOUND["Found: 6 matching questions"]
+    FOUND --> SLICE["examQuestions.slice(0, 40)\n= [6 questions]\n(slice stops at array end)"]
+    SLICE --> SESSION["ExamSession {\n  questions: 6 items\n  examCode: 'AB-100'\n}"]
+    SESSION --> CHECK{"count(40)\n> session.questions.length(6)?"}
+    CHECK -->|"Yes"| BANNER["⚠️ Yellow demo banner shown\n'6 questions available\n(requested 40)'"]
+    CHECK -->|"No (if enough mock data)"| NORMAL["Exam loads normally"]
+
+    BANNER --> EXAM["Exam plays with 6 questions\nUser sees Q1 of 6"]
+    NORMAL --> EXAM
+
+    style U fill:#0078d4,stroke:#0078d4,color:#fff
+    style FOUND fill:#92400e,stroke:#f59e0b,color:#fbbf24
+    style BANNER fill:#78350f,stroke:#f59e0b,color:#fbbf24
+    style SLICE fill:#7f1d1d,stroke:#ef4444,color:#f87171
+    </div>
+  </div>
+  <div style="margin-top:16px;">
+    <table class="status-table">
+      <thead><tr><th>Exam</th><th>Mock Questions Available</th><th>Default Request (20)</th><th>Max Request (50)</th><th>Always Shows Banner?</th></tr></thead>
+      <tbody>
+        <tr><td>AI-102</td><td>7</td><td>⚠️ 7 of 20</td><td>⚠️ 7 of 50</td><td>Yes</td></tr>
+        <tr><td>AZ-104</td><td>3</td><td>⚠️ 3 of 20</td><td>⚠️ 3 of 50</td><td>Yes</td></tr>
+        <tr><td>AZ-305</td><td>2</td><td>⚠️ 2 of 20</td><td>⚠️ 2 of 50</td><td>Yes</td></tr>
+        <tr><td>GH-300</td><td>4</td><td>⚠️ 4 of 20</td><td>⚠️ 4 of 50</td><td>Yes</td></tr>
+        <tr><td>AB-100</td><td>6</td><td>⚠️ 6 of 20</td><td>⚠️ 6 of 50</td><td>Yes</td></tr>
+        <tr><td>AI-103</td><td>2</td><td>⚠️ 2 of 20</td><td>⚠️ 2 of 50</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-info">
+    <div class="callout-icon">ℹ️</div>
+    <div><strong>Fix:</strong> The permanent solution is connecting <code>examApi.startSession()</code> so the real backend generates AI questions. Until then, the demo banner is the honest UX. The count mismatch is a data limitation, not a code bug.</div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 9: GAPS & PRIORITIES -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">
+      <h2>Known Gaps &amp; Fix Priority</h2>
+      <p>Everything that needs to be done, ranked by impact.</p>
+    </div>
+  </div>
+  <div class="diagram-card">
+    <div class="mermaid">
+flowchart LR
+    subgraph P0["🔴 P0 — Critical (Blocks real usage)"]
+        direction TB
+        G1["Wire examApi.startSession()\nin exam player\nexam/page.tsx lines 39-44"]
+        G2["Fix auth token key\nauth.tsx writes 'certmaster-user'\napi.ts reads 'access_token'\n→ Bearer header always missing"]
+        G3["Add database\nAll data resets on restart\nNo PostgreSQL / CosmosDB exists"]
+        G4["Add auth middleware\nAll backend endpoints public\nNo Depends(get_current_user)"]
+    end
+
+    subgraph P1["🟡 P1 — High (Affects quality)"]
+        direction TB
+        G5["Wire Redis caching\nLibraries installed\nZero client code exists"]
+        G6["Fix Practice timer\nExamTimer.tsx:16\ntimer shows but never counts"]
+        G7["Call check_duplicate()\nvalidator.py:77\nexists but never called"]
+        G8["Persist timeRemaining\nTimer resets to 0\non browser refresh"]
+    end
+
+    subgraph P2["🟢 P2 — Medium (Polish)"]
+        direction TB
+        G9["Use blueprint.passingScore\nnot hardcoded 700\nexam/page.tsx:132"]
+        G10["Wire Azure Blob Storage\nconfigured but no\nBlobServiceClient code"]
+        G11["Admin role flow\nlogin() hardcodes role='student'\nadmin unreachable via UI"]
+        G12["Add more mock questions\n10+ per exam covering\nHotspot, CaseStudy, BestAnswer"]
+    end
+    </div>
+  </div>
+  <div class="callout callout-ok">
+    <div class="callout-icon">✅</div>
+    <div><strong>What is working correctly:</strong> RAG pipeline architecture (retriever.py), grounding validation gates, exam blueprint config (6 exams), all three mode UI differences, Zustand session persistence, AuthContext login/guest/logout, Perficient co-branding, theme toggle (after hydration fix), question type renderers (7 of 10 types have mock coverage).</div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<!-- SECTION 10: n8n CONTENT AUTOMATION -->
+<!-- ─────────────────────────────────────────────────────────── -->
+<div class="diagram-section" id="s10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">
+      <h2>Content Refresh Automation — n8n Workflows</h2>
+      <p>All 5 n8n workflow definitions exist and are importable. Docker container is NOT running. Workflow 5 alert output is unconnected.</p>
+    </div>
+  </div>
+
+  <!-- 10a: All 5 workflows overview -->
+  <div class="diagram-card" style="margin-bottom:16px;">
+    <div class="mermaid">
+flowchart LR
+    subgraph N8N_STACK["⚙️ n8n  ·  http://localhost:5678  ·  docker-compose.n8n.yml"]
+        direction TB
+
+        subgraph WF1_BOX["WF1 — URL Discovery"]
+            WF1A["Schedule Trigger\n(manual / cron)"]
+            WF1B["Read exam blueprints\nfrom config"]
+            WF1C["Generate MS Learn\nURL list per exam"]
+            WF1D["Save to\ndata/urls/*.txt"]
+            WF1A --> WF1B --> WF1C --> WF1D
+        end
+
+        subgraph WF2_BOX["WF2 — Download"]
+            WF2A["Read URL lists\nfrom data/urls/"]
+            WF2B["HTTP GET each page\nskip if already downloaded"]
+            WF2C["Save HTML to\ndata/scraped/"]
+            WF2A --> WF2B --> WF2C
+        end
+
+        subgraph WF3_BOX["WF3 — Index"]
+            WF3A["POST /api/v1/admin/index\nto FastAPI backend"]
+            WF3B["FastAPI reads scraped/\nchunks + embeds\npushes to Azure AI Search"]
+            WF3A --> WF3B
+        end
+
+        subgraph WF4_BOX["WF4 — Quality Check"]
+            WF4A["POST /api/v1/admin/validate\nto FastAPI backend"]
+            WF4B["Spot-generate questions\nper exam, check grounding"]
+            WF4C["Log quality report"]
+            WF4A --> WF4B --> WF4C
+        end
+
+        subgraph WF5_BOX["WF5 — Content Monitor  ⚠️ alert unconnected"]
+            WF5A["Schedule Trigger\nEvery Monday 03:00 AM"]
+            WF5B["Sample 6 URLs\n1 per exam"]
+            WF5C["SplitInBatches\n1 at a time"]
+            WF5D["HTTP HEAD request\ncheck Last-Modified + status"]
+            WF5E["Extract Last-Modified\n+ reachability flag"]
+            WF5F["Summarise Scan\ncount OK vs unreachable"]
+            WF5G["⚠️ Alert node\nNOT connected\nSlack / Email / Teams\nneeded here"]
+            WF5A --> WF5B --> WF5C --> WF5D --> WF5E -->|loop| WF5C
+            WF5E -->|done| WF5F --> WF5G
+        end
+    end
+
+    WF1D -->|"URL lists ready"| WF2A
+    WF2C -->|"HTML ready"| WF3A
+    WF3B -->|"indexed"| WF4A
+    WF5F -. "changed pages detected\n→ re-run WF2 + WF3 manually\nvia: python scripts/download_docs.py --all\n     python scripts/index_docs.py --all --clear" .-> WF2A
+
+    style N8N_STACK fill:#0a0010,stroke:#a855f7,color:#e6edf3
+    style WF5_BOX fill:#1a1200,stroke:#f59e0b,color:#e6edf3
+    style WF5G fill:#7f1d1d,stroke:#ef4444,color:#f87171,stroke-dasharray:5 3
+    style WF1_BOX fill:#0d1a0d,stroke:#22c55e,color:#e6edf3
+    style WF2_BOX fill:#0d1a0d,stroke:#22c55e,color:#e6edf3
+    style WF3_BOX fill:#0d1420,stroke:#0078d4,color:#e6edf3
+    style WF4_BOX fill:#0d1420,stroke:#0078d4,color:#e6edf3
+    </div>
+  </div>
+
+  <!-- 10b: Deployment status table -->
+  <div class="diagram-card">
+    <table class="status-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>File</th>
+          <th>Status</th>
+          <th>What's needed to activate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Docker Compose</td>
+          <td><code>backend/docker-compose.n8n.yml</code></td>
+          <td><span class="badge badge-yellow">File exists</span></td>
+          <td><code>docker compose -f docker-compose.n8n.yml up -d</code></td>
+        </tr>
+        <tr>
+          <td>WF1 — URL Discovery</td>
+          <td><code>backend/n8n/workflow_1_url_discovery.json</code></td>
+          <td><span class="badge badge-yellow">Importable · active=false</span></td>
+          <td>Import via n8n UI → Settings → Import workflow, then activate</td>
+        </tr>
+        <tr>
+          <td>WF2 — Download</td>
+          <td><code>backend/n8n/workflow_2_download.json</code></td>
+          <td><span class="badge badge-yellow">Importable · active=false</span></td>
+          <td>Same as above. Requires <code>data/scraped/</code> volume mounted.</td>
+        </tr>
+        <tr>
+          <td>WF3 — Index</td>
+          <td><code>backend/n8n/workflow_3_index.json</code></td>
+          <td><span class="badge badge-yellow">Importable · active=false</span></td>
+          <td>FastAPI must be running at <code>host.docker.internal:8003</code></td>
+        </tr>
+        <tr>
+          <td>WF4 — Quality</td>
+          <td><code>backend/n8n/workflow_4_quality.json</code></td>
+          <td><span class="badge badge-yellow">Importable · active=false</span></td>
+          <td>Same as WF3</td>
+        </tr>
+        <tr>
+          <td>WF5 — Content Monitor</td>
+          <td><code>backend/n8n/workflow_5_monitor.json</code></td>
+          <td><span class="badge badge-red">Importable · active=false · alert unconnected</span></td>
+          <td>Import → wire "Summarise Scan" → Slack/Email node → activate. Runs every Monday 03:00 AM.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 10c: Workflow 5 detail — actual node flow from JSON -->
+  <div style="margin-top:16px;" class="diagram-card">
+    <div class="mermaid">
+sequenceDiagram
+    participant CRON as Weekly Monday Cron\n(03:00 AM)
+    participant CODE1 as Sample URLs to Check\n(6 URLs, 1 per exam)
+    participant SPLIT as SplitInBatches\n(batch size = 1)
+    participant HTTP  as HEAD Request\n(Last-Modified + ETag)
+    participant CODE2 as Extract Last-Modified\n(status + reachability)
+    participant CODE3 as Summarise Scan\n(count OK vs unreachable)
+    participant ALERT as ⚠️ Alert Node\n(NOT connected — add Slack/Email)
+
+    CRON->>CODE1: trigger
+    CODE1->>SPLIT: array of 6 URL objects
+    loop For each URL
+        SPLIT->>HTTP: url
+        HTTP-->>CODE2: response headers + statusCode
+        CODE2-->>SPLIT: { exam, url, last_modified, reachable }
+    end
+    SPLIT->>CODE3: all 6 results
+    CODE3->>ALERT: { total, reachable_count, unreachable_urls, details }
+    Note over ALERT: Add a Slack / Email / MS Teams node here.\nIf unreachable_count > 0 → re-run:\n  python scripts/download_docs.py --all\n  python scripts/index_docs.py --all --clear
+    </div>
+  </div>
+
+  <div class="callout callout-warn" style="margin-top:16px;">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <strong>Current trigger for re-indexing is manual.</strong> Workflow 5 detects that a page changed (via HEAD Last-Modified) but does <em>not</em> automatically re-download or re-index. It logs a summary and is supposed to alert you — but the alert node is not yet wired. The two commands to run after any alert are:<br>
+      <code>python scripts/download_docs.py --all</code><br>
+      <code>python scripts/index_docs.py --all --clear</code>
+    </div>
+  </div>
+  <div class="callout callout-info" style="margin-top:8px;">
+    <div class="callout-icon">ℹ️</div>
+    <div>
+      <strong>To start n8n:</strong> <code>docker compose -f backend/docker-compose.n8n.yml up -d</code> → open <code>http://localhost:5678</code> (admin / certmasterai2024) → import each <code>backend/n8n/*.json</code> → add alert node to WF5 → activate all workflows.
+    </div>
+  </div>
+</div>
+
+
+<div style="text-align:center; padding:32px; color:#8b949e; font-size:0.8rem; border-top: 1px solid #21262d; margin-top:32px;">
+  CertMasterAI Architecture Diagrams · Generated from code audit · <strong style="color:#0078d4">docs/DIAGRAMS.html</strong>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      background: '#161b22',
+      primaryColor: '#0d2137',
+      primaryTextColor: '#e6edf3',
+      primaryBorderColor: '#0078d4',
+      lineColor: '#58a6ff',
+      secondaryColor: '#21262d',
+      tertiaryColor: '#0d1117',
+      edgeLabelBackground: '#161b22',
+      fontSize: '14px'
+    },
+    flowchart: { htmlLabels: true, curve: 'basis' },
+    sequence: { actorMargin: 80, messageMargin: 20, mirrorActors: false }
+  });
+</script>
+</body>
+</html>

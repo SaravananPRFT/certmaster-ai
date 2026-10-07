@@ -7,18 +7,28 @@
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [250, 300]
+      "position": [250, 220],
+      "notes": "For manual use: click Execute in n8n UI."
+    },
+    {
+      "parameters": {},
+      "id": "node-wf-trigger-3",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "notes": "NEW: Allows WF1 (or any workflow) to call this workflow programmatically.\nAccepts: { exam_code, scraped_dir, clear_first }\nIf not provided, Configure Index Job uses safe defaults."
     },
     {
       "parameters": {
-        "jsCode": "// Configure indexing parameters\nreturn [{\n  json: {\n    exam_code: 'all',\n    scraped_dir: './data/scraped',\n    clear_first: false\n  }\n}];"
+        "jsCode": "// Works for BOTH triggers:\n//   Manual Trigger      → $input.first().json = {}\n//   Execute Workflow    → $input.first().json = { exam_code, scraped_dir, clear_first }\n// Defaults ensure safe standalone manual execution.\nconst input = $input.first().json;\nreturn [{\n  json: {\n    exam_code:   input.exam_code   || 'all',\n    scraped_dir: input.scraped_dir || './data/scraped',\n    clear_first: input.clear_first !== undefined ? input.clear_first : false\n  }\n}];"
       },
       "id": "node-code-3a",
       "name": "Configure Index Job",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300],
-      "notes": "Change exam_code to a specific exam like 'AI-102', or keep 'all' to index everything.\nSet clear_first: true to rebuild from scratch."
+      "position": [520, 300],
+      "notes": "Change exam_code to a specific exam like 'AI-102', or keep 'all' to index everything.\nSet clear_first: true to wipe + rebuild from scratch.\nNow accepts input from Execute Workflow Trigger (called by WF1)."
     },
     {
       "parameters": {
@@ -44,18 +54,21 @@
       "name": "POST /admin/index-documents",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [710, 300],
-      "notes": "Calls the FastAPI backend to chunk, embed, and store all scraped docs into ChromaDB."
+      "position": [750, 300],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "FIX: Added retry (2 attempts, 5s wait).\nCalls the FastAPI backend to chunk, embed, and store all scraped docs into ChromaDB."
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nconst results = data.results || {};\nconst summary = Object.entries(results).map(([exam, r]) => ({\n  exam,\n  status: r.status,\n  chunks: r.chunks_indexed || 0,\n  files: r.files || 0,\n  note: r.reason || ''\n}));\nconst total = summary.reduce((s, r) => s + r.chunks, 0);\nconsole.log(`Total chunks indexed: ${total}`);\nconsole.log(JSON.stringify(summary, null, 2));\nreturn [{ json: { summary, total_chunks: total } }];"
+        "jsCode": "const data = $input.first().json;\nconst results = data.results || {};\nconst summary = Object.entries(results).map(([exam, r]) => ({\n  exam,\n  status: r.status,\n  chunks: r.chunks_indexed || 0,\n  files: r.files || 0,\n  note: r.reason || ''\n}));\nconst total = summary.reduce((s, r) => s + r.chunks, 0);\nconsole.log('Total chunks indexed: ' + total);\nconsole.log(JSON.stringify(summary, null, 2));\nreturn [{ json: { summary, total_chunks: total } }];"
       },
       "id": "node-code-3b",
       "name": "Summarise Results",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, 300]
+      "position": [980, 300]
     },
     {
       "parameters": {
@@ -83,17 +96,17 @@
       "name": "Index Has Content?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1170, 300]
+      "position": [1210, 300]
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nreturn [{ json: { status: 'SUCCESS', message: `ChromaDB ready — ${data.total_chunks} chunks indexed`, summary: data.summary } }];"
+        "jsCode": "const data = $input.first().json;\nreturn [{ json: { status: 'SUCCESS', message: 'ChromaDB ready — ' + data.total_chunks + ' chunks indexed', summary: data.summary } }];"
       },
       "id": "node-success-3",
       "name": "Success",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1400, 220]
+      "position": [1440, 220]
     },
     {
       "parameters": {
@@ -103,23 +116,34 @@
       "name": "Warn Empty",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1400, 400]
+      "position": [1440, 400]
     },
     {
       "parameters": {
-        "content": "## Workflow 3 — ChromaDB Indexing\n\nIndexes scraped docs from disk into ChromaDB via the backend API.\n\n**Input:** Scraped .txt + .meta.json files in `data/scraped/<exam>/`\n**Output:** Chunks embedded and stored in ChromaDB\n\n**Parameters (edit in 'Configure Index Job' node):**\n- `exam_code`: `\"all\"` or specific like `\"AI-102\"`\n- `scraped_dir`: path relative to backend working directory\n- `clear_first`: `true` to wipe + rebuild, `false` to upsert",
-        "height": 210,
-        "width": 380
+        "content": "## Workflow 3 — ChromaDB Indexing (v2)\n\nIndexes scraped docs from disk into ChromaDB via the backend API.\n\n**Changes from v1:**\n- Added Execute Workflow Trigger (can now be called from WF1 or any other workflow)\n- Configure Index Job reads from trigger input if provided, otherwise uses defaults\n- Added retry logic on HTTP node (2 retries, 5s wait)\n\n**Two ways to trigger:**\n1. Manual: click Execute in n8n UI\n2. Programmatic: use Execute Workflow node (pass exam_code, scraped_dir, clear_first)\n\n**To call from WF1:**\n  Add an Execute Workflow node in WF1 pointing to this workflow's ID.\n  WF1 currently uses direct API calls instead (no ID dependency) — this trigger\n  is here for future use if you prefer the chained workflow approach.\n\n**Parameters (edit Configure Index Job or pass via trigger):**\n- exam_code: 'all' or specific like 'AI-102'\n- scraped_dir: path relative to backend working directory\n- clear_first: true to wipe + rebuild, false to upsert",
+        "height": 290,
+        "width": 480
       },
       "id": "node-note-3",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [250, 520]
+      "position": [250, 580]
     }
   ],
   "connections": {
     "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configure Index Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
       "main": [
         [
           {

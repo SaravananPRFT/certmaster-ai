@@ -21,7 +21,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// One representative URL per exam to check for content changes.\n// Expand to cover more pages by adding entries here.\nconst sampleUrls = [\n  { exam: 'AI-102', url: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/overview' },\n  { exam: 'AZ-104', url: 'https://learn.microsoft.com/en-us/azure/virtual-machines/overview' },\n  { exam: 'AZ-305', url: 'https://learn.microsoft.com/en-us/azure/architecture/guide/' },\n  { exam: 'GH-300', url: 'https://docs.github.com/en/code-security/getting-started/github-security-features' },\n  { exam: 'AB-100', url: 'https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning' },\n  { exam: 'AI-103', url: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/retrieval-augmented-generation' }\n];\nreturn sampleUrls.map(item => ({ json: item }));"
+        "jsCode": "// FIX: Added AI-901 (7 exams total).\n// One representative URL per exam to check availability.\n// Expand to cover more pages by adding entries here.\nconst sampleUrls = [\n  { exam: 'AI-102', url: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/overview' },\n  { exam: 'AZ-104', url: 'https://learn.microsoft.com/en-us/azure/virtual-machines/overview' },\n  { exam: 'AZ-305', url: 'https://learn.microsoft.com/en-us/azure/architecture/guide/' },\n  { exam: 'GH-300', url: 'https://docs.github.com/en/code-security/getting-started/github-security-features' },\n  { exam: 'AB-100', url: 'https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning' },\n  { exam: 'AI-103', url: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/retrieval-augmented-generation' },\n  { exam: 'AI-901', url: 'https://learn.microsoft.com/en-us/azure/ai-services/what-are-ai-services' }\n];\nreturn sampleUrls.map(item => ({ json: item }));"
       },
       "id": "node-code-5a",
       "name": "Sample URLs to Check",
@@ -73,13 +73,42 @@
     },
     {
       "parameters": {
-        "jsCode": "const allResults = $input.all().map(item => item.json);\nconst unreachable = allResults.filter(r => !r.reachable);\nconst reachable = allResults.filter(r => r.reachable);\nconsole.log(`[CertMasterAI Monitor] ${reachable.length} URLs OK, ${unreachable.length} unreachable`);\nif (unreachable.length > 0) {\n  console.warn('Unreachable:', unreachable.map(r => r.url).join(', '));\n}\nreturn [{\n  json: {\n    scan_time: new Date().toISOString(),\n    total_checked: allResults.length,\n    reachable_count: reachable.length,\n    unreachable_count: unreachable.length,\n    unreachable_urls: unreachable.map(r => ({ exam: r.exam, url: r.url, status_code: r.status_code })),\n    details: allResults\n  }\n}];"
+        "jsCode": "const allResults = $input.all().map(item => item.json);\nconst unreachable = allResults.filter(r => !r.reachable);\nconst reachable = allResults.filter(r => r.reachable);\nconsole.log('[CertMasterAI Monitor] ' + reachable.length + ' URLs OK, ' + unreachable.length + ' unreachable');\nif (unreachable.length > 0) {\n  console.warn('Unreachable: ' + unreachable.map(r => r.url).join(', '));\n}\nreturn [{\n  json: {\n    scan_time: new Date().toISOString(),\n    total_checked: allResults.length,\n    reachable_count: reachable.length,\n    unreachable_count: unreachable.length,\n    unreachable_urls: unreachable.map(r => ({ exam: r.exam, url: r.url, status_code: r.status_code })),\n    details: allResults\n  }\n}];"
       },
       "id": "node-code-5c",
       "name": "Summarise Scan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1400, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-unreachable",
+              "leftValue": "={{ $json.unreachable_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "node-if-5",
+      "name": "Any Unreachable URLs?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1630, 300],
+      "notes": "FIX: Added this IF guard. Previously Alert FastAPI always fired.\nNow only fires when unreachable_count > 0."
     },
     {
       "parameters": {
@@ -110,20 +139,31 @@
       "name": "Alert FastAPI",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1630, 300],
-      "notes": "POSTs scan summary to /admin/content-alert — persisted to data/alerts.json.\nIf unreachable_count > 0, re-run: python scripts/download_docs.py --all && python scripts/index_docs.py --all --clear"
+      "position": [1860, 220],
+      "notes": "FIX: Now only reached when unreachable_count > 0 (was always firing before).\nPOSTs scan summary to /admin/content-alert — persisted to data/alerts.json.\nIf unreachable_count > 0, re-run: python scripts/download_docs.py --all && python scripts/index_docs.py --all --clear"
     },
     {
       "parameters": {
-        "content": "## Workflow 5 — Content Change Monitor\n\nWeekly scan (Monday 03:00 AM) that checks source documentation URLs for availability.\n\n**Flow:**\n1. Weekly cron fires\n2. 6 sample URLs loaded (1 per exam)\n3. Each URL checked via HTTP HEAD (Last-Modified + status)\n4. Results summarised (reachable vs unreachable)\n5. Summary POSTed to FastAPI `/admin/content-alert`\n   → Saved to `data/alerts.json` (view at GET /admin/content-alerts)\n\n**On unreachable pages:** Re-download and re-index:\n```\npython scripts/download_docs.py --all\npython scripts/index_docs.py --all --clear\n```\n\n**Backend must be running at:** http://localhost:8003",
-        "height": 270,
-        "width": 440
+        "jsCode": "const data = $input.first().json;\nconsole.log('[WF5] All ' + data.total_checked + ' URLs reachable — no alert sent. Scan time: ' + data.scan_time);\nreturn [{ json: { status: 'all_reachable', total_checked: data.total_checked, scan_time: data.scan_time } }];"
+      },
+      "id": "node-all-ok-5",
+      "name": "Log All Reachable",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1860, 400],
+      "notes": "NEW: Terminal node for the healthy path. No alert sent."
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 5 — Content Change Monitor (v2)\n\nWeekly scan (Monday 03:00 AM) that checks source documentation URLs for availability.\n\n**Changes from v1:**\n- FIX: Added IF guard — Alert FastAPI now only fires when unreachable_count > 0\n  (was always firing before, flooding the alert channel every Monday)\n- FIX: Added AI-901 sample URL (7 exams total)\n- Added Log All Reachable terminal node for the healthy path\n\n**Known limitation (by design):**\nThis workflow checks URL *availability*, not content changes.\nThe last-modified header is captured but not compared to a stored baseline.\nRenaming it to 'URL Availability Monitor' would be more accurate.\nTrue content-change detection would require storing last-modified values\nbetween runs (e.g., in a file or database).\n\n**On unreachable pages:** Re-download and re-index:\n```\npython scripts/download_docs.py --all\npython scripts/index_docs.py --all --clear\n```\n\n**Backend must be running at:** http://localhost:8003",
+        "height": 310,
+        "width": 480
       },
       "id": "node-note-5",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [250, 540]
+      "position": [250, 560]
     }
   ],
   "connections": {
@@ -193,7 +233,25 @@
       "main": [
         [
           {
+            "node": "Any Unreachable URLs?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Unreachable URLs?": {
+      "main": [
+        [
+          {
             "node": "Alert FastAPI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log All Reachable",
             "type": "main",
             "index": 0
           }

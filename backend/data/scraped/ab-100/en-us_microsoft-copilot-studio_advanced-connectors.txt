@@ -1,0 +1,69 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Use Power Platform connectors as tools
+Features in this article are powered by the
+, which uses the billing options described in
+Licensing for agents powered by the standard harness
+. Learn how to access standard features in
+Access standard agents and agent flows
+Connectors from Microsoft Power Platform
+act as proxies or "wrappers" around APIs. They enable Copilot Studio, Power Automate, Power Apps, and Azure Logic Apps to communicate with other apps and services. By using connectors, you can connect your accounts and use prebuilt tools and triggers to build your apps and workflows.
+By using connectors, you can access various services (both within the Microsoft ecosystem and outside it) to perform a wide array of tasks automatically.
+Many connectors are available. Connectors include connections between and to Microsoft services like Office 365, SharePoint, and Dynamics 365, as well as connections to non-Microsoft services like Twitter, Google services, Salesforce, and more. Connectors are categorized as:
+, which are built-in connections to popular services available to use in Copilot Studio agents. These connectors include:
+, such as SharePoint, which are included with all Copilot Studio plans.
+, which are available in select
+, which you use to connect to any publicly available API for services not covered by existing connectors.
+Integration with Copilot Studio
+Connectors are useful tools that greatly extend the functionality of Copilot Studio agents. By using connectors, you can connect to various external services and applications to perform a wide range of tasks or retrieve data. By using these connectors, you can create more dynamic, responsive, and useful agents that are tailored to specific business needs and processes.
+You can call connectors as tools in your agent in different ways:
+Connectors can also be used in Copilot Studio as:
+Knowledge sources. For more information, see
+Add Power Platform connectors as knowledge (preview)
+Image generation isn't natively supported in Copilot Studio agents. For scenarios like UI wireframe or image generation, use external services integrated through connectors.
+Add tools from a prebuilt connector to your agent
+You can select and add tools from prebuilt connectors directly to your agent. Connector tools represent specific actions or operations you want your agent to perform by using that connector.
+Add a tool from a prebuilt connector
+and select the agent you want to add a connector to.
+page of your agent and select
+. The different services with connectors available are displayed.
+Select the service you want to connect to, or search for the service by name in the search box. You see a list of tools available for the service connector.
+Select the tool you want to add. The
+If the connection doesn't already exist, select
+. The details of setting up the connection depend on the connector you selected.
+as applicable when you're done.
+. The configuration page for the new tool opens, showing the new tool and its details.
+By default, the connection uses user credentials. For more information about the supported authentication modes, see
+Configure user authentication for tools
+. To change this behavior, see the following section.
+Add a tool from a prebuilt connector in a topic
+and select the agent you want to add a connector to.
+page and select the topic you want to add a connector to.
+) on the authoring canvas.
+In the node selection window, select
+, and search for the connector tool you want to add.
+Set up connection details as needed for the connector.
+By default, the connection uses user credentials. For more information about the supported authentication modes, see
+Configure user authentication for tools
+. To change this behavior, see
+Create a custom connector to add to an agent
+Create a custom connector to add to an agent
+and select the agent you want to add a connector to.
+. You're taken to the Power Apps portal under the
+and select the method you want to use to create the connector.
+Use connectors with maker-provided credentials
+Connectors need a valid set of credentials. By default, connectors ask users (users of your agent) to enter their credentials for the associated service when they use the tool. To have your agent use the maker's credentials, follow these steps:
+Configure your agent to use an
+Add a connector tool to your agent, and configure it.
+Maker-provided credentials
+Publish and test the experience in the
+pane, or in the desired channel.
+To share your connection with others:
+in the left navigation bar.
+Select the connection and select
+dialog, search for the desired user and select the user.
+, next to the user, select
+Single sign-on (SSO) isn't supported for connectors when an agent uses custom Active Directory authentication and the agent is deployed to Microsoft Teams. In this configuration, connectors can't use SSO, and users must authenticate to each connector manually. To enable your users to connect successfully, make sure the necessary connections are set up in Copilot Studio. For guidance on setting up connections, see
+Configure and manage connections
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

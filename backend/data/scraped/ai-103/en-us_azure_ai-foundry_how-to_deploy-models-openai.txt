@@ -1,0 +1,89 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Deploy Microsoft Foundry Models in the Foundry portal
+In this article, you learn how to use the Foundry portal to deploy a Foundry Model in a Foundry resource for inference. Foundry Models include models such as Azure OpenAI models, Meta Llama models, and more. After you deploy a Foundry Model, you can interact with it in the Foundry Playground and use it from code.
+This article uses a Foundry Model from partners and community
+Llama-4-Scout-17B-16E-Instruct
+for illustration. Models from partners and community require that you subscribe to Azure Marketplace before deployment. On the other hand, Foundry Models sold by Azure, such as Azure OpenAI in Foundry Models, don't have this requirement. For more information about Foundry Models, including the regions where they're available for deployment, see
+Foundry Models sold by Azure
+Foundry Models from partners and community
+To complete this article, you need:
+An Azure subscription with a valid payment method. If you don't have an Azure subscription, create a
+to begin. If you're using GitHub Models, you can
+and create an Azure subscription in the process.
+Cognitive Services Contributor
+role or equivalent permissions on the Foundry resource to create and manage deployments. For more information, see
+. This kind of project is managed under a Foundry resource.
+Foundry Models from partners and community
+to create subscriptions. Ensure you have the
+permissions required to subscribe to model offerings
+Foundry Models sold by Azure
+don't have this requirement.
+Deploy a model by following these steps in the Foundry portal:
+toggle is on. These steps refer to
+From the Foundry portal homepage, select
+in the upper-right navigation, then
+Select a model and review its details in the model card. This article uses
+Llama-4-Scout-17B-16E-Instruct
+to customize your deployment. Alternatively, you can use the default deployment settings by selecting
+Foundry Models from partners and community
+, you need to subscribe to Azure Marketplace. This requirement applies to
+Llama-4-Scout-17B-16E-Instruct
+, for example. Read the terms of use and select
+Foundry Models sold by Azure
+, such as the Azure OpenAI model
+, you don't subscribe to Azure Marketplace.
+Configure the deployment settings:
+By default, the deployment uses the model name. You can modify this name before deploying.
+During inference, the deployment name is used in the
+parameter to route requests to this particular deployment.
+to create your deployment.
+Each model supports different deployment types, providing different data residency or throughput guarantees. See
+for more details. In this example, the model supports the Global Standard deployment type.
+When the deployment completes, you land on the
+where you can interactively test the model. Your project and resource must be in one of the supported regions of deployment for the model. Verify that the deployment status shows
+You can manage the existing model deployments in the resource by using the Foundry portal.
+in the upper-right navigation.
+in the left pane to see the list of deployments in the resource.
+From a deployment's detail page, you can view endpoint details and keys, adjust deployment settings, or delete a deployment that you no longer need.
+Test the deployment in the playground
+You can interact with the new model in the Foundry portal by using the playground. The playground is a web-based interface that lets you interact with the model in real-time. Use the playground to test the model with different prompts and see the model's responses.
+From the list of deployments, select the
+Llama-4-Scout-17B-16E-Instruct
+deployment to open the playground page.
+Type your prompt and see the outputs.
+tab to see details about how to access the model deployment programmatically.
+To run inference on the deployed model, see the following examples:
+Responses API with Foundry Models sold by Azure
+, such as Microsoft AI, DeepSeek, and Grok models, see
+How to generate text responses with Microsoft Foundry Models
+Responses API with OpenAI models
+Getting started with the responses API
+Chat completions API with models sold by partners
+, such as the Llama model deployed in this article, see
+Model support for chat completions
+Regional availability and quota limits of a model
+For Foundry Models, the default quota varies by model and region. Certain models might only be available in some regions. For more information on availability and quota limits, see
+Azure OpenAI in Microsoft Foundry Models quotas and limits
+Microsoft Foundry Models quotas and limits
+Quota for deploying and running inference on a model
+For Foundry Models, deploying and running inference consume quota that Azure assigns to your subscription on a per-region, per-model basis in units of Tokens-per-Minute (TPM). When you sign up for Foundry, you receive default quota for most of the available models. Then, you assign TPM to each deployment as you create it, which reduces the available quota for that model. You can continue to create deployments and assign them TPMs until you reach your quota limit.
+When you reach your quota limit, you can only create new deployments of that model if you:
+Request more quota by submitting a
+Adjust the allocated quota on other model deployments in the Foundry portal, to free up tokens for new deployments.
+For more information about quota, see
+Microsoft Foundry Models quotas and limits
+or reallocate TPM from existing deployments.
+and deploy in a supported region.
+Marketplace subscription error
+to subscribe to Azure Marketplace offerings.
+Confirm that the model is available in your selected region and that you have sufficient quota.
+Elevated-role tasks in Microsoft Foundry
+â role requirements for model deployment.
+How to generate text responses with Microsoft Foundry Models
+Deployment types for Foundry Models
+Instant access to models in Microsoft Foundry (preview)
+Deploy models using Azure CLI and Bicep
+Azure OpenAI supported programming languages
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

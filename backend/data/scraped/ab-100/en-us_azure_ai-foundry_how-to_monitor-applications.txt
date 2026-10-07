@@ -1,0 +1,57 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Monitor your generative AI applications (preview) (classic)
+. This article isn't available for the new Foundry portal.
+Learn more about the new portal
+Links in this article might open content in the new Microsoft Foundry documentation instead of the Foundry (classic) documentation you're viewing now.
+Items marked (preview) in this article are currently in public preview. This preview is provided without a service-level agreement, and we don't recommend it for production workloads. Certain features might not be supported or might have constrained capabilities. For more information, see
+Supplemental Terms of Use for Microsoft Azure Previews
+Monitoring your generative AI applications is important because of the complexity and rapid evolution of the AI industry. By using observability integrated with Azure Monitor Application Insights, you can continuously monitor your deployed AI applications to ensure that they're performant, safe, and produce high-quality results in production. In addition to the continuous monitoring capabilities, the Foundry Observability dashboard also provides
+continuous evaluation capabilities for Agents
+with visibility into critical quality and safety metrics.
+How do I know which type of project I have?
+. To migrate your hub-based project to a Foundry project, see
+Migrate from hub-based to Foundry projects
+To use monitoring capabilities in Microsoft Foundry, connect an Application Insights resource to your Foundry project.
+in the left navigation pane of the Foundry portal.
+Create a new Application Insights resource if you don't already have one.
+Connect the resource to your Foundry project.
+Collect production data for monitoring
+Start collecting telemetry for your application that you can monitor in the built-in views. To do this, follow these recommendations:
+Instrument traces to capture detailed telemetry data from your application. This data provides insights into the performance, latency, and behavior of your application in production.
+to help monitor the quality and safety of your agent in production by assessing its outputs against predefined metrics and thresholds.
+Viewing monitoring results
+dashboard view uses signals from
+Azure Monitor Application Insights
+and creating visualizations.
+These views bring key metrics - token consumption, latency, exceptions, response quality - into a single pane that provides transparency to teams. They help teams track operational health and quality, understand trends, and continuously assess to improve their application.
+Follow these steps to access and utilize the built-in monitoring view in your Foundry Project:
+Go to your Foundry Project in the Foundry portal.
+from the left navigation pane.
+tab, review the overview of your application's health.
+Use filters to specify a time range, application, and model to extract detailed insights.
+If you notice problems, such as declining quality metrics, go to
+debug problems in your application
+To further customize your monitoring experience and use advanced capabilities in Azure Monitor, select
+View in Azure Monitor Application Insights
+When you share this workbook with your team members, they must have at least the
+role to the connected Application Insights resource to view the displayed information.
+Customize and share your dashboard
+Application Insights is a powerful tool for application performance monitoring (APM) that provides insights into the health and performance of your applications.
+dashboard in Azure Monitor Application Insights workbooks gallery by selecting the
+View in Azure Monitor Application Insights
+link at the end of the page.
+This dashboard is opened as an editable workbook where you can customize the workbook and save according to your needs.
+Modify elements as needed for your use case. Select
+on an element to edit, add, move, resize, clone, or remove. For example, you can add a tile by using KQL to track a custom attribute you're collecting and that isn't shown in the built-in view.
+Save your latest changes and create different views as needed by selecting
+Explore and analyze with Kusto Query Language (KQL)
+KQL (Kusto Query Language)
+is a powerful query language you can use in Azure to explore, analyze, and visualize large volumes of telemetry and log data.
+by selecting the icon in the upper right for a particular tile or chart.
+When you select that icon, you can view and run the same KQL queries that power your monitoring view. You can also deep dive into the related data.
+You can define Azure Alert rules based on the previous KQL queries to proactively detect problems with your post-production operations. Select
+button opens a wizard to create an alert rule on the related signal.
+To learn more about setting up and managing Azure Alerts to proactively address problems, see
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

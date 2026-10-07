@@ -1,33 +1,36 @@
-# AI-103 — Designing and Implementing Advanced Azure AI Solutions
+# AI-103 — Developing AI Apps and Agents on Azure
+# Certification: Microsoft Certified: Azure AI Apps and Agents Developer Associate
+# Skills: Plan and manage Azure AI solution (25-30%), Implement generative AI and agentic solutions (30-35%), Computer vision (10-15%), Text analysis (10-15%), Information extraction (10-15%)
+# Official study guide: https://learn.microsoft.com/credentials/certifications/resources/study-guides/ai-103
 # Microsoft Learn documentation URLs (~30 pages)
 
-https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/prompt-engineering
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/retrieval-augmented-generation
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/use-your-data
-https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter
-https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning
-https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/function-calling
-https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/assistants
-https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/evaluations
+https://learn.microsoft.com/en-us/azure/ai-foundry/what-is-azure-ai-foundry
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/model-catalog-overview
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/deploy-models-openai
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/prompt-flow
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/evaluate-generative-ai-app
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-approach-gen-ai
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/monitor-applications
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/secure-data-playground
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/trace
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/safety-evaluations-transparency-note
 https://learn.microsoft.com/en-us/azure/ai-services/agents/overview
 https://learn.microsoft.com/en-us/azure/ai-services/agents/concepts/agents
-https://learn.microsoft.com/en-us/azure/ai-services/agents/concepts/threads
-https://learn.microsoft.com/en-us/azure/search/semantic-search-overview
-https://learn.microsoft.com/en-us/azure/search/vector-search-overview
-https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-responsible-ai
-https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview
-https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning
-https://learn.microsoft.com/en-us/azure/architecture/ai-ml/
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-model-monitoring
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-mlflow
-https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-mlflow-models
-https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview
-https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview
+https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/create-run-agent
+https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/retrieval-augmented-generation
+https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/assistants
+https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter
 https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/overview
+https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-image-analysis
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/language-service/named-entity-recognition/overview
+https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
+https://learn.microsoft.com/en-us/azure/ai-services/translator/overview
+https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview
+https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-layout
 https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview
-https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/batch
-https://learn.microsoft.com/en-us/azure/machine-learning/how-to-create-component-pipeline-and-submit
+https://learn.microsoft.com/en-us/azure/search/vector-search-overview
+https://learn.microsoft.com/en-us/azure/search/semantic-search-overview
+https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview

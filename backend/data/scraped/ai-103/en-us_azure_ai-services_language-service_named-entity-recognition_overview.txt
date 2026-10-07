@@ -1,0 +1,40 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is named entity recognition (NER) in Azure Language?
+Named entity recognition (NER) is an Azure Language prebuilt
+. The NER feature can identify and categorize entities in unstructured text such as people, places, organizations, and quantities. The prebuilt NER feature has a preset list of
+. The custom NER feature allows you to train the model to recognize specialized entities specific to your use case.
+are getting-started instructions to guide you through making requests to the service.
+contain instructions for using the service in more specific or customized ways.
+provide in-depth explanations of the service's functionality and features.
+To use this feature, you submit data for analysis and handle the API output in your application. Analysis is performed as-is, with no added customization to the model used on your data.
+Create an Azure Language in Foundry Tools resource, which grants you access to the features offered by Language. It generates a password (called a key) and an endpoint URL that you use to authenticate API requests.
+Create a request using either the REST API or the client library for C#, Java, JavaScript, and Python. You can also send asynchronous calls with a batch request to combine API requests for multiple features into a single call.
+Send the request containing your text data. Your key and endpoint are used for authentication.
+Stream or store the response locally.
+Get started with named entity recognition
+To use named entity recognition, you submit raw unstructured text for analysis and handle the API output in your application. Analysis is performed as-is, with no additional customization to the model used on your data. There are two ways to use named entity recognition:
+Foundry is a web-based platform that lets you use named entity recognition with text examples with your own data when you sign up. For more information, see the
+REST API or Client library (Azure SDK)
+Integrate named entity recognition into your applications using the REST API, or the client library available in a variety of languages. For more information, see the
+named entity recognition quickstart
+Reference documentation and code samples
+As you use this feature in your applications, see the following reference documentation and samples for Azure Language in Foundry Tools:
+Development option / language
+An AI system consists of more than just its core technology. It also includes the people who operate it, the people its use affects, and the broader deployment context.
+All these interconnected elements shape the effectiveness and outcomes of AI. Read the
+to learn about responsible AI use and deployment in your systems. For more information,
+Transparency note for Azure Language in Foundry Tools
+Integration and responsible use
+Data, privacy, and security
+Enhance search capabilities and search indexing
+. Customers can build knowledge graphs based on entities detected in documents to enhance document search as tags.
+Automate business processes
+- Insurance claims, recognized entities like name and location can be highlighted to facilitate review. Support tickets can be automatically generated with customer name and company from an email.
+In-depth customer analysis
+. Determine the most popular information conveyed by customers in reviews, emails, and calls to determine relevant topics and trends over time.
+There are two ways to get started using the Named Entity Recognition (NER) feature:
+is a web-based platform that lets you use several Language features without needing to write code.
+for instructions on making requests to the service using the REST API and client library SDK.
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

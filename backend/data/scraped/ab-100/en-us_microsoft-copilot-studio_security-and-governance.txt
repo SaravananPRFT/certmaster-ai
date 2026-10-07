@@ -1,0 +1,86 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Key concepts - Copilot Studio security and governance
+Copilot Studio follows a number of security and governance controls and processes, including geographic data residency, data loss prevention (DLP), multiple standards certifications, regulatory compliance,
+, and regional customization. For details on data residency and handling practices for Copilot Studio agents, see
+Geographic data residency in Copilot Studio
+This article provides an overview of the security practices followed by Copilot Studio, a list of security and governance controls and features, and examples and suggestions for employing safety and security within Copilot Studio for your agent makers and users.
+serves as a central control plane to observe, govern, and secure Copilot Studio agents. For organizations that onboard Agent 365, Copilot Studio agents can be represented as identities in Microsoft Entra. These identities can be governed with controls such as Conditional Access, role-based and attribute-based access controls, and access governance workflows. Admins can use Agent 365 for centralized observability and policy enforcement across Copilot Studio agents, in addition to existing Power Platform and Microsoft 365 governance mechanisms.
+Security and governance controls
+Agent runtime protection status
+Makers can see the security status of their agents from the Agents page. For organizations that onboard Agent 365, this status is complemented by centralized agent inventory and ownership telemetry in Agent 365 experiences.
+Agent runtime protection status
+Admins can use data policies in the Power Platform admin center to govern the use and availability of Copilot Studio features and agent capabilities, including:
+Maker and user authentication
+Actions, connectors, and skills
+Azure Monitor Application Insights
+Configure data policies for agents
+Usage visibility and Copilot credit governance
+Admins can monitor agent usage and Copilot adoption trends, and set pay-as-you-go Copilot credit caps to manage spend.
+Copilot Hub in the Power Platform admin center
+Manage Copilot Studio credits and capacity
+Connector dependency insights
+Admins can review connector dependencies used by agents to understand data movement risk and apply governance controls before deployment.
+Configure data policies for agents
+GitHub integration and deploy-from-Git with audit trails
+Admins and makers can use GitHub-backed source control and deploy-from-Git with auditable deployment history.
+Application lifecycle management (ALM) guidance
+Makers audit logs in Microsoft Purview for admins
+Admins have full visibility into maker audit logs in Microsoft Purview. Agent 365 complements this with centralized agent inventory and lifecycle context that can be correlated with audit records.
+Audit logs in Microsoft Sentinel for admins
+Admins can monitor and receive alerts on agent activities through Microsoft Sentinel. Agent 365 complements Sentinel monitoring with unified agent governance telemetry and ownership context.
+Run tools with user credentials
+Agent makers can configure tools to use the user's credentials by default.
+Use tools with custom agents
+Sensitivity label for Knowledge with SharePoint
+Agent makers and users can see the highest sensitivity label applied to sources used in the agent's response and individual reference labels in the chat.
+View sensitivity labels for SharePoint data sources
+User authentication with certificates
+Admins and makers can configure agents to use Entra ID manual authentication with certificate provider.
+Configure user authentication
+Makers can see security alerts for their agent before publishing it when security and governance default configurations are modified.
+Automatic security scan in Copilot Studio
+Makers can review continuously updated risk findings while configuring knowledge, tools, and actions so they can remediate potential data exfiltration or security issues before publishing.
+Automatic security scan in Copilot Studio
+Admins can configure environment routing to provide their makers a safe space to build agents.
+Work with Power Platform environments
+Admins can configure a maker welcome message to inform makers about important privacy and compliance requirements.
+Work with Power Platform environments
+Autonomous agents governance with data policies
+Admins can manage agent capabilities with triggers using data policies, ensuring protection against data exfiltration and other risks.
+Configure data policies for agents
+Admins can enable customer-managed encryption keys (CMK) for their Copilot Studio environments.
+Configure customer-managed encryption keys
+Microsoft Entra network controls (via Agent 365)
+Admins can apply Microsoft Entra network egress and ingress controls to Copilot Studio agents through
+. This capability is generally available.
+Microsoft Agent 365 documentation
+Security Development Lifecycle
+Copilot Studio follows the Security Development Lifecycle (SDL). The SDL is a set of strict practices that support security assurance and compliance requirements. Learn more at
+Microsoft Security Development Lifecycle Practices
+Data processing and license agreements
+Your commercial license agreements, including the
+, govern the Copilot Studio service. For the location of data processing, refer to the
+geographical availability documentation
+Compliance with standards and practices
+is the primary resource for Power Platform compliance information.
+Copilot Studio compliance offerings
+Data loss prevention and governance
+Copilot Studio supports an extensive set of
+data loss prevention features
+to help you manage the security of your data, along with
+Power Platform data policies
+Additionally, to further govern and secure Copilot Studio using generative AI features in your organization, you can:
+Disable agent publishing: Your admin can use the Power Platform admin center to turn off the ability to publish agents that use generative AI features for your tenant.
+Disable data movement across geographic locations
+for Copilot Studio generative AI features outside the United States.
+Use the Microsoft 365 admin center to govern the conversational and AI actions and agents that show in Microsoft 365 Copilot
+Finally, Copilot Studio supports securely accessing customer data using
+The configured Lockbox doesn't cover all outbound data sent from Copilot Studio. Two categories of outbound data are excluded from Lockbox coverage:
+Copilot Studio security audit logging
+: Telemetry such as agent invocation events, tool and action calls, policy enforcement decisions, and runtime activity signals is processed by the Microsoft Purview audit logging pipeline rather than the Copilot Studio service. Customer Lockbox protections don't apply to this telemetry.
+Agent 365 governance and audit events
+: Certain governance, telemetry, and audit events for agent operations flow through
+âa separate governance control plane for Copilot Studio agents that provides identity management and centralized observability. These events aren't covered by the configured Lockbox.
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

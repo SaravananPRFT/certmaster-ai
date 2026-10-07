@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sections 1–3: Architecture, Ingestion &amp; Query Flow</title>
+<style>
+  :root { --azure:#0078d4; --azure-dark:#005a9e; --bg:#f4f6f9; --card:#fff; --text:#1a1a2e; --muted:#6b7280; --border:#e5e7eb; --shadow:0 2px 12px rgba(0,0,0,0.08); }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  nav{width:260px;min-height:100vh;background:var(--azure-dark);color:#fff;padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav .logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:16px;}
+  nav .logo a{color:#fff;text-decoration:none;font-weight:800;font-size:1rem;}
+  nav .logo p{font-size:0.75rem;opacity:0.7;margin-top:4px;}
+  nav ul{list-style:none;padding:0 12px;}
+  nav ul li a{display:block;padding:8px 12px;color:rgba(255,255,255,0.82);text-decoration:none;border-radius:6px;font-size:0.85rem;transition:background 0.15s;}
+  nav ul li a:hover,nav ul li a.active{background:rgba(255,255,255,0.15);color:#fff;}
+  nav .section-label{padding:16px 24px 6px;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;opacity:0.5;}
+
+  /* Content */
+  main{flex:1;padding:40px;max-width:900px;}
+  .page-header{background:linear-gradient(135deg,#0078d4,#005a9e);color:#fff;padding:32px 36px;border-radius:12px;margin-bottom:36px;}
+  .page-header .breadcrumb{font-size:0.8rem;opacity:0.75;margin-bottom:8px;}
+  .page-header h1{font-size:1.8rem;font-weight:800;}
+  .page-header p{margin-top:8px;opacity:0.88;font-size:0.95rem;}
+
+  h2{font-size:1.4rem;font-weight:700;color:var(--azure-dark);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  h2::before{content:'';display:inline-block;width:4px;height:1em;background:var(--azure);margin-right:10px;vertical-align:middle;border-radius:2px;}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px;color:#1e3a5f;}
+  p{line-height:1.7;margin-bottom:14px;font-size:0.95rem;}
+
+  /* Diagram / terminal blocks */
+  .diagram{background:#0d1117;color:#c9d1d9;font-family:'Courier New',monospace;font-size:0.78rem;line-height:1.5;padding:24px;border-radius:10px;overflow-x:auto;margin:20px 0;border:1px solid #30363d;}
+  .diagram .comment{color:#8b949e;}
+  .diagram .highlight{color:#58a6ff;}
+  .diagram .green{color:#3fb950;}
+
+  /* Code blocks */
+  .code-wrap{margin:20px 0;}
+  .code-label{display:inline-block;background:#1e1e1e;color:#9cdcfe;font-size:0.72rem;font-family:monospace;padding:4px 14px;border-radius:6px 6px 0 0;border:1px solid #3e3e3e;border-bottom:none;}
+  pre.code{background:#1e1e1e;color:#d4d4d4;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.6;padding:20px;border-radius:0 8px 8px 8px;overflow-x:auto;margin:0;border:1px solid #3e3e3e;}
+  .kw{color:#569cd6;} .fn{color:#dcdcaa;} .str{color:#ce9178;} .cm{color:#6a9955;} .num{color:#b5cea8;} .cls{color:#4ec9b0;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.88rem;}
+  th{background:var(--azure);color:#fff;padding:10px 14px;text-align:left;}
+  td{padding:9px 14px;border:1px solid var(--border);}
+  tr:nth-child(even) td{background:#f8fafc;}
+
+  /* Callouts */
+  .note{background:#eff6ff;border-left:4px solid var(--azure);border-radius:0 8px 8px 0;padding:14px 18px;margin:20px 0;font-size:0.9rem;color:#1e3a5f;}
+  .warn{background:#fef9c3;border-left:4px solid #ca8a04;border-radius:0 8px 8px 0;padding:14px 18px;margin:20px 0;font-size:0.9rem;color:#78350f;}
+
+  /* Nav between pages */
+  .page-nav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid var(--border);}
+  .page-nav a{display:inline-flex;align-items:center;gap:8px;color:var(--azure);text-decoration:none;font-weight:600;font-size:0.9rem;padding:10px 18px;border:1px solid var(--azure);border-radius:8px;transition:background 0.15s;}
+  .page-nav a:hover{background:#eff6ff;}
+
+  section{scroll-margin-top:20px;}
+
+  @media(max-width:768px){body{flex-direction:column;}nav{width:100%;min-height:auto;height:auto;position:relative;}main{padding:20px;}}
+  @media print{nav{display:none;}main{padding:20px;max-width:100%;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <a href="index.html">← CertMasterAI Guide</a>
+    <p>Sections 1–3</p>
+  </div>
+  <div class="section-label">This Page</div>
+  <ul>
+    <li><a href="#s1">1. High-Level Architecture</a></li>
+    <li><a href="#s2">2. Document Ingestion Flow</a></li>
+    <li><a href="#s3">3. User Question Flow</a></li>
+  </ul>
+  <div class="section-label">Other Pages</div>
+  <ul>
+    <li><a href="part2-fastapi-chromadb.html">FastAPI &amp; ChromaDB →</a></li>
+    <li><a href="part3-azure-search.html">Azure AI Search →</a></li>
+    <li><a href="part4-implementation-setup-summary.html">Setup &amp; Summary →</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <div class="breadcrumb">CertMasterAI Technical Guide &rsaquo; Sections 1–3</div>
+  <h1>Architecture, Ingestion &amp; Query Flow</h1>
+  <p>System architecture, how documents become vectors, and how a user question travels end-to-end through the RAG pipeline.</p>
+</div>
+
+<!-- SECTION 1 -->
+<section id="s1">
+<h2>Section 1 — High-Level Architecture</h2>
+
+<p>The CertMasterAI system is a <strong>RAG-grounded exam question generator</strong>. No question is allowed to come from LLM training memory alone — every answer must be traceable to retrieved Microsoft Learn documents. This architecture enforces that contract at every layer.</p>
+
+<div class="diagram">
+<span class="comment">┌─────────────────────────────────────────────────────────────────────────┐</span>
+<span class="comment">│                         CertMasterAI System                              │</span>
+<span class="comment">└─────────────────────────────────────────────────────────────────────────┘</span>
+
+  <span class="highlight">┌──────────┐</span>    HTTP POST     <span class="highlight">┌─────────────────────────────────────┐</span>
+  <span class="highlight">│  Browser  │</span>───────────────►<span class="highlight">│         FastAPI Backend              │</span>
+  <span class="highlight">│ Next.js   │</span>◄───────────────<span class="highlight">│  Pydantic validated I/O + DI wiring  │</span>
+  <span class="highlight">└──────────┘</span>    JSON 200      <span class="highlight">└──────────────┬──────────────────────┘</span>
+                                              │ async orchestration
+                                              ▼
+                              <span class="highlight">┌──────────────────────────┐</span>
+                              <span class="highlight">│    QuestionGenerator      │</span>
+                              <span class="highlight">│   (generator.py:380)      │</span>
+                              <span class="highlight">│  1. select_objective()    │</span>
+                              <span class="highlight">│  2. get_embedding()       │</span>
+                              <span class="highlight">│  3. retriever.retrieve()  │</span>
+                              <span class="highlight">│  4. build_context()       │</span>
+                              <span class="highlight">│  5. build_prompt()        │</span>
+                              <span class="highlight">│  6. _llm_generate()       │</span>
+                              <span class="highlight">│  7. _parse_question()     │</span>
+                              <span class="highlight">└──────┬──────────┬─────────┘</span>
+                                     │          │
+                    ┌────────────────┘          └────────────────┐
+                    ▼                                            ▼
+      <span class="green">┌─────────────────────────┐         ┌─────────────────────────┐</span>
+      <span class="green">│    Azure AI Search       │         │       ChromaDB           │</span>
+      <span class="green">│  (Tier 1 — primary)      │         │  (Tier 2 — fallback)     │</span>
+      <span class="green">│  Vector + BM25 + Hybrid  │         │  HNSW cosine similarity  │</span>
+      <span class="green">│  + Semantic reranking    │         │  local file on disk      │</span>
+      <span class="green">└────────────┬────────────┘         └───────────┬─────────────┘</span>
+                   │                                  │
+                   └────────────────┬─────────────────┘
+                                    ▼
+                   <span class="highlight">┌───────────────────────────┐</span>
+                   <span class="highlight">│     Retrieved Chunks       │</span>
+                   <span class="highlight">│  top-K scored text passages│</span>
+                   <span class="highlight">│  + doc_ids + metadata      │</span>
+                   <span class="highlight">└──────────────┬────────────┘</span>
+                                  │
+                                  ▼
+            <span class="highlight">┌──────────────────────────────────────┐</span>
+            <span class="highlight">│        LLM Provider Cascade           │</span>
+            <span class="highlight">│  Portkey → Azure OpenAI → Anthropic   │</span>
+            <span class="highlight">│  (generator.py:209  _llm_generate)    │</span>
+            <span class="highlight">└─────────────────┬────────────────────┘</span>
+                             │
+                             ▼
+            <span class="highlight">┌──────────────────────────────────────┐</span>
+            <span class="highlight">│     Pydantic Question Model           │</span>
+            <span class="highlight">│  + grounding_score ≥ 0.75 gate        │</span>
+            <span class="highlight">│  + citation_coverage ≥ 0.60 gate      │</span>
+            <span class="highlight">│  + quality_score                      │</span>
+            <span class="highlight">└─────────────────┬────────────────────┘</span>
+                             │ JSON 200
+                             ▼
+                         Browser
+</div>
+
+<h3>Component Responsibilities</h3>
+<table>
+  <tr><th>Component</th><th>What it owns</th><th>What it does NOT own</th></tr>
+  <tr><td><strong>FastAPI</strong></td><td>HTTP routing, request validation (Pydantic), response serialization, dependency injection</td><td>Business logic</td></tr>
+  <tr><td><strong>Pydantic</strong></td><td>Schema enforcement, type coercion, grounding threshold validation</td><td>Data storage</td></tr>
+  <tr><td><strong>QuestionGenerator</strong></td><td>RAG orchestration, LLM selection, prompt building, grounding gate</td><td>Transport layer</td></tr>
+  <tr><td><strong>retriever</strong></td><td>Tiered search strategy (Azure → Chroma → fallback)</td><td>Embedding generation</td></tr>
+  <tr><td><strong>Azure AI Search</strong></td><td>Production hybrid + semantic search, cloud-managed index</td><td>Generating embeddings</td></tr>
+  <tr><td><strong>ChromaDB</strong></td><td>Local HNSW vector store, zero-cost dev fallback</td><td>Cloud features</td></tr>
+  <tr><td><strong>Azure OpenAI</strong></td><td>Embedding generation (text-embedding-3-large) + question generation (GPT-4o)</td><td>Retrieval</td></tr>
+  <tr><td><strong>Grounding Gate</strong></td><td>Drops questions with grounding_score &lt; 0.75 or citation_coverage &lt; 0.60</td><td>Content generation</td></tr>
+</table>
+
+<div class="note">
+  <strong>Key insight:</strong> The LLM is given <em>only</em> the retrieved context and is instructed to compute its own grounding score. If its answer relies on training memory rather than the provided context, it must self-report a low score — which the grounding gate then catches and drops. This is your anti-hallucination contract.
+</div>
+
+</section>
+
+<!-- SECTION 2 -->
+<section id="s2">
+<h2>Section 2 — Document Ingestion Flow</h2>
+
+<p>Ingestion is a <strong>one-time (or periodic) operation</strong> that converts raw text documents into a searchable vector index. It must complete before any user query can succeed. Think of it as building a library catalogue before opening to the public.</p>
+
+<h3>Ingestion Pipeline Flowchart</h3>
+
+<div class="diagram">
+Source Documents
+(backend/data/scraped/ai-102/*.txt  — Microsoft Learn pages)
+            │
+            ▼
+<span class="highlight">┌──────────────────────────────────────────────────────┐</span>
+<span class="highlight">│                    CHUNKING                           │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Strategy: Recursive character text split            │</span>
+<span class="highlight">│  chunk_size:    ~500 tokens                          │</span>
+<span class="highlight">│  chunk_overlap: ~50 tokens                           │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Input:  "Azure AI Language is a managed service...  │</span>
+<span class="highlight">│           Key phrase extraction identifies..."        │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Output: [                                            │</span>
+<span class="highlight">│    "Azure AI Language is a managed service...",      │</span>
+<span class="highlight">│    "Key phrase extraction identifies the main...",   │</span>
+<span class="highlight">│    ...                                                │</span>
+<span class="highlight">│  ]                                                    │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  WHY OVERLAP? A sentence that spans a chunk          │</span>
+<span class="highlight">│  boundary appears in BOTH adjacent chunks,           │</span>
+<span class="highlight">│  so it is always retrievable.                        │</span>
+<span class="highlight">└───────────────────────┬──────────────────────────────┘</span>
+                        │
+                        ▼
+<span class="highlight">┌──────────────────────────────────────────────────────┐</span>
+<span class="highlight">│              EMBEDDING GENERATION                     │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Model: text-embedding-3-large (Azure OpenAI)        │</span>
+<span class="highlight">│  Dimensions: 3072 floats per chunk                   │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Input:  "Key phrase extraction identifies..."       │</span>
+<span class="highlight">│  Output: [0.023, -0.451, 0.892, ... 3072 floats]     │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  API call (generator.py:165):                        │</span>
+<span class="highlight">│  POST /openai/deployments/                           │</span>
+<span class="highlight">│       text-embedding-3-large/embeddings              │</span>
+<span class="highlight">│  {"input": "Key phrase extraction identifies..."}    │</span>
+<span class="highlight">└───────────────────────┬──────────────────────────────┘</span>
+                        │
+                        ▼
+<span class="highlight">┌──────────────────────────────────────────────────────┐</span>
+<span class="highlight">│              METADATA ASSEMBLY                        │</span>
+<span class="highlight">│                                                       │</span>
+<span class="highlight">│  Each chunk becomes a record:                        │</span>
+<span class="highlight">│  {                                                    │</span>
+<span class="highlight">│    "chunk_id":    "ai102-chunk-0047",                │</span>
+<span class="highlight">│    "content":     "Key phrase extraction...",        │</span>
+<span class="highlight">│    "embedding":   [0.023, -0.451, ...],  ← 3072     │</span>
+<span class="highlight">│    "title":       "Azure AI Language Overview",      │</span>
+<span class="highlight">│    "url":         "https://learn.microsoft.com/...", │</span>
+<span class="highlight">│    "exam_code":   "AI-102",                          │</span>
+<span class="highlight">│    "chunk_index": 47                                  │</span>
+<span class="highlight">│  }                                                    │</span>
+<span class="highlight">│  (chroma_retriever.py:96-108)                        │</span>
+<span class="highlight">└───────────────────────┬──────────────────────────────┘</span>
+                        │
+             ┌──────────┴──────────┐
+             ▼                     ▼
+<span class="green">┌──────────────────┐   ┌──────────────────────────────┐</span>
+<span class="green">│    ChromaDB       │   │      Azure AI Search          │</span>
+<span class="green">│  collection.      │   │  search_client.              │</span>
+<span class="green">│  upsert(          │   │  upload_documents(docs)       │</span>
+<span class="green">│    ids,           │   │                               │</span>
+<span class="green">│    embeddings,    │   │  Index has:                   │</span>
+<span class="green">│    documents,     │   │  - BM25 inverted index        │</span>
+<span class="green">│    metadatas      │   │  - HNSW vector index          │</span>
+<span class="green">│  )                │   │  - semantic config            │</span>
+<span class="green">│  (line 93-108)    │   │  - filterable fields          │</span>
+<span class="green">└──────────────────┘   └──────────────────────────────┘</span>
+</div>
+
+<h3>Ingestion Sequence Diagram</h3>
+
+<div class="diagram">
+Ingest Script    Chunker    EmbeddingModel    ChromaDB    AzureAISearch
+      │              │             │               │            │
+      │──load file──►│             │               │            │
+      │◄──raw text───│             │               │            │
+      │──split()────►│             │               │            │
+      │◄──chunks[]───│             │               │            │
+      │                            │               │            │
+      │──embed(chunk_0)───────────►│               │            │
+      │◄──vector[3072]─────────────│               │            │
+      │──embed(chunk_1)───────────►│               │            │
+      │◄──vector[3072]─────────────│               │            │
+      │  ... (all chunks, can run parallel)        │            │
+      │                            │               │            │
+      │──collection.upsert(ids, embeddings, docs)─►│            │
+      │◄──indexed count────────────────────────────│            │
+      │                                                          │
+      │──search_client.upload_documents(docs)──────────────────►│
+      │◄──upload result──────────────────────────────────────── │
+      │                            │               │            │
+   DONE                         (free)          persisted    indexed
+                                               to disk      in cloud
+</div>
+
+<h3>ChromaDB Insert Code</h3>
+<div class="code-wrap">
+  <div class="code-label">chroma_retriever.py : index_chunks() — lines 93–108</div>
+  <pre class="code"><span class="fn">collection</span> = client.<span class="fn">get_or_create_collection</span>(
+    name=<span class="fn">_coll_name</span>(exam_code),          <span class="cm"># e.g. "certmaster_ai_102"</span>
+    metadata={<span class="str">"hnsw:space"</span>: <span class="str">"cosine"</span>},    <span class="cm"># distance metric</span>
+)
+collection.<span class="fn">upsert</span>(
+    ids=[c[<span class="str">"chunk_id"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],
+    documents=[c[<span class="str">"content"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],
+    embeddings=[c[<span class="str">"embedding"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],
+    metadatas=[
+        {
+            <span class="str">"title"</span>: c.get(<span class="str">"title"</span>, <span class="str">""</span>),
+            <span class="str">"url"</span>: c.get(<span class="str">"url"</span>, <span class="str">""</span>),
+            <span class="str">"exam_code"</span>: exam_code,
+            <span class="str">"chunk_index"</span>: c.get(<span class="str">"chunk_index"</span>, <span class="num">0</span>),
+            <span class="str">"chunk_id"</span>: c[<span class="str">"chunk_id"</span>],
+        }
+        <span class="kw">for</span> c <span class="kw">in</span> chunks
+    ],
+)</pre>
+</div>
+
+<h3>Embedding Generation Code</h3>
+<div class="code-wrap">
+  <div class="code-label">generator.py : get_embedding() — lines 165–175</div>
+  <pre class="code"><span class="kw">async def</span> <span class="fn">get_embedding</span>(<span class="cls">self</span>, text: <span class="cls">str</span>) -> Optional[list[<span class="cls">float</span>]]:
+    <span class="kw">try</span>:
+        client = <span class="cls">self</span>.<span class="fn">_get_openai_client</span>()
+        resp = <span class="kw">await</span> client.embeddings.<span class="fn">create</span>(
+            model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,  <span class="cm"># text-embedding-3-large</span>
+            input=text,
+        )
+        <span class="kw">return</span> resp.data[<span class="num">0</span>].embedding   <span class="cm"># list of 3072 floats</span>
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        logger.<span class="fn">warning</span>(<span class="str">"Embedding generation failed: %s"</span>, e)
+        <span class="kw">return None</span></pre>
+</div>
+
+<h3>What Is Stored Where</h3>
+<table>
+  <tr><th>Data</th><th>ChromaDB</th><th>Azure AI Search</th></tr>
+  <tr><td>Original text</td><td>✓ document store</td><td>✓ content field (searchable)</td></tr>
+  <tr><td>Embedding vector (3072 floats)</td><td>✓ HNSW segment</td><td>✓ Collection(Single) vector field</td></tr>
+  <tr><td>title, url, exam_code, chunk_index</td><td>✓ SQLite metadata store</td><td>✓ filterable/retrievable fields</td></tr>
+  <tr><td>BM25 inverted index</td><td>✗ not supported</td><td>✓ auto-built during indexing</td></tr>
+  <tr><td>Semantic ranking model</td><td>✗ not supported</td><td>✓ L2 cross-encoder reranker</td></tr>
+</table>
+
+</section>
+
+<!-- SECTION 3 -->
+<section id="s3">
+<h2>Section 3 — User Question Flow</h2>
+
+<p>Let's trace exactly what happens when a user clicks <strong>"Generate Question"</strong> for AI-102, NLP domain, Medium difficulty. Nine distinct steps, each with the actual code reference.</p>
+
+<div class="diagram">
+<span class="highlight">STEP 1 — HTTP Request arrives at FastAPI</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  POST /api/v1/questions/generate
+  Body: {"exam_code": "AI-102", "difficulty": "Medium", "count": 1}
+
+  Pydantic QuestionGenerationRequest validates:
+    exam_code  → must be in ["AI-102","AZ-104","AZ-305","GH-300","AB-100","AI-103","AI-901"]
+    difficulty → must be "Easy" | "Medium" | "Hard"
+    count      → must be 1–10 (ge=1, le=10)
+
+  If invalid → HTTP 422 Unprocessable Entity, zero business logic runs.
+  If valid   → calls generator.generate_question(request)
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 2 — Objective Selection</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  generator.py:361  _select_objective()
+
+  AI-102 blueprint domain weights:
+    NLP domain:              30%  ← probabilistically most likely
+    Generative AI:           20%
+    Computer Vision:         15%
+    Plan & Manage:           15%
+    Content Moderation:      10%
+    Knowledge Mining:        10%
+
+  Result: objective = "Implement Azure AI Language"
+  (weighted random selection — mirrors real exam composition)
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 3 — Query Embedding Generation</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  generator.py:386-388
+
+  query = "AI-102 Implement Azure AI Language Medium question"
+
+  API CALL:
+  POST https://{endpoint}/openai/deployments/
+       text-embedding-3-large/embeddings
+  Body: {"input": "AI-102 Implement Azure AI Language Medium question"}
+
+  Response: {"data": [{"embedding": [0.023, -0.451, 0.892, ...]}]}
+
+  embedding = [0.023, -0.451, 0.892, ...] ← 3072 floats
+  This vector represents the MEANING of the query in high-dimensional space.
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 4 — Tiered Vector Search</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  retriever.py: retrieve()
+
+  Tier 1: Azure AI Search (primary)
+  ─────────────────────────────────
+  POST https://{service}.search.windows.net/indexes/certmaster-ai102/docs/search
+  Body: {
+    "search": "AI-102 Implement Azure AI Language Medium question",
+    "vectorQueries": [{
+      "vector": [0.023, -0.451, ...],
+      "fields": "embedding",
+      "k": 5
+    }],
+    "queryType": "semantic",
+    "semanticConfiguration": "certmaster-semantic",
+    "select": "content,title,url,chunk_id",
+    "$filter": "exam_code eq 'AI-102'"
+  }
+
+  → Returns hybrid (BM25 + vector) + semantic reranked top-5 chunks
+  → If returns 0 results or raises exception → fall to Tier 2
+
+  Tier 2: ChromaDB (fallback)
+  ─────────────────────────────────
+  chroma_retriever.py:35
+  query_vec = embedder.embed(query)          ← local embedding
+  collection.query(
+    query_embeddings=[query_vec],
+    n_results=5,
+    include=["documents","metadatas","distances"]
+  )
+  → Returns 5 nearest chunks by cosine distance
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 5 — Context Assembly</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  retriever.py: build_context()
+
+  Chunks sorted by score (descending).
+  Concatenated until MAX_CONTEXT_TOKENS budget exhausted.
+
+  context = """
+  [Source: Azure AI Language Overview | doc_id: ai102-0047]
+  Key phrase extraction identifies the main concepts in text...
+
+  [Source: Text Analytics API | doc_id: ai102-0089]
+  The language detection feature supports 120 languages...
+
+  [Source: Named Entity Recognition | doc_id: ai102-0103]
+  NER identifies people, places, organizations in text...
+  ... (2 more chunks)
+  """
+
+  doc_ids = ["ai102-0047", "ai102-0089", "ai102-0103", ...]
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 6 — Prompt Construction</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  prompts.py:162  build_generation_prompt()
+
+  system_prompt = SYSTEM_PROMPT   ← strict grounding rules
+  (prompts.py:6 — "Generate ONLY from provided context")
+
+  user_prompt = f"""
+  EXAM: AI-102
+  DOMAIN/OBJECTIVE: Implement Azure AI Language
+  DIFFICULTY: Medium
+  QUESTION TYPE: MultipleChoiceSingle
+
+  RETRIEVED CONTEXT (use ONLY this to generate the question):
+  {context}
+
+  RETRIEVED DOCUMENT IDs: {doc_ids}
+
+  TYPE-SPECIFIC INSTRUCTIONS:
+  Generate a single-answer multiple choice question with exactly 4 options...
+
+  DIFFICULTY GUIDELINES:
+  Medium: Tests implementation knowledge. May involve 2-3 services.
+  Cognitive level: Apply/Analyze (Bloom's)
+
+  OUTPUT SCHEMA: {OUTPUT_SCHEMA}
+  """
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 7 — LLM Provider Cascade</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  generator.py:209  _llm_generate()
+
+  1. Portkey (if settings.PORTKEY_API_KEY set)
+     POST {PORTKEY_BASE_URL}/chat/completions
+     → routes to Claude or GPT-4o via Portkey gateway
+
+  2. Azure OpenAI (if AZURE_OPENAI_KEY set)
+     POST {endpoint}/openai/deployments/gpt-4o/chat/completions
+     Body: {
+       "messages": [
+         {"role":"system", "content": SYSTEM_PROMPT},
+         {"role":"user",   "content": user_prompt}
+       ],
+       "temperature": 0.7,
+       "max_tokens": 4096,
+       "response_format": {"type": "json_object"}  ← enforces JSON output
+     }
+
+  3. Anthropic (if ANTHROPIC_API_KEY set)
+     client.messages.create(model=settings.ANTHROPIC_MODEL, ...)
+
+  4. Mock response (dev fallback — no API keys needed)
+
+  → Returns raw JSON string
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 8 — Parse + Grounding Gate</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  generator.py:273  _parse_question()
+
+  1. Strip markdown fences (some models add ```json despite instructions)
+  2. json.loads(raw) → data dict
+
+  GROUNDING CHECKS:
+    grounding_score    = data["grounding"]["grounding_score"]
+    citation_coverage  = data["grounding"]["citation_coverage"]
+    blocked            = data.get("blocked", False)
+
+    if blocked == True:
+        logger.warning("Question blocked: %s", data["block_reason"])
+        return None   ← question dropped, caller retries
+
+    if grounding_score < settings.MIN_GROUNDING_SCORE (0.75):
+        return None   ← dropped: LLM relied on training memory
+
+    if citation_coverage < settings.MIN_CITATION_COVERAGE (0.60):
+        return None   ← dropped: claims not backed by sources
+
+  3. Construct Pydantic Question model (line 327)
+     Question(question_id, exam, options, correct_answer,
+              explanation, grounding=GroundingInfo(...), ...)
+</div>
+
+<div class="diagram">
+<span class="highlight">STEP 9 — Quality Scoring + HTTP Response</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  generator.py:423-425
+
+  quality_result = validator.score_quality(question)
+  question.quality_score = quality_result.score
+
+  FastAPI serializes Question → JSON via Pydantic .model_dump()
+
+  HTTP 200 Response:
+  {
+    "question_id": "550e8400-e29b-41d4-a716-446655440000",
+    "exam": "AI-102",
+    "type": "MultipleChoiceSingle",
+    "question": "You are developing a solution to analyze customer feedback...",
+    "options": [
+      {"id":"A","text":"Custom text classification"},
+      {"id":"B","text":"Key phrase extraction"},
+      {"id":"C","text":"Conversational Language Understanding"},
+      {"id":"D","text":"Named entity recognition"}
+    ],
+    "correct_answer": ["B"],
+    "explanation": "Key phrase extraction is a pre-built capability...",
+    "grounding": {
+      "grounding_score": 0.87,
+      "citation_coverage": 0.82,
+      "retrieved_document_ids": ["ai102-0047","ai102-0089"]
+    }
+  }
+</div>
+
+<h3>Complete Sequence Diagram</h3>
+<div class="diagram">
+Browser  FastAPI  Generator  Retriever  AzureSearch  ChromaDB  AzureOpenAI  Validator
+   │        │         │           │           │           │          │           │
+   │─POST──►│         │           │           │           │          │           │
+   │        │─valid──►│           │           │           │          │           │
+   │        │         │─select────┤           │           │          │           │
+   │        │         │◄─objective┤           │           │          │           │
+   │        │         │─embed(q)────────────────────────────────────►│           │
+   │        │         │◄─vec[3072]────────────────────────────────── │           │
+   │        │         │─retrieve()►│           │           │          │           │
+   │        │         │            │─search()──►│           │          │           │
+   │        │         │            │◄─chunks────│           │          │           │
+   │        │         │            │  [if empty/error, fallback]       │           │
+   │        │         │            │─chroma.query()─────────►│          │           │
+   │        │         │            │◄─chunks─────────────────│          │           │
+   │        │         │◄─chunks────│           │           │          │           │
+   │        │         │─build_context()         │           │          │           │
+   │        │         │─build_prompt()          │           │          │           │
+   │        │         │─_llm_generate()─────────────────────────────►│           │
+   │        │         │◄─raw JSON───────────────────────────────────── │           │
+   │        │         │─_parse_question()        │           │          │           │
+   │        │         │  [grounding gate: drop if score low]            │           │
+   │        │         │─score_quality()──────────────────────────────────────────►│
+   │        │         │◄─quality_score───────────────────────────────────────────-│
+   │        │◄─Qstn───│           │           │           │          │           │
+   │◄─200 ──│         │           │           │           │          │           │
+</div>
+
+<div class="warn">
+  <strong>What if Azure AI Search is down?</strong> The retriever detects an empty result set or exception and automatically falls to ChromaDB. If ChromaDB also has no data, a fallback doc_id "fallback-001" is returned, which triggers the <code>FALLBACK_SYSTEM_PROMPT</code> path — the LLM generates from its own expert knowledge, with grounding check bypassed. The question is still valid but not RAG-grounded.
+</div>
+
+</section>
+
+<div class="page-nav">
+  <a href="index.html">← Home</a>
+  <a href="part2-fastapi-chromadb.html">FastAPI &amp; ChromaDB →</a>
+</div>
+
+</main>
+</body>
+</html>

@@ -129,7 +129,7 @@ async def index_documents_chroma(body: dict):
     chunk_size: int = 512
     overlap: int = 50
 
-    exams = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103"] if exam_code == "all" else [exam_code]
+    exams = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103", "AI-901"] if exam_code == "all" else [exam_code]
     results = {}
 
     for code in exams:

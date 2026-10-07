@@ -25,7 +25,7 @@ except ImportError as exc:
     print("Make sure you are running from the backend/ directory and dependencies are installed.")
     sys.exit(1)
 
-EXAM_CODES = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103"]
+EXAM_CODES = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103", "AI-901"]
 CHUNK_WORDS = 512
 OVERLAP_WORDS = 50
 MIN_CHUNK_WORDS = 20

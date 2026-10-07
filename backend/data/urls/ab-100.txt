@@ -1,33 +1,36 @@
-# AB-100 — Azure AI Fundamentals / Azure Basics
+# AB-100 — Agentic AI Business Solutions Architect
+# Certification: Microsoft Certified: Agentic AI Business Solutions Architect
+# Skills: Plan AI-powered business solutions (25-30%), Design AI-powered business solutions (25-30%), Deploy AI-powered business solutions (40-45%)
+# Official study guide: https://learn.microsoft.com/credentials/certifications/resources/study-guides/ab-100
 # Microsoft Learn documentation URLs (~30 pages)
 
-https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview
-https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview
-https://learn.microsoft.com/en-us/azure/architecture/guide/
-https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learning
-https://learn.microsoft.com/en-us/azure/machine-learning/overview-what-is-machine-learning-studio
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-azure-machine-learning-architecture
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-responsible-ai
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-fairness-ml
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-model-interpretability
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-automated-ml
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-data
-https://learn.microsoft.com/en-us/azure/machine-learning/concept-train-model
-https://learn.microsoft.com/en-us/azure/ai-services/overview
-https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview
-https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/overview
-https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview
-https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview
+https://learn.microsoft.com/en-us/azure/ai-foundry/what-is-azure-ai-foundry
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/model-catalog-overview
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/model-router
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-approach-gen-ai
+https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/trace
+https://learn.microsoft.com/en-us/azure/ai-services/agents/overview
+https://learn.microsoft.com/en-us/azure/ai-services/agents/concepts/agents
+https://learn.microsoft.com/en-us/azure/ai-services/agents/how-to/tools/overview
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-what-is-copilot-studio
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-build-overview
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/multi-agent-orchestration
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-plugin-actions
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-connectors
+https://learn.microsoft.com/en-us/microsoft-copilot-studio/security-and-governance
+https://learn.microsoft.com/en-us/power-platform/well-architected/intelligent-applications/overview
+https://learn.microsoft.com/en-us/power-platform/guidance/adoption/maturity-model-intro
+https://learn.microsoft.com/en-us/power-platform/admin/dlp-activity-logging
+https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/copilot/ai-copilot-overview
+https://learn.microsoft.com/en-us/dynamics365/guidance/
+https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/overview-business-applications
+https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/strategy/ai-strategy
+https://learn.microsoft.com/en-us/azure/architecture/ai-ml/
+https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/baseline-openai-e2e-chat
 https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
-https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/overview
-https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview
-https://learn.microsoft.com/en-us/azure/ai-services/translator/overview
-https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/overview
-https://learn.microsoft.com/en-us/azure/ai-services/face/overview
-https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-and-machine-learning
-https://learn.microsoft.com/en-us/azure/search/search-what-is-azure-search
-https://learn.microsoft.com/en-us/azure/bot-service/bot-service-overview
-https://learn.microsoft.com/en-us/azure/machine-learning/how-to-manage-workspace
-https://learn.microsoft.com/en-us/azure/machine-learning/how-to-create-component-pipeline-and-submit
-https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-mlflow-models
-https://learn.microsoft.com/en-us/azure/cognitive-services/create-account
+https://learn.microsoft.com/en-us/azure/ai-services/responsible-use-of-ai-overview
+https://learn.microsoft.com/en-us/azure/machine-learning/concept-responsible-ai
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/monitor-applications
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/evaluate-generative-ai-app
+https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/content-filter
+https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/secure-data-playground

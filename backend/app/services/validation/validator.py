@@ -84,7 +84,7 @@ class QuestionValidator:
             intersection = len(q_tokens & e_tokens)
             union = len(q_tokens | e_tokens)
             similarity = intersection / union if union > 0 else 0
-            if similarity > 0.85:
+            if similarity > 0.70:
                 logger.info("Duplicate detected: similarity %.2f", similarity)
                 return True
         return False

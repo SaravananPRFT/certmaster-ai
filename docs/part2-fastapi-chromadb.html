@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sections 4–5: FastAPI &amp; ChromaDB</title>
+<style>
+  :root { --azure:#0078d4; --azure-dark:#005a9e; --bg:#f4f6f9; --card:#fff; --text:#1a1a2e; --muted:#6b7280; --border:#e5e7eb; --shadow:0 2px 12px rgba(0,0,0,0.08); }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+  nav{width:260px;min-height:100vh;background:var(--azure-dark);color:#fff;padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav .logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:16px;}
+  nav .logo a{color:#fff;text-decoration:none;font-weight:800;font-size:1rem;}
+  nav .logo p{font-size:0.75rem;opacity:0.7;margin-top:4px;}
+  nav ul{list-style:none;padding:0 12px;}
+  nav ul li a{display:block;padding:8px 12px;color:rgba(255,255,255,0.82);text-decoration:none;border-radius:6px;font-size:0.85rem;transition:background 0.15s;}
+  nav ul li a:hover{background:rgba(255,255,255,0.15);color:#fff;}
+  nav .section-label{padding:16px 24px 6px;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;opacity:0.5;}
+  main{flex:1;padding:40px;max-width:900px;}
+  .page-header{background:linear-gradient(135deg,#0078d4,#005a9e);color:#fff;padding:32px 36px;border-radius:12px;margin-bottom:36px;}
+  .page-header .breadcrumb{font-size:0.8rem;opacity:0.75;margin-bottom:8px;}
+  .page-header h1{font-size:1.8rem;font-weight:800;}
+  .page-header p{margin-top:8px;opacity:0.88;font-size:0.95rem;}
+  h2{font-size:1.4rem;font-weight:700;color:var(--azure-dark);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  h2::before{content:'';display:inline-block;width:4px;height:1em;background:var(--azure);margin-right:10px;vertical-align:middle;border-radius:2px;}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px;color:#1e3a5f;}
+  p{line-height:1.7;margin-bottom:14px;font-size:0.95rem;}
+  .diagram{background:#0d1117;color:#c9d1d9;font-family:'Courier New',monospace;font-size:0.78rem;line-height:1.5;padding:24px;border-radius:10px;overflow-x:auto;margin:20px 0;border:1px solid #30363d;}
+  .diagram .hi{color:#58a6ff;} .diagram .gr{color:#3fb950;} .diagram .or{color:#e3b341;}
+  .code-wrap{margin:20px 0;}
+  .code-label{display:inline-block;background:#1e1e1e;color:#9cdcfe;font-size:0.72rem;font-family:monospace;padding:4px 14px;border-radius:6px 6px 0 0;border:1px solid #3e3e3e;border-bottom:none;}
+  pre.code{background:#1e1e1e;color:#d4d4d4;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.6;padding:20px;border-radius:0 8px 8px 8px;overflow-x:auto;margin:0;border:1px solid #3e3e3e;}
+  .kw{color:#569cd6;} .fn{color:#dcdcaa;} .str{color:#ce9178;} .cm{color:#6a9955;} .num{color:#b5cea8;} .cls{color:#4ec9b0;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.88rem;}
+  th{background:var(--azure);color:#fff;padding:10px 14px;text-align:left;}
+  td{padding:9px 14px;border:1px solid var(--border);}
+  tr:nth-child(even) td{background:#f8fafc;}
+  .note{background:#eff6ff;border-left:4px solid var(--azure);border-radius:0 8px 8px 0;padding:14px 18px;margin:20px 0;font-size:0.9rem;color:#1e3a5f;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0;}
+  .col-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;}
+  .col-card h4{font-size:0.95rem;font-weight:700;margin-bottom:12px;color:var(--azure-dark);}
+  .page-nav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid var(--border);}
+  .page-nav a{display:inline-flex;align-items:center;gap:8px;color:var(--azure);text-decoration:none;font-weight:600;font-size:0.9rem;padding:10px 18px;border:1px solid var(--azure);border-radius:8px;transition:background 0.15s;}
+  .page-nav a:hover{background:#eff6ff;}
+  section{scroll-margin-top:20px;}
+  @media(max-width:768px){body{flex-direction:column;}nav{width:100%;min-height:auto;height:auto;position:relative;}main{padding:20px;}.two-col{grid-template-columns:1fr;}}
+  @media print{nav{display:none;}main{padding:20px;max-width:100%;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <a href="index.html">← CertMasterAI Guide</a>
+    <p>Sections 4–5</p>
+  </div>
+  <div class="section-label">This Page</div>
+  <ul>
+    <li><a href="#s4">4. FastAPI for .NET Developers</a></li>
+    <li><a href="#s4-di">Dependency Injection</a></li>
+    <li><a href="#s4-pydantic">Pydantic vs Data Annotations</a></li>
+    <li><a href="#s5">5. ChromaDB Architecture</a></li>
+    <li><a href="#s5-hnsw">HNSW Explained</a></li>
+    <li><a href="#s5-ops">Insert &amp; Query Operations</a></li>
+  </ul>
+  <div class="section-label">Other Pages</div>
+  <ul>
+    <li><a href="part1-architecture-ingestion-query.html">← Architecture</a></li>
+    <li><a href="part3-azure-search.html">Azure AI Search →</a></li>
+    <li><a href="part4-implementation-setup-summary.html">Setup &amp; Summary →</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <div class="breadcrumb">CertMasterAI Technical Guide &rsaquo; Sections 4–5</div>
+  <h1>FastAPI Implementation &amp; ChromaDB Architecture</h1>
+  <p>FastAPI mapped to ASP.NET Core concepts. Pydantic, DI, middleware. Then: ChromaDB internals, HNSW, insert and query operations.</p>
+</div>
+
+<!-- SECTION 4 -->
+<section id="s4">
+<h2>Section 4 — FastAPI Implementation (for .NET Developers)</h2>
+
+<p>If you come from .NET/ASP.NET Core, FastAPI will feel immediately familiar. The mental model is nearly identical — the syntax is just Python. Here is the complete mapping.</p>
+
+<h3>Conceptual Mapping Table</h3>
+<table>
+  <tr><th>.NET / ASP.NET Core</th><th>FastAPI equivalent</th><th>Your code location</th></tr>
+  <tr><td><code>Program.cs</code> / <code>Startup.cs</code></td><td><code>FastAPI()</code> app factory in <code>main.py</code></td><td><code>backend/app/main.py</code></td></tr>
+  <tr><td><code>[ApiController] + [Route("api/v1")]</code></td><td><code>APIRouter(prefix="/api/v1")</code></td><td><code>app/api/v1/questions.py</code></td></tr>
+  <tr><td><code>[HttpPost("generate")]</code></td><td><code>@router.post("/generate")</code></td><td>questions.py</td></tr>
+  <tr><td>Data Annotations (<code>[Required]</code>, <code>[Range]</code>)</td><td>Pydantic <code>BaseModel</code> field constraints</td><td><code>app/models/question.py</code></td></tr>
+  <tr><td><code>ModelState.IsValid</code></td><td>Automatic — Pydantic raises <code>422</code> before handler runs</td><td>built-in</td></tr>
+  <tr><td><code>IServiceCollection.AddSingleton&lt;T&gt;</code></td><td>Module-level singleton + <code>Depends()</code></td><td><code>generator.py:441</code></td></tr>
+  <tr><td><code>IServiceCollection.AddScoped&lt;T&gt;</code></td><td><code>Depends()</code> with per-request factory</td><td><code>app/core/deps.py</code></td></tr>
+  <tr><td><code>IOptions&lt;AppSettings&gt;</code></td><td>Pydantic <code>BaseSettings</code> (reads env vars)</td><td><code>app/core/config.py</code></td></tr>
+  <tr><td><code>IMiddleware</code></td><td><code>app.add_middleware(CORSMiddleware, ...)</code></td><td><code>main.py</code></td></tr>
+  <tr><td><code>async Task&lt;IActionResult&gt;</code></td><td><code>async def</code> returning Pydantic model</td><td>all router handlers</td></tr>
+  <tr><td><code>HttpClient / IHttpClientFactory</code></td><td><code>AsyncAzureOpenAI</code>, <code>httpx.AsyncClient</code></td><td><code>generator.py:137–163</code></td></tr>
+  <tr><td><code>DbContext</code></td><td><code>chromadb.PersistentClient</code></td><td><code>chroma_retriever.py:20</code></td></tr>
+</table>
+
+<h3>Folder Structure (with ASP.NET analogues)</h3>
+<div class="code-wrap">
+  <div class="code-label">Project layout</div>
+  <pre class="code">backend/
+├── app/
+│   ├── main.py              <span class="cm"># Program.cs — creates app, registers middleware, includes routers</span>
+│   ├── core/
+│   │   ├── config.py        <span class="cm"># IOptions&lt;AppSettings&gt; — reads env vars into typed Settings</span>
+│   │   └── deps.py          <span class="cm"># IServiceCollection — DI factory functions</span>
+│   │
+│   ├── api/                 <span class="cm"># Controllers layer</span>
+│   │   └── v1/
+│   │       └── questions.py <span class="cm"># QuestionsController.cs — route handlers only, no logic</span>
+│   │
+│   ├── models/              <span class="cm"># DTOs and domain models (C# records / classes)</span>
+│   │   └── question.py      <span class="cm"># QuestionGenerationRequest, Question, GroundingInfo (Pydantic)</span>
+│   │
+│   └── services/            <span class="cm"># Service layer — all business logic lives here</span>
+│       ├── generation/
+│       │   ├── generator.py <span class="cm"># QuestionGenerationService.cs — RAG orchestrator</span>
+│       │   └── prompts.py   <span class="cm"># PromptTemplates.cs — static string builders</span>
+│       ├── rag/
+│       │   ├── retriever.py <span class="cm"># IRAGRetriever — tiered retrieval orchestration</span>
+│       │   └── chroma_retriever.py  <span class="cm"># ChromaDbRetrieverService.cs</span>
+│       ├── embedding/
+│       │   └── local_embedder.py    <span class="cm"># IEmbeddingService.cs</span>
+│       └── validation/
+│           └── validator.py         <span class="cm"># IQuestionValidator.cs</span></pre>
+</div>
+
+<section id="s4-di">
+<h3>Dependency Injection: .NET vs FastAPI</h3>
+
+<div class="two-col">
+  <div class="col-card">
+    <h4>.NET — IServiceCollection</h4>
+    <pre class="code" style="font-size:0.75rem"><span class="cm">// Program.cs</span>
+builder.Services
+  .<span class="fn">AddSingleton</span>&lt;<span class="cls">IQuestionGenerator</span>,
+              <span class="cls">QuestionGenerator</span>&gt;()
+  .<span class="fn">AddSingleton</span>&lt;<span class="cls">IRetriever</span>,
+              <span class="cls">AzureSearchRetriever</span>&gt;();
+
+<span class="cm">// Controller</span>
+<span class="kw">public class</span> <span class="cls">QuestionController</span>
+{
+    <span class="kw">private readonly</span> <span class="cls">IQuestionGenerator</span> _gen;
+    <span class="kw">public</span> <span class="fn">QuestionController</span>(<span class="cls">IQuestionGenerator</span> gen)
+        => _gen = gen;
+
+    [<span class="cls">HttpPost</span>]
+    <span class="kw">public async</span> <span class="cls">Task</span>&lt;<span class="cls">IActionResult</span>&gt; <span class="fn">Generate</span>(
+        <span class="cls">QuestionRequest</span> req)
+        => Ok(<span class="kw">await</span> _gen.<span class="fn">Generate</span>(req));
+}</pre>
+  </div>
+  <div class="col-card">
+    <h4>FastAPI — Depends()</h4>
+    <pre class="code" style="font-size:0.75rem"><span class="cm"># deps.py — factory functions</span>
+<span class="kw">def</span> <span class="fn">get_generator</span>() -> <span class="cls">QuestionGenerator</span>:
+    <span class="kw">return</span> generator  <span class="cm"># module-level singleton</span>
+
+<span class="cm"># questions.py — router handler</span>
+@router.<span class="fn">post</span>(<span class="str">"/generate"</span>)
+<span class="kw">async def</span> <span class="fn">generate_question</span>(
+    req: <span class="cls">QuestionGenerationRequest</span>,   <span class="cm"># Pydantic body</span>
+    gen: <span class="cls">QuestionGenerator</span> = <span class="fn">Depends</span>(
+        get_generator                    <span class="cm"># DI injected</span>
+    ),
+):
+    q = <span class="kw">await</span> gen.<span class="fn">generate_question</span>(req)
+    <span class="kw">if not</span> q:
+        <span class="kw">raise</span> <span class="cls">HTTPException</span>(<span class="num">503</span>)
+    <span class="kw">return</span> q</pre>
+  </div>
+</div>
+
+<div class="note">
+  In your project, <code>generator = QuestionGenerator()</code> is created at module load time (generator.py:441) — equivalent to <code>AddSingleton</code>. The <code>Depends()</code> call injects it per-request without re-creating it. This is the Python idiom for singleton DI.
+</div>
+</section>
+
+<section id="s4-pydantic">
+<h3>Pydantic = Data Annotations + ModelState</h3>
+
+<div class="two-col">
+  <div class="col-card">
+    <h4>.NET — Data Annotations</h4>
+    <pre class="code" style="font-size:0.75rem"><span class="kw">public class</span> <span class="cls">QuestionRequest</span>
+{
+    [<span class="cls">Required</span>]
+    [<span class="cls">RegularExpression</span>(<span class="str">"AI-102|AZ-104|..."</span>)]
+    <span class="kw">public string</span> ExamCode { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    [<span class="cls">Range</span>(<span class="num">1</span>, <span class="num">10</span>)]
+    <span class="kw">public int</span> Count { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="num">1</span>;
+
+    [<span class="cls">AllowedValues</span>(<span class="str">"Easy"</span>,<span class="str">"Medium"</span>,<span class="str">"Hard"</span>)]
+    <span class="kw">public string</span>? Difficulty { <span class="kw">get</span>; <span class="kw">set</span>; }
+}</pre>
+  </div>
+  <div class="col-card">
+    <h4>FastAPI — Pydantic BaseModel</h4>
+    <pre class="code" style="font-size:0.75rem"><span class="kw">class</span> <span class="cls">Difficulty</span>(<span class="cls">str</span>, <span class="cls">Enum</span>):
+    Easy   = <span class="str">"Easy"</span>
+    Medium = <span class="str">"Medium"</span>
+    Hard   = <span class="str">"Hard"</span>
+
+<span class="kw">class</span> <span class="cls">QuestionGenerationRequest</span>(<span class="cls">BaseModel</span>):
+    exam_code:     <span class="cls">str</span>          <span class="cm"># Required (no default)</span>
+    difficulty: Optional[<span class="cls">Difficulty</span>] = <span class="kw">None</span>
+    count: <span class="cls">int</span> = <span class="fn">Field</span>(<span class="num">1</span>, ge=<span class="num">1</span>, le=<span class="num">10</span>)
+    objective: Optional[<span class="cls">str</span>]   = <span class="kw">None</span>
+    question_type: Optional[<span class="cls">str</span>] = <span class="kw">None</span></pre>
+  </div>
+</div>
+
+<p>If <code>exam_code</code> is missing or <code>count</code> is 11, Pydantic raises a <code>RequestValidationError</code> and FastAPI automatically returns:</p>
+<div class="code-wrap">
+  <div class="code-label">HTTP 422 — automatic, before your handler runs</div>
+  <pre class="code">{
+  <span class="str">"detail"</span>: [
+    {
+      <span class="str">"type"</span>: <span class="str">"missing"</span>,
+      <span class="str">"loc"</span>: [<span class="str">"body"</span>, <span class="str">"exam_code"</span>],
+      <span class="str">"msg"</span>: <span class="str">"Field required"</span>
+    }
+  ]
+}</pre>
+</div>
+
+<h3>Pydantic BaseSettings = IOptions&lt;AppSettings&gt;</h3>
+<div class="code-wrap">
+  <div class="code-label">app/core/config.py</div>
+  <pre class="code"><span class="kw">class</span> <span class="cls">Settings</span>(<span class="cls">BaseSettings</span>):
+    <span class="cm"># Azure AI Search</span>
+    AZURE_SEARCH_ENDPOINT: <span class="cls">str</span> = <span class="str">""</span>
+    AZURE_SEARCH_KEY: <span class="cls">str</span> = <span class="str">""</span>
+    AZURE_SEARCH_INDEX: <span class="cls">str</span> = <span class="str">"certmaster"</span>
+
+    <span class="cm"># Azure OpenAI</span>
+    AZURE_OPENAI_ENDPOINT: <span class="cls">str</span> = <span class="str">""</span>
+    AZURE_OPENAI_KEY: <span class="cls">str</span> = <span class="str">""</span>
+    AZURE_OPENAI_DEPLOYMENT: <span class="cls">str</span> = <span class="str">"gpt-4o"</span>
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT: <span class="cls">str</span> = <span class="str">"text-embedding-3-large"</span>
+
+    <span class="cm"># ChromaDB</span>
+    CHROMA_DB_PATH: <span class="cls">str</span> = <span class="str">"./chroma_db"</span>
+
+    <span class="cm"># Grounding thresholds</span>
+    MIN_GROUNDING_SCORE: <span class="cls">float</span> = <span class="num">0.75</span>
+    MIN_CITATION_COVERAGE: <span class="cls">float</span> = <span class="num">0.60</span>
+    TOP_K_RETRIEVAL: <span class="cls">int</span> = <span class="num">5</span>
+    MAX_CONTEXT_TOKENS: <span class="cls">int</span> = <span class="num">6000</span>
+
+    <span class="kw">class</span> <span class="cls">Config</span>:
+        env_file = <span class="str">".env"</span>          <span class="cm"># reads from .env file</span>
+        case_sensitive = <span class="kw">False</span>
+
+settings = <span class="cls">Settings</span>()              <span class="cm"># singleton, reads env at startup</span></pre>
+</div>
+
+<h3>How Components Communicate</h3>
+<div class="diagram">
+questions.py (router — thin, no logic)
+    │
+    │  Depends(get_generator)  ← Python DI wiring
+    │
+    ▼
+generator.py (QuestionGenerator — orchestrator)
+    │
+    ├── await retriever.retrieve()          ← async I/O call, non-blocking
+    │         │
+    │         ├── AzureSearchRetriever      ← tries Azure AI Search first
+    │         │       └── httpx.AsyncClient.post(search_url)
+    │         │
+    │         └── ChromaRetriever           ← fallback (chroma_retriever.py)
+    │                 └── collection.query(query_embeddings=[...])
+    │
+    ├── build_generation_prompt()           ← pure function, no I/O, instant
+    │         (prompts.py:162)
+    │
+    └── await _llm_generate()              ← async HTTP, ~1-3s latency
+              │
+              ├── AsyncAzureOpenAI         ← chat.completions.create()
+              ├── AsyncOpenAI (Portkey)    ← chat.completions.create()
+              └── AsyncAnthropic           ← messages.create()
+</div>
+
+<div class="note">
+  <strong>Why <code>async def</code> matters:</strong> When FastAPI awaits <code>retriever.retrieve()</code>, the thread is released back to the event loop. The server can handle other incoming requests while waiting for Azure AI Search to respond. This is identical to <code>async Task</code> in C# — non-blocking I/O on a single thread. For an AI service that spends most time waiting on external APIs, this means hundreds of concurrent requests on one CPU core.
+</div>
+
+</section>
+</section>
+
+<!-- SECTION 5 -->
+<section id="s5">
+<h2>Section 5 — ChromaDB Architecture</h2>
+
+<p>ChromaDB is an <strong>embedded vector database</strong> — it runs inside your Python process with no separate server. Think of it as SQLite but for vectors: a folder on disk, fully queryable, zero infrastructure cost.</p>
+
+<h3>Internal Data Model</h3>
+<div class="diagram">
+ChromaDB PersistentClient (path: ./chroma_db)
+│
+├── Collection: <span class="hi">certmaster_ai_102</span>       ← "Table" for AI-102 content
+│   │
+│   ├── Segment: HNSW Vector Index       ← The search structure (fast ANN)
+│   │   └── Graph of vectors, each connected to nearby vectors by cosine similarity
+│   │   └── Configured: hnsw:space = "cosine"  (chroma_retriever.py:92)
+│   │
+│   ├── Segment: Metadata Store          ← SQLite under the hood
+│   │   └── chunk_id → {title, url, exam_code, chunk_index}
+│   │
+│   └── Segment: Document Store          ← Raw text strings
+│       └── chunk_id → "Key phrase extraction identifies..."
+│
+├── Collection: <span class="hi">certmaster_az_104</span>
+├── Collection: <span class="hi">certmaster_az_305</span>
+├── Collection: <span class="hi">certmaster_gh_300</span>
+├── Collection: <span class="hi">certmaster_ab_100</span>
+├── Collection: <span class="hi">certmaster_ai_103</span>
+└── Collection: <span class="hi">certmaster_ai_901</span>
+
+Collection naming: _coll_name(exam_code)
+→ "AI-102" becomes "certmaster_ai_102"  (chroma_retriever.py:11)
+</div>
+
+<section id="s5-hnsw">
+<h3>HNSW Explained — The Multi-Floor Building Analogy</h3>
+
+<div class="diagram">
+HNSW = Hierarchical Navigable Small World
+
+Imagine a multi-floor building:
+
+  Layer 2 (top):   * ─────────── *           ← few nodes, long jumps
+                        \       /
+  Layer 1 (mid):    * ─── * ─── * ─── *      ← more nodes, medium jumps
+                         |     |
+  Layer 0 (base):  ALL nodes (every chunk you indexed)
+
+When you search for a query vector:
+  1. Enter at the TOP layer with a random starting node
+  2. Walk GREEDILY: at each step, move to the neighbor nearest your query
+  3. When stuck (no neighbor is closer), DROP DOWN a layer
+  4. Repeat from step 2 on the lower layer
+  5. At Layer 0 (base), collect the K nearest neighbors
+
+Why FAST?   You skip 99% of the graph — only visit a tiny path
+Why APPROX? You might miss the absolute best match (greedy walk)
+Why GOOD?   For RAG, "very similar" is as useful as "most similar"
+
+Performance:
+  Linear scan (exact):  O(n)   — checks every vector
+  HNSW (approximate):   O(log n) — traverses the graph hierarchy
+</div>
+
+<h3>Cosine Similarity vs Cosine Distance</h3>
+<div class="diagram">
+ChromaDB with hnsw:space="cosine" returns DISTANCES (0 to 2):
+  distance = 0.0   → identical vectors (perfect match)
+  distance = 1.0   → orthogonal (completely unrelated)
+  distance = 2.0   → opposite meaning
+
+Your code converts to similarity (chroma_retriever.py:60):
+  score = max(0.0, 1.0 - distance)
+
+  distance = 0.08  →  score = 0.92  (excellent match)
+  distance = 0.35  →  score = 0.65  (decent match)
+  distance = 0.70  →  score = 0.30  (weak match)
+
+2D Illustration (simplified from 3072D reality):
+
+  Vector Space:
+                  "key phrase"
+                   embedding ●
+                              ↖ 8° angle (score ≈ 0.99)
+                        ● ← your query: "extract key phrases"
+                       ↙ 45° angle (score ≈ 0.71)
+              "speech-to-text"
+               embedding ●
+</div>
+</section>
+
+<section id="s5-ops">
+<h3>Insert Operation</h3>
+<div class="code-wrap">
+  <div class="code-label">chroma_retriever.py : index_chunks() — lines 89–113</div>
+  <pre class="code"><span class="cm"># Step 1: Get or create the collection for this exam</span>
+client = <span class="cls">self</span>.<span class="fn">_get_client</span>()              <span class="cm"># lazy-init PersistentClient</span>
+collection = client.<span class="fn">get_or_create_collection</span>(
+    name=<span class="fn">_coll_name</span>(exam_code),           <span class="cm"># "certmaster_ai_102"</span>
+    metadata={<span class="str">"hnsw:space"</span>: <span class="str">"cosine"</span>},    <span class="cm"># distance metric for HNSW</span>
+)
+
+<span class="cm"># Step 2: Upsert chunks (insert if new, update if chunk_id exists)</span>
+collection.<span class="fn">upsert</span>(
+    ids=[c[<span class="str">"chunk_id"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],         <span class="cm"># primary keys</span>
+    documents=[c[<span class="str">"content"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],     <span class="cm"># raw text</span>
+    embeddings=[c[<span class="str">"embedding"</span>] <span class="kw">for</span> c <span class="kw">in</span> chunks],   <span class="cm"># 3072-float vectors</span>
+    metadatas=[                                        <span class="cm"># filterable metadata</span>
+        {
+            <span class="str">"title"</span>:       c.get(<span class="str">"title"</span>, <span class="str">""</span>),
+            <span class="str">"url"</span>:         c.get(<span class="str">"url"</span>, <span class="str">""</span>),
+            <span class="str">"exam_code"</span>:   exam_code,
+            <span class="str">"chunk_index"</span>: c.get(<span class="str">"chunk_index"</span>, <span class="num">0</span>),
+            <span class="str">"chunk_id"</span>:    c[<span class="str">"chunk_id"</span>],
+        }
+        <span class="kw">for</span> c <span class="kw">in</span> chunks
+    ],
+)
+<span class="cm"># ChromaDB internally:
+# 1. Stores documents in Document Store
+# 2. Stores metadatas in SQLite Metadata Store
+# 3. Inserts embeddings into HNSW graph (re-builds incrementally)</span></pre>
+</div>
+
+<h3>Query Operation</h3>
+<div class="code-wrap">
+  <div class="code-label">chroma_retriever.py : retrieve() — lines 43–67</div>
+  <pre class="code"><span class="cm"># Step 1: Generate query embedding using same model as ingestion</span>
+query_vec = embedder.<span class="fn">embed</span>(query)      <span class="cm"># must use SAME model as ingestion!</span>
+
+<span class="cm"># Step 2: Similarity search in ChromaDB</span>
+n = <span class="fn">min</span>(top_k, collection.<span class="fn">count</span>())    <span class="cm"># can't request more than we have</span>
+results = collection.<span class="fn">query</span>(
+    query_embeddings=[query_vec],         <span class="cm"># [[0.045, -0.388, ...]]</span>
+    n_results=n,                          <span class="cm"># top-K (default 5)</span>
+    include=[<span class="str">"documents"</span>, <span class="str">"metadatas"</span>, <span class="str">"distances"</span>],
+)
+
+<span class="cm"># Step 3: Convert results to standard chunk dicts</span>
+chunks = []
+<span class="kw">for</span> i, doc <span class="kw">in</span> <span class="fn">enumerate</span>(results[<span class="str">"documents"</span>][<span class="num">0</span>]):
+    meta     = results[<span class="str">"metadatas"</span>][<span class="num">0</span>][i]
+    distance = results[<span class="str">"distances"</span>][<span class="num">0</span>][i]
+    score    = <span class="fn">max</span>(<span class="num">0.0</span>, <span class="num">1.0</span> - distance)   <span class="cm"># cosine distance → similarity</span>
+    chunks.<span class="fn">append</span>({
+        <span class="str">"doc_id"</span>:  meta.get(<span class="str">"chunk_id"</span>, <span class="kw">f</span><span class="str">"chroma-{exam_code}-{i}"</span>),
+        <span class="str">"content"</span>: doc,
+        <span class="str">"title"</span>:   meta.get(<span class="str">"title"</span>, <span class="str">""</span>),
+        <span class="str">"url"</span>:     meta.get(<span class="str">"url"</span>, <span class="str">""</span>),
+        <span class="str">"score"</span>:   score,
+    })</pre>
+</div>
+
+<h3>What ChromaDB Does Internally During query()</h3>
+<div class="diagram">
+1. Receive query_vec = [0.045, -0.388, 0.712, ...]
+
+2. Enter HNSW graph at top layer
+   Walk greedily toward query_vec using cosine distance
+
+3. Drop to base layer
+   Collect 5 nearest stored vectors
+
+4. Fetch corresponding documents from Document Store
+   Fetch corresponding metadata from SQLite Metadata Store
+
+5. Return:
+   results["documents"][0]  → ["Key phrase extraction...", "NER identifies...", ...]
+   results["metadatas"][0]  → [{"title":"Azure AI Language","url":"...","exam_code":"AI-102"}, ...]
+   results["distances"][0]  → [0.08, 0.15, 0.22, 0.31, 0.44]
+                                 ↑ closest            ↑ farthest of top-5
+
+6. Your code converts: score = 1.0 - distance
+   [0.08, 0.15, 0.22, 0.31, 0.44] → [0.92, 0.85, 0.78, 0.69, 0.56]
+</div>
+
+<div class="note">
+  <strong>Critical requirement:</strong> The embedding model used at <em>query time</em> must be the <strong>same model</strong> used at <em>ingestion time</em>. Both must project text into the same vector space for similarity to be meaningful. In your project: <code>text-embedding-3-large</code> (Azure OpenAI, 3072 dims) for production, <code>nomic-embed-text</code> (Ollama, 768 dims) for local dev. Never mix them — the vectors live in different spaces.
+</div>
+
+</section>
+</section>
+
+<div class="page-nav">
+  <a href="part1-architecture-ingestion-query.html">← Architecture</a>
+  <a href="part3-azure-search.html">Azure AI Search →</a>
+</div>
+
+</main>
+</body>
+</html>

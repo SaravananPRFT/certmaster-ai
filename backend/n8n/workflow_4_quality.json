@@ -31,7 +31,10 @@
       "name": "GET /admin/index/status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [480, 300]
+      "position": [480, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
     },
     {
       "parameters": {
@@ -73,7 +76,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nconst alertSummary = data.alerts.map(a => `  - ${a.exam}: ${a.count} chunks (${a.issue})`).join('\\n');\nconst message = `[CertMasterAI] RAG Quality Alert\\n\\nThe following exams have insufficient ChromaDB coverage:\\n${alertSummary}\\n\\nTotal chunks: ${data.total_chunks}\\nChecked at: ${data.checked_at}\\n\\nAction: Auto re-index triggered.`;\nconsole.warn(message);\nreturn [{ json: { alert: true, message, alerts: data.alerts, total_chunks: data.total_chunks, checked_at: data.checked_at } }];"
+        "jsCode": "const data = $input.first().json;\nconst alertSummary = data.alerts.map(a => '  - ' + a.exam + ': ' + a.count + ' chunks (' + a.issue + ')').join('\\n');\nconst message = '[CertMasterAI] RAG Quality Alert\\n\\nThe following exams have insufficient ChromaDB coverage:\\n' + alertSummary + '\\n\\nTotal chunks: ' + data.total_chunks + '\\nChecked at: ' + data.checked_at + '\\n\\nAction: Auto re-index triggered for failing exams only.';\nconsole.warn(message);\nreturn [{ json: { alert: true, message, alerts: data.alerts, total_chunks: data.total_chunks, checked_at: data.checked_at } }];"
       },
       "id": "node-alert-4",
       "name": "Log Quality Alert",
@@ -111,17 +114,29 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [1400, 220],
-      "notes": "POSTs the alert to /admin/content-alert — persisted to data/alerts.json on the FastAPI host"
+      "notes": "neverError: true — workflow continues to re-index even if this endpoint is down.\nPOSTs the alert to /admin/content-alert — persisted to data/alerts.json on the FastAPI host."
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nconsole.log(`[CertMasterAI] Quality check PASSED — ${data.total_chunks} total chunks across ${data.healthy.length} exams.`);\nreturn [{ json: { alert: false, status: 'healthy', total_chunks: data.total_chunks } }];"
+        "jsCode": "// FIX: Extract only the failing exams and return one item per exam.\n// Previously this node re-indexed ALL exams even when only 1 failed.\nconst data = $input.first().json;\nreturn data.alerts.map(a => ({ json: { exam_code: a.exam, issue: a.issue, count: a.count } }));"
       },
-      "id": "node-ok-4",
-      "name": "Log All Clear",
+      "id": "node-split-alerts-4",
+      "name": "Split Failing Exams",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1170, 400]
+      "position": [1630, 220],
+      "notes": "FIX: Emits one item per failing exam only, not 'all'."
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "node-split-batch-4",
+      "name": "Re-index One at a Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1860, 220]
     },
     {
       "parameters": {
@@ -138,29 +153,52 @@
         },
         "sendBody": true,
         "contentType": "json",
-        "body": "{\"exam_code\": \"all\", \"scraped_dir\": \"./data/scraped\", \"clear_first\": false}",
+        "body": "={{ JSON.stringify({ exam_code: $json.exam_code, scraped_dir: './data/scraped', clear_first: false }) }}",
         "options": {
           "timeout": 600000
         }
       },
       "id": "node-reindex-4",
-      "name": "Auto Re-index",
+      "name": "Auto Re-index Exam",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1630, 220],
-      "notes": "Automatically triggers re-indexing when quality alerts are detected"
+      "position": [2090, 220],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "FIX: Now targets only the specific failing exam (not 'all').\nRetry: 2 attempts, 5s wait."
     },
     {
       "parameters": {
-        "content": "## Workflow 4 — Quality Verification\n\nRuns daily at 06:00 to verify ChromaDB has sufficient content for all 6 exams.\n\n**Thresholds:**\n- < 50 chunks = alert (may produce poor-quality questions)\n- 0 chunks = EMPTY alert (will use hardcoded fallback)\n\n**On alert:**\n1. Logs warning to n8n console\n2. POSTs to FastAPI /admin/content-alert (saved to data/alerts.json)\n3. Automatically triggers re-indexing from data/scraped/\n\n**Backend must be running at:** http://localhost:8003\n(run: `cd backend && uvicorn app.main:app --port 8003 --reload`)",
-        "height": 230,
-        "width": 420
+        "jsCode": "// FIX: Added result check — was completely missing before.\nconst result = $input.first().json;\nlet exam;\ntry {\n  exam = $('Re-index One at a Time').first().json.exam_code;\n} catch (e) {\n  exam = 'UNKNOWN';\n}\nconst r = (result.results && result.results[exam]) || {};\n\nif (r.status === 'success') {\n  console.log('[WF4 Auto-fix] ' + exam + ': SUCCESS — ' + (r.chunks_indexed || 0) + ' chunks');\n} else {\n  console.error('[WF4 Auto-fix] ' + exam + ': FAILED — ' + (r.reason || 'check if data/scraped/' + exam.toLowerCase() + '/ has .txt files'));\n}\n\nreturn [{ json: { exam_code: exam, status: r.status || 'failed', chunks_indexed: r.chunks_indexed || 0, reason: r.reason || null } }];"
+      },
+      "id": "node-check-reindex-4",
+      "name": "Check Re-index Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2320, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconsole.log('[CertMasterAI] Quality check PASSED — ' + data.total_chunks + ' total chunks across ' + data.healthy.length + ' exams.');\nreturn [{ json: { alert: false, status: 'healthy', total_chunks: data.total_chunks } }];"
+      },
+      "id": "node-ok-4",
+      "name": "Log All Clear",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 400]
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 4 — Quality Verification (v2)\n\nRuns daily at 06:00 to verify ChromaDB has sufficient content for all exams.\n\n**Thresholds:**\n- < 50 chunks = BELOW_THRESHOLD alert\n- 0 chunks = EMPTY alert (will use hardcoded fallback)\n\n**Changes from v1:**\n- FIX: Auto re-index now targets only failing exams (was 'all' before)\n- FIX: Added result check after re-index (was missing before)\n- FIX: Added retry logic on all HTTP nodes\n- Added splitInBatches loop for per-exam targeted re-index\n\n**On alert flow:**\n1. Log warning to n8n console\n2. POST to FastAPI /admin/content-alert (saved to data/alerts.json)\n3. Extract only failing exams\n4. Re-index each failing exam one at a time\n5. Check and log result per exam\n\n**Backend must be running at:** http://localhost:8003",
+        "height": 270,
+        "width": 460
       },
       "id": "node-note-4",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [250, 520]
+      "position": [250, 560]
     }
   ],
   "connections": {
@@ -230,7 +268,51 @@
       "main": [
         [
           {
-            "node": "Auto Re-index",
+            "node": "Split Failing Exams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Failing Exams": {
+      "main": [
+        [
+          {
+            "node": "Re-index One at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-index One at a Time": {
+      "main": [
+        [
+          {
+            "node": "Auto Re-index Exam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Re-index Exam": {
+      "main": [
+        [
+          {
+            "node": "Check Re-index Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Re-index Result": {
+      "main": [
+        [
+          {
+            "node": "Re-index One at a Time",
             "type": "main",
             "index": 0
           }

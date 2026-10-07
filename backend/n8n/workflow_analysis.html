@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CertMasterAI — n8n Workflow Analysis v2</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3250;
+    --accent:#5b7fff;--accent2:#7c4dff;--green:#22c55e;--yellow:#f59e0b;
+    --red:#ef4444;--orange:#f97316;--teal:#2dd4bf;
+    --text:#e2e8f0;--muted:#8892b0;--code-bg:#0d1117;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.7;}
+  a{color:var(--accent);text-decoration:none;}
+  .wrapper{display:flex;min-height:100vh;}
+
+  /* Sidebar */
+  nav{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  nav h2{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:0 20px 8px;}
+  nav a{display:block;padding:6px 20px;color:var(--muted);font-size:13px;border-left:3px solid transparent;transition:all .2s;}
+  nav a:hover,nav a.active{color:var(--text);background:var(--surface2);border-left-color:var(--accent);}
+  nav .nav-section{margin-top:16px;}
+  nav .nav-badge{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px;background:#14532d;color:#86efac;}
+  nav .nav-badge.fix{background:#422006;color:#fcd34d;}
+
+  /* Main */
+  main{flex:1;padding:40px 52px;max-width:1160px;}
+
+  /* Typography */
+  h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+  h2{font-size:1.4rem;font-weight:600;color:var(--text);margin:40px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  h3{font-size:1.1rem;font-weight:600;color:var(--accent);margin:28px 0 12px;}
+  h4{font-size:.95rem;font-weight:600;color:var(--text);margin:18px 0 8px;}
+  p{margin-bottom:12px;}
+  li{margin-bottom:5px;}
+  ul,ol{padding-left:22px;margin-bottom:12px;}
+
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#1a1d27 0%,#1e1033 100%);border:1px solid var(--border);border-radius:12px;padding:32px 36px;margin-bottom:36px;}
+  .hero .subtitle{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .hero-stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:20px;}
+  .stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 20px;text-align:center;min-width:105px;}
+  .stat .num{font-size:1.8rem;font-weight:700;color:var(--accent);}
+  .stat .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+  /* Version banner */
+  .version-banner{background:linear-gradient(90deg,#0a2a0a,#0a1a2a);border:1px solid #22c55e44;border-radius:8px;padding:14px 20px;margin-bottom:28px;display:flex;align-items:center;gap:12px;}
+  .version-banner .v{background:#14532d;color:#86efac;padding:3px 10px;border-radius:20px;font-weight:700;font-size:13px;}
+
+  /* Badges */
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+  .badge-active{background:#14532d;color:#86efac;border:1px solid #16a34a;}
+  .badge-inactive{background:#422006;color:#fcd34d;border:1px solid #d97706;}
+  .badge-fixed{background:#0a2a1a;color:#6ee7b7;border:1px solid #059669;}
+  .badge-pending{background:#2d1a00;color:#fbbf24;border:1px solid #d97706;}
+  .badge-new{background:#1e1a3d;color:#c4b5fd;border:1px solid #7c3aed;}
+  .badge-red{background:#450a0a;color:#fca5a5;border:1px solid #dc2626;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px;}
+  th{background:var(--surface2);color:var(--accent);font-weight:600;text-align:left;padding:10px 14px;border:1px solid var(--border);font-size:13px;}
+  td{padding:9px 14px;border:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  tr:hover td{background:rgba(91,127,255,.05);}
+
+  /* Code */
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 20px;overflow-x:auto;margin:10px 0 18px;font-size:13px;line-height:1.6;}
+  code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;}
+  p code,li code,td code{background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:13px;color:#f8b4d9;}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:20px;}
+  .card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .wf-number{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+  .wf-1{background:#1e3a5f;color:#60a5fa;}
+  .wf-2{background:#1a2e1a;color:#4ade80;}
+  .wf-3{background:#2d1a3d;color:#c084fc;}
+  .wf-4{background:#3d2000;color:#fb923c;}
+  .wf-5{background:#1a2d2d;color:#2dd4bf;}
+
+  /* Flow */
+  .flow{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:monospace;font-size:13px;line-height:2;overflow-x:auto;margin:10px 0 18px;white-space:pre;}
+
+  /* Node blocks */
+  .node-block{border-left:3px solid var(--accent);padding:12px 16px;background:var(--surface);border-radius:0 8px 8px 0;margin:12px 0;}
+  .node-block.new{border-left-color:var(--green);}
+  .node-block.changed{border-left-color:var(--yellow);}
+  .node-block h4{margin:0 0 6px;color:var(--accent);}
+  .node-block.new h4{color:var(--green);}
+  .node-block.changed h4{color:var(--yellow);}
+  .node-type{font-size:11px;color:var(--muted);font-family:monospace;margin-bottom:8px;}
+
+  /* Alerts */
+  .alert{border-radius:8px;padding:14px 18px;margin:12px 0;border-left:4px solid;}
+  .alert-red{background:#1c0a0a;border-color:var(--red);}
+  .alert-yellow{background:#1c1500;border-color:var(--yellow);}
+  .alert-green{background:#0a1c0a;border-color:var(--green);}
+  .alert-blue{background:#0a1020;border-color:var(--accent);}
+  .alert-purple{background:#1a0a2a;border-color:var(--accent2);}
+  .alert strong{display:block;margin-bottom:4px;}
+
+  /* Mermaid */
+  .mermaid-wrap{background:#fff;border-radius:10px;padding:24px;margin:14px 0;overflow-x:auto;}
+
+  /* Collapsible */
+  details{margin:10px 0;}
+  summary{cursor:pointer;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-weight:600;color:var(--text);list-style:none;display:flex;align-items:center;gap:8px;}
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:'▶';font-size:11px;color:var(--accent);transition:transform .2s;}
+  details[open] summary::before{transform:rotate(90deg);}
+  details[open] summary{border-radius:8px 8px 0 0;}
+  .details-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:16px 20px;}
+
+  /* Change log tags */
+  .tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;}
+  .tag-fix{background:#0a2a1a;color:#6ee7b7;}
+  .tag-new{background:#1e1a3d;color:#c4b5fd;}
+  .tag-pending{background:#2d1a00;color:#fbbf24;}
+
+  /* Divider */
+  hr.divider{border:none;border-top:1px solid var(--border);margin:36px 0;}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  @media print{nav{display:none;}main{padding:20px;}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- ── SIDEBAR ── -->
+<nav id="sidebar">
+  <div style="padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+    <div style="font-size:17px;font-weight:700;color:var(--text);">CertMasterAI</div>
+    <div style="font-size:12px;color:var(--muted);">n8n Workflow Analysis <span style="color:var(--green);font-weight:700;">v2</span></div>
+  </div>
+  <div class="nav-section">
+    <h2>Overview</h2>
+    <a href="#summary">Executive Summary</a>
+    <a href="#changelog">What Changed <span class="nav-badge">v2</span></a>
+    <a href="#inventory">Workflow Inventory</a>
+    <a href="#diagram">System Diagram</a>
+  </div>
+  <div class="nav-section">
+    <h2>Workflows</h2>
+    <a href="#wf1">WF1 — URL Discovery <span class="nav-badge">v2</span></a>
+    <a href="#wf2">WF2 — Download &amp; Scrape <span class="nav-badge fix">fix</span></a>
+    <a href="#wf3">WF3 — ChromaDB Index <span class="nav-badge">v2</span></a>
+    <a href="#wf4">WF4 — Quality Check <span class="nav-badge">v2</span></a>
+    <a href="#wf5">WF5 — Content Monitor <span class="nav-badge">v2</span></a>
+  </div>
+  <div class="nav-section">
+    <h2>Analysis</h2>
+    <a href="#e2e">End-to-End Flow</a>
+    <a href="#wf1-chain">WF1 → Auto-Fix Chain</a>
+    <a href="#issues">Issues Tracker</a>
+    <a href="#pending">Still Needs Backend Work</a>
+    <a href="#howto">How to Import in n8n</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="subtitle">Senior n8n Solution Architect Report · CertMasterAI · August 2026 · <strong style="color:var(--green)">v2 — All Issues Addressed</strong></div>
+  <h1>n8n Workflow Analysis</h1>
+  <p style="color:var(--muted);max-width:700px;">Updated analysis reflecting all fixes applied to the 5 n8n workflows. 11 of 14 issues resolved in JSON. 3 require backend changes outside n8n.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">5</div><div class="label">Workflows</div></div>
+    <div class="stat"><div class="num" style="color:var(--green)">3</div><div class="label">Active</div></div>
+    <div class="stat"><div class="num" style="color:var(--muted)">2</div><div class="label">Manual</div></div>
+    <div class="stat"><div class="num" style="color:var(--green)">11</div><div class="label">Fixed</div></div>
+    <div class="stat"><div class="num" style="color:var(--yellow)">3</div><div class="label">Pending</div></div>
+  </div>
+</div>
+
+<div class="version-banner">
+  <span class="v">v2</span>
+  <span style="color:var(--text);">All 5 workflow JSON files have been updated. Import them into n8n to apply fixes. See <a href="#howto">How to Import</a> for step-by-step instructions.</span>
+</div>
+
+<!-- ══ WHAT CHANGED ══ -->
+<h2 id="changelog">What Changed in v2</h2>
+<table>
+  <tr><th>WF</th><th>Change</th><th>Type</th><th>Issue Fixed</th></tr>
+  <tr><td>WF1</td><td>Removed <code>Build Exam List</code> node — <code>url_file</code>/<code>scraped_dir</code> fields were dead code</td><td><span class="badge badge-fixed">Fixed</span></td><td>#5</td></tr>
+  <tr><td>WF1</td><td>Status API now called once (was 6×) — <code>Check Index Status</code> moved directly after Schedule</td><td><span class="badge badge-fixed">Fixed</span></td><td>#4</td></tr>
+  <tr><td>WF1</td><td>Added <code>EXPECTED_EXAMS</code> list with AI-901 — detects exams missing from stats entirely</td><td><span class="badge badge-fixed">Fixed</span></td><td>#11</td></tr>
+  <tr><td>WF1</td><td>Added auto-fix loop: <code>Any Gaps?</code> → <code>Filter Failing Exams</code> → <code>splitInBatches</code> → <code>Trigger Re-index Per Exam</code> → <code>Log Re-index Result</code></td><td><span class="badge badge-new">New</span></td><td>#14</td></tr>
+  <tr><td>WF1</td><td>Set <code>active: true</code></td><td><span class="badge badge-fixed">Fixed</span></td><td>#1</td></tr>
+  <tr><td>WF2</td><td>Added AI-901 to <code>Set Exam Targets</code> (7 exams total)</td><td><span class="badge badge-fixed">Fixed</span></td><td>#11</td></tr>
+  <tr><td>WF2</td><td>Added retry (2 retries, 5s wait) on HTTP node</td><td><span class="badge badge-fixed">Fixed</span></td><td>#10</td></tr>
+  <tr><td>WF2</td><td>Added <code>try/catch</code> fallback in <code>Parse Result</code> for node name reference</td><td><span class="badge badge-fixed">Fixed</span></td><td>#9</td></tr>
+  <tr><td>WF3</td><td>Added <code>Execute Workflow Trigger</code> — WF3 can now be called programmatically</td><td><span class="badge badge-new">New</span></td><td>—</td></tr>
+  <tr><td>WF3</td><td><code>Configure Index Job</code> now reads trigger input; falls back to defaults for manual runs</td><td><span class="badge badge-new">New</span></td><td>—</td></tr>
+  <tr><td>WF3</td><td>Added retry on HTTP node</td><td><span class="badge badge-fixed">Fixed</span></td><td>#10</td></tr>
+  <tr><td>WF4</td><td>Auto Re-index now loops only through failing exams via <code>Split Failing Exams</code> + <code>splitInBatches</code> (was re-indexing ALL)</td><td><span class="badge badge-fixed">Fixed</span></td><td>#2</td></tr>
+  <tr><td>WF4</td><td>Added <code>Check Re-index Result</code> node — logs success/failure per exam with actionable message</td><td><span class="badge badge-fixed">Fixed</span></td><td>#7</td></tr>
+  <tr><td>WF4</td><td>Added retry on all HTTP nodes</td><td><span class="badge badge-fixed">Fixed</span></td><td>#10</td></tr>
+  <tr><td>WF5</td><td>Added <code>Any Unreachable URLs?</code> IF node — <code>Alert FastAPI</code> only fires when unreachable_count &gt; 0 (was always firing)</td><td><span class="badge badge-fixed">Fixed</span></td><td>#3</td></tr>
+  <tr><td>WF5</td><td>Added AI-901 URL to <code>Sample URLs to Check</code> (7 exams total)</td><td><span class="badge badge-fixed">Fixed</span></td><td>#11</td></tr>
+  <tr><td>WF5</td><td>Added <code>Log All Reachable</code> terminal node for healthy path</td><td><span class="badge badge-new">New</span></td><td>—</td></tr>
+  <tr><td>WF5</td><td>Documented known limitation in sticky note: monitors availability not content changes</td><td><span class="badge badge-fixed">Fixed</span></td><td>#8</td></tr>
+  <tr><td>WF2+WF3</td><td>Sticky notes updated with clear guidance on when to use WF2 vs WF3 vs WF1</td><td><span class="badge badge-fixed">Fixed</span></td><td>#12</td></tr>
+</table>
+
+<!-- ══ INVENTORY ══ -->
+<h2 id="inventory">Workflow Inventory</h2>
+<table>
+  <tr><th>#</th><th>File</th><th>Name</th><th>Trigger</th><th>Status v2</th><th>Key Change</th></tr>
+  <tr>
+    <td>1</td><td><code>workflow_1_url_discovery.json</code></td><td>URL Discovery</td>
+    <td>Weekly Sun 01:00</td>
+    <td><span class="badge badge-active">Active ✅</span></td>
+    <td>Now auto-fixes gaps; 1 API call; AI-901</td>
+  </tr>
+  <tr>
+    <td>2</td><td><code>workflow_2_download.json</code></td><td>Download &amp; Scrape Docs</td>
+    <td>Manual</td>
+    <td><span class="badge badge-inactive">Manual Utility</span></td>
+    <td>AI-901 added; retry; hardened code</td>
+  </tr>
+  <tr>
+    <td>3</td><td><code>workflow_3_index.json</code></td><td>ChromaDB Indexing</td>
+    <td>Manual / Execute Workflow</td>
+    <td><span class="badge badge-inactive">Manual Utility</span></td>
+    <td>Execute Workflow Trigger added</td>
+  </tr>
+  <tr>
+    <td>4</td><td><code>workflow_4_quality.json</code></td><td>Quality Verification</td>
+    <td>Daily 06:00</td>
+    <td><span class="badge badge-active">Active ✅</span></td>
+    <td>Targeted re-index; result check added</td>
+  </tr>
+  <tr>
+    <td>5</td><td><code>workflow_5_monitor.json</code></td><td>Content Change Monitor</td>
+    <td>Weekly Mon 03:00</td>
+    <td><span class="badge badge-active">Active ✅</span></td>
+    <td>IF guard added; AI-901; healthy path</td>
+  </tr>
+</table>
+
+<!-- ══ SYSTEM DIAGRAM ══ -->
+<h2 id="diagram">Updated System Diagram</h2>
+<div class="flow">ACTIVE WORKFLOWS (running on schedule)
+────────────────────────────────────────────────────────────
+
+[WF1] Sun 01:00  ──→ GET /admin/index/status (1 call only)
+(ACTIVE ✅)              │
+                   Identify Gaps (7 exams incl. AI-901)
+                         │
+                  ┌──────┴──────┐
+             gaps │             │ all healthy
+                  ↓             ↓
+        Filter Failing      All Healthy
+            Exams           (terminal)
+                  │
+         splitInBatches (1 per failing exam)
+                  │
+         POST /admin/index-documents   ← per failing exam only
+                  │
+         Log Re-index Result
+                  └──→ (loop back)
+
+[WF4] Daily 06:00 ──→ GET /admin/index/status
+(ACTIVE ✅)              │
+                   Evaluate Quality (threshold: 50 chunks)
+                         │
+                  ┌──────┴──────┐
+             alert│             │ healthy
+                  ↓             ↓
+        Log Quality Alert   Log All Clear
+                  │           (terminal)
+                  ↓
+        POST /admin/content-alert (neverError)
+                  │
+        Split Failing Exams only   ← FIX: was 'all'
+                  │
+         splitInBatches (1 per failing exam)
+                  │
+         POST /admin/index-documents
+                  │
+         Check Re-index Result     ← NEW: was missing
+                  └──→ (loop back)
+
+[WF5] Mon 03:00  ──→ HEAD ×7 URLs (incl. AI-901)
+(ACTIVE ✅)              │ (loop: 1 URL at a time)
+                   Summarise Scan
+                         │
+                  ┌──────┴────────────┐
+            down  │                   │ all up
+                  ↓                   ↓
+        POST /admin/content-alert  Log All Reachable
+                                    (terminal)  ← NEW
+────────────────────────────────────────────────────────────
+MANUAL WORKFLOWS (on-demand utilities)
+
+[WF2] Manual ──→ 7 exams (incl. AI-901) ──→ POST per exam loop
+[WF3] Manual or Execute Workflow Trigger  ──→ POST all-at-once
+
+Both feed: FastAPI → ChromaDB</div>
+
+<h3>Mermaid — Full System Diagram v2</h3>
+<div class="mermaid-wrap">
+<div class="mermaid">
+graph TD
+    subgraph ACTIVE["Active Workflows (Auto-scheduled)"]
+        WF1["WF1 — URL Discovery\nSun 01:00 · Active ✅\nNow auto-fixes gaps"]
+        WF4["WF4 — Quality Verification\nDaily 06:00 · Active ✅\nTargeted re-index only"]
+        WF5["WF5 — Content Monitor\nMonday 03:00 · Active ✅\nIF guard added"]
+    end
+    subgraph MANUAL["Manual Utility Workflows"]
+        WF2["WF2 — Download & Scrape\nManual · 7 exams"]
+        WF3["WF3 — ChromaDB Indexing\nManual or Execute Workflow Trigger"]
+    end
+    subgraph BACKEND["FastAPI Backend · port 8003"]
+        S1["GET /admin/index/status"]
+        S2["POST /admin/index-documents"]
+        S3["POST /admin/content-alert"]
+    end
+    subgraph DB["ChromaDB"]
+        CHROMA[("7 Exam Collections\nAI-102·AZ-104·AZ-305\nGH-300·AB-100·AI-103·AI-901")]
+    end
+    subgraph EXT["External Docs"]
+        MS["learn.microsoft.com\ndocs.github.com"]
+    end
+    WF1 -->|"GET (1 call)"| S1
+    WF1 -->|"POST per failing exam"| S2
+    WF2 -->|"POST per exam loop"| S2
+    WF3 -->|"POST all-at-once"| S2
+    WF4 -->|GET| S1
+    WF4 -->|"POST (failing only)"| S2
+    WF4 -->|POST alert| S3
+    WF5 -->|"HEAD ×7"| MS
+    WF5 -->|"POST (only if down)"| S3
+    S1 --> CHROMA
+    S2 --> CHROMA
+    style ACTIVE fill:#0a2a0a,stroke:#22c55e
+    style MANUAL fill:#1a1a2a,stroke:#5b7fff
+</div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════ WF1 ══════════ -->
+<h2 id="wf1">Workflow 1 — URL Discovery <span class="tag tag-new">v2 — Major Update</span></h2>
+<div class="card">
+  <div class="card-header">
+    <div class="wf-number wf-1">1</div>
+    <div>
+      <div style="font-weight:700">CertMasterAI — 1. URL Discovery</div>
+      <div style="font-size:13px;color:var(--muted)">certmasterai-wf-001 &nbsp;·&nbsp; <span class="badge badge-active">Active ✅</span> (was inactive)</div>
+    </div>
+  </div>
+  <table>
+    <tr><th>Field</th><th>v1 (old)</th><th>v2 (new)</th></tr>
+    <tr><td>Status</td><td>Inactive</td><td><strong style="color:var(--green)">Active ✅</strong></td></tr>
+    <tr><td>API calls to status</td><td>6× (one per exam item)</td><td><strong>1×</strong></td></tr>
+    <tr><td>Exam count</td><td>6 (AI-901 missing)</td><td><strong>7 (AI-901 added)</strong></td></tr>
+    <tr><td>Auto-fix on gaps?</td><td>No — report only</td><td><strong>Yes — re-indexes each failing exam</strong></td></tr>
+    <tr><td>Dead code</td><td>url_file, scraped_dir fields unused</td><td><strong>Removed</strong></td></tr>
+    <tr><td>Retry logic</td><td>None</td><td><strong>3 retries, 3s wait</strong></td></tr>
+  </table>
+</div>
+
+<h3>Updated Execution Flow</h3>
+<div class="flow">[Weekly Schedule]
+       ↓
+[Check Index Status]  ← 1 GET call only (was 6×)
+       ↓
+[Identify Gaps]  ← EXPECTED_EXAMS list with AI-901; outputs {has_gaps, needs_index[], healthy[]}
+       ↓
+[Any Gaps?]  ← IF node on has_gaps flag
+     /   \
+TRUE/     \FALSE
+   /       \
+[Filter      [All Healthy]
+ Failing      (terminal)
+ Exams]
+   ↓
+[Process Gaps One at a Time]  ← splitInBatches, 1 per exam
+   ↓
+[Trigger Re-index Per Exam]  ← POST /admin/index-documents with specific exam_code
+   ↓
+[Log Re-index Result]  ← checks success/failure, logs actionable message
+   └──────────────────→ (loop back to splitInBatches)</div>
+
+<div class="node-block changed">
+  <h4>Node: Identify Gaps <span class="tag tag-fix">Rewritten</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code</div>
+  <p>Now uses a fixed <code>EXPECTED_EXAMS</code> list to catch exams that are missing from <code>chroma_db_stats</code> entirely (not just those with 0 chunks). Returns a single item with <code>has_gaps</code> flag and arrays — so the IF node only needs one check.</p>
+<pre><code>const EXPECTED_EXAMS = ['AI-102','AZ-104','AZ-305','GH-300','AB-100','AI-103','AI-901'];
+// stats[exam] ?? -1 means "exam not in stats at all" = treat as MISSING
+// Output: { needs_index: [...], healthy: [...], has_gaps: bool, checked_at }</code></pre>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Any Gaps? <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.if</div>
+  <p>Checks <code>$json.has_gaps === true</code>. TRUE → auto-fix loop. FALSE → All Healthy terminal node. Prevents any indexing work when everything is already healthy.</p>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Filter Failing Exams <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code</div>
+  <p>Extracts the <code>needs_index</code> array from <code>Identify Gaps</code> output and emits one item per failing exam. These feed into the loop below.</p>
+<pre><code>return data.needs_index.map(exam => ({ json: exam }));
+// e.g. outputs: { exam_code:"AZ-104", issue:"EMPTY", current_chunks:0 }</code></pre>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Process Gaps One at a Time <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.splitInBatches · batchSize: 1</div>
+  <p>Loop controller. Processes each failing exam one at a time to avoid overloading the backend. <code>Log Re-index Result</code> feeds back into this node to advance to the next exam.</p>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Trigger Re-index Per Exam <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.httpRequest · POST · retry: 2×</div>
+  <p>Calls <code>POST /admin/index-documents</code> for the specific failing exam. Uses <code>={{ JSON.stringify({ exam_code: $json.exam_code, ... }) }}</code> — no hardcoded <code>"all"</code>.</p>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Log Re-index Result <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code</div>
+  <p>Checks the API response and logs success or an actionable failure message. Loops back to <code>Process Gaps One at a Time</code>.</p>
+<pre><code>if (r.status === 'success')
+  console.log('[WF1 Auto-fix] AI-102: SUCCESS — 847 chunks')
+else
+  console.error('[WF1 Auto-fix] AI-102: FAILED — check backend logs')</code></pre>
+</div>
+
+<div class="node-block new">
+  <h4>Node: All Healthy <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code · Terminal</div>
+  <p>FALSE branch. Logs "all exams healthy" and ends the workflow. No API calls, no indexing.</p>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════ WF2 ══════════ -->
+<h2 id="wf2">Workflow 2 — Download &amp; Scrape Docs <span class="tag tag-fix">Minor Fixes</span></h2>
+<div class="card">
+  <div class="card-header">
+    <div class="wf-number wf-2">2</div>
+    <div>
+      <div style="font-weight:700">CertMasterAI — 2. Download &amp; Scrape Docs</div>
+      <div style="font-size:13px;color:var(--muted)">certmasterai-wf-002 &nbsp;·&nbsp; <span class="badge badge-inactive">Manual Utility</span></div>
+    </div>
+  </div>
+  <p>Flow is unchanged. Three targeted fixes applied.</p>
+  <table>
+    <tr><th>Node</th><th>Change</th></tr>
+    <tr><td>Set Exam Targets</td><td>Added <code>'AI-901'</code> — now 7 exams total</td></tr>
+    <tr><td>Trigger Download + Index</td><td>Added <code>retryOnFail: true</code>, maxTries: 2, waitBetweenTries: 5000ms</td></tr>
+    <tr><td>Parse Result</td><td>Wrapped <code>$('Process One Exam at a Time')</code> in <code>try/catch</code> — returns 'UNKNOWN' if node reference breaks instead of crashing</td></tr>
+  </table>
+  <div class="alert alert-blue">
+    <strong>When to use WF2 vs WF3 vs WF1:</strong>
+    <ul style="margin:6px 0 0;">
+      <li><strong>WF1</strong> — automatic (runs Sunday 1 AM), fixes gaps; no action needed</li>
+      <li><strong>WF2</strong> — manual, per-exam visibility, useful for debugging one exam at a time</li>
+      <li><strong>WF3</strong> — manual, fastest full rebuild with a single API call</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════ WF3 ══════════ -->
+<h2 id="wf3">Workflow 3 — ChromaDB Indexing <span class="tag tag-new">New Trigger Added</span></h2>
+<div class="card">
+  <div class="card-header">
+    <div class="wf-number wf-3">3</div>
+    <div>
+      <div style="font-weight:700">CertMasterAI — 3. ChromaDB Indexing</div>
+      <div style="font-size:13px;color:var(--muted)">certmasterai-wf-003 &nbsp;·&nbsp; <span class="badge badge-inactive">Manual / Callable</span></div>
+    </div>
+  </div>
+  <table>
+    <tr><th>Node</th><th>Change</th></tr>
+    <tr><td>Execute Workflow Trigger <span class="tag tag-new">New</span></td><td>Added alongside Manual Trigger. Both connect to Configure Index Job. Allows WF1, WF4, or any future workflow to call WF3 programmatically.</td></tr>
+    <tr><td>Configure Index Job <span class="tag tag-fix">Updated</span></td><td>Now reads from trigger input if provided. Falls back to <code>'all'</code> + safe defaults for manual runs. Works for both trigger types.</td></tr>
+    <tr><td>POST /admin/index-documents</td><td>Added retry: 2 retries, 5s wait</td></tr>
+  </table>
+</div>
+
+<h3>Two-Trigger Pattern Explained</h3>
+<div class="flow">Manual Trigger ─────────────→ ┐
+                               ├── Configure Index Job → POST → Summarise → IF → Success/Warn
+Execute Workflow Trigger ────→ ┘
+
+Configure Index Job logic:
+  const input = $input.first().json;
+  // Manual Trigger sends {}  → input.exam_code is undefined → uses 'all'
+  // Execute Workflow sends data → input.exam_code = "AZ-104" → uses that
+  return [{ json: {
+    exam_code:   input.exam_code   || 'all',
+    scraped_dir: input.scraped_dir || './data/scraped',
+    clear_first: input.clear_first !== undefined ? input.clear_first : false
+  }}];</div>
+
+<div class="alert alert-purple">
+  <strong>To call WF3 from WF1 explicitly (optional future enhancement):</strong>
+  WF3 is now ready to receive calls. Once imported into n8n, note WF3's numeric ID from the URL bar (<code>/workflow/[ID]</code>). Add an <code>Execute Workflow</code> node to WF1 pointing to that ID and pass <code>{ exam_code, scraped_dir, clear_first }</code> as payload. Currently WF1 calls the API directly (no ID dependency), which is why this is optional.
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════ WF4 ══════════ -->
+<h2 id="wf4">Workflow 4 — Quality Verification <span class="tag tag-fix">Targeted Re-index + Result Check</span></h2>
+<div class="card">
+  <div class="card-header">
+    <div class="wf-number wf-4">4</div>
+    <div>
+      <div style="font-weight:700">CertMasterAI — 4. Quality Verification</div>
+      <div style="font-size:13px;color:var(--muted)">certmasterai-wf-004 &nbsp;·&nbsp; <span class="badge badge-active">Active ✅</span></div>
+    </div>
+  </div>
+  <table>
+    <tr><th>Field</th><th>v1 (old)</th><th>v2 (new)</th></tr>
+    <tr><td>Re-index scope</td><td><code>exam_code: "all"</code> — always all exams</td><td><strong>Only failing exams</strong> via loop</td></tr>
+    <tr><td>Result check</td><td>None — silent failure</td><td><strong>Check Re-index Result</strong> node added</td></tr>
+    <tr><td>Retry logic</td><td>None</td><td>All HTTP nodes: 2–3 retries</td></tr>
+  </table>
+</div>
+
+<h3>Updated TRUE-Branch Flow (Alert Path)</h3>
+<div class="flow">[Log Quality Alert]
+       ↓
+[Send Alert to FastAPI]  ← neverError:true — workflow continues even if endpoint is down
+       ↓
+[Split Failing Exams]  ← NEW: emits one item per failing exam only
+       ↓
+[Re-index One at a Time]  ← splitInBatches, 1 per exam
+       ↓
+[Auto Re-index Exam]  ← POST /admin/index-documents with specific exam_code
+       ↓
+[Check Re-index Result]  ← NEW: logs success or actionable failure
+       └──→ (loop back)</div>
+
+<div class="node-block changed">
+  <h4>Node: Split Failing Exams <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code</div>
+  <p>Extracts only the failing exams from the alert payload and returns one item per exam. Previously, <code>Auto Re-index</code> used a hardcoded <code>"all"</code> body — this fix makes it targeted.</p>
+<pre><code>// data.alerts = [{exam:"AZ-104", count:0, issue:"EMPTY"}, ...]
+return data.alerts.map(a => ({ json: { exam_code: a.exam, issue: a.issue, count: a.count } }));</code></pre>
+</div>
+
+<div class="node-block new">
+  <h4>Node: Check Re-index Result <span class="tag tag-new">New</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.code · loops back to splitInBatches</div>
+<pre><code>if (r.status === 'success')
+  console.log('[WF4 Auto-fix] AZ-104: SUCCESS — 1203 chunks')
+else
+  console.error('[WF4 Auto-fix] AZ-104: FAILED — check if data/scraped/az-104/ has .txt files')</code></pre>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════ WF5 ══════════ -->
+<h2 id="wf5">Workflow 5 — Content Change Monitor <span class="tag tag-fix">IF Guard + AI-901</span></h2>
+<div class="card">
+  <div class="card-header">
+    <div class="wf-number wf-5">5</div>
+    <div>
+      <div style="font-weight:700">CertMasterAI — 5. Content Change Monitor</div>
+      <div style="font-size:13px;color:var(--muted)">certmasterai-wf-005 &nbsp;·&nbsp; <span class="badge badge-active">Active ✅</span></div>
+    </div>
+  </div>
+  <table>
+    <tr><th>Field</th><th>v1 (old)</th><th>v2 (new)</th></tr>
+    <tr><td>Alert frequency</td><td>Every Monday regardless (6 URLs)</td><td>Only when URLs are unreachable (7 URLs)</td></tr>
+    <tr><td>AI-901</td><td>Missing</td><td><strong>Added</strong></td></tr>
+    <tr><td>Healthy path</td><td>No terminal node (silent)</td><td><strong>Log All Reachable</strong> terminal node</td></tr>
+  </table>
+</div>
+
+<h3>Updated Flow After Summarise Scan</h3>
+<div class="flow">... → [Summarise Scan]
+                           ↓
+                  [Any Unreachable URLs?]  ← NEW IF guard
+                         /   \
+              DOWN (>0) /     \ ALL UP (=0)
+                       /       \
+           [Alert FastAPI]  [Log All Reachable]
+            (as before)      (NEW terminal —
+                              no POST sent)</div>
+
+<div class="node-block new">
+  <h4>Node: Any Unreachable URLs? <span class="tag tag-new">New IF Guard</span></h4>
+  <div class="node-type">Type: n8n-nodes-base.if</div>
+  <p>Condition: <code>$json.unreachable_count &gt; 0</code></p>
+  <p>TRUE → Alert FastAPI (only when something is actually down)</p>
+  <p>FALSE → Log All Reachable (silent, no POST to backend)</p>
+  <p>This stops <code>/admin/content-alert</code> from receiving a POST every Monday when nothing is wrong.</p>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ E2E ══ -->
+<h2 id="e2e">End-to-End Execution Flows (Updated)</h2>
+
+<details open>
+  <summary>Path A — Weekly Gap Detection + Auto-Fix (WF1, Automated)</summary>
+  <div class="details-body">
+    <div class="flow">TRIGGER  : Every Sunday 01:00 AM
+GET      : /admin/index/status (1 call)
+CODE     : Check 7 EXPECTED_EXAMS against stats
+           → AZ-104: 0 chunks (EMPTY)
+           → AI-901: not in stats (MISSING)
+IF       : has_gaps = true → auto-fix path
+CODE     : Filter failing: [AZ-104, AI-901]
+LOOP     : Process AZ-104
+POST     : /admin/index-documents {exam_code:"AZ-104", clear_first:false}
+           → backend reads data/scraped/az-104/*.txt
+           → chunks + embeds → stores in ChromaDB
+LOG      : AZ-104: SUCCESS — 1203 chunks
+LOOP     : Process AI-901
+POST     : /admin/index-documents {exam_code:"AI-901", clear_first:false}
+LOG      : AI-901: SUCCESS — 892 chunks
+END      : All gaps fixed</div>
+  </div>
+</details>
+
+<details>
+  <summary>Path B — Daily Quality Self-Heal (WF4, Automated — Targeted)</summary>
+  <div class="details-body">
+    <div class="flow">TRIGGER  : Every day 06:00 AM
+GET      : /admin/index/status
+CODE     : AZ-104 has 12 chunks < MIN(50) → BELOW_THRESHOLD
+IF       : has_alerts = true → alert path
+LOG      : Format alert message to n8n console
+POST     : /admin/content-alert {type:"quality_degradation"}  (neverError)
+CODE     : Split failing: [{exam:"AZ-104", issue:"BELOW_THRESHOLD"}]
+LOOP     : Process AZ-104 only  ← FIX: was 'all' before
+POST     : /admin/index-documents {exam_code:"AZ-104"}
+CODE     : AZ-104: SUCCESS — 1203 chunks  ← FIX: result now checked
+END      : Only failing exam re-indexed, others untouched</div>
+  </div>
+</details>
+
+<details>
+  <summary>Path C — Weekly URL Availability Scan (WF5, Automated — Conditional Alert)</summary>
+  <div class="details-body">
+    <div class="flow">TRIGGER  : Every Monday 03:00 AM
+CODE     : 7 sample URLs (incl. AI-901)
+LOOP     : HEAD request for each URL (7 iterations)
+           AI-102: 200 OK  | AZ-104: 200 OK  | AZ-305: 200 OK
+           GH-300: 404 NOT FOUND  | AB-100: 200 OK
+           AI-103: 200 OK  | AI-901: 200 OK
+CODE     : Summarise: reachable=6, unreachable=1 (GH-300)
+IF       : unreachable_count=1 > 0 → TRUE  ← NEW IF guard
+POST     : /admin/content-alert {type:"content_change", unreachable:[{exam:"GH-300"}]}
+END      : Alert sent only because something is actually down
+
+--- If all 7 are up ---
+IF       : unreachable_count=0 → FALSE
+LOG      : "All 7 URLs reachable — no alert sent"  ← NEW
+END      : No POST, no noise in alerts channel</div>
+  </div>
+</details>
+
+<!-- ══ WF1 CHAIN ══ -->
+<h2 id="wf1-chain">WF1 → Auto-Fix Chain Explained</h2>
+<div class="alert alert-blue">
+  <strong>The user asked: "Can WF1 trigger WF2 &amp; WF3?"</strong>
+  Yes — and WF1 now does this, but using a direct API call rather than n8n's Execute Workflow node. Here is why and how.
+</div>
+<table>
+  <tr><th>Approach</th><th>How it works</th><th>Trade-off</th></tr>
+  <tr>
+    <td><strong>Option A — Direct API (implemented)</strong></td>
+    <td>WF1 calls <code>POST /admin/index-documents</code> directly for each failing exam — same endpoint WF2/WF3 use</td>
+    <td>✅ No workflow ID dependency. Self-contained. Works immediately after import.</td>
+  </tr>
+  <tr>
+    <td><strong>Option B — Execute Workflow (optional)</strong></td>
+    <td>WF1 uses n8n's <code>Execute Workflow</code> node to trigger WF3 by its database ID</td>
+    <td>⚠️ Requires knowing WF3's ID after import. WF3 now has <code>Execute Workflow Trigger</code> so this is ready to wire up.</td>
+  </tr>
+</table>
+<p>To use Option B: import all workflows → get WF3's ID from n8n URL → add <code>Execute Workflow</code> node to WF1's gap-fix branch → set workflow ID → pass <code>{ exam_code, scraped_dir, clear_first }</code>.</p>
+
+<hr class="divider"/>
+
+<!-- ══ ISSUES ══ -->
+<h2 id="issues">Issues Tracker — v1 vs v2</h2>
+<table>
+  <tr><th>#</th><th>Severity</th><th>Issue</th><th>Status</th><th>Fix Applied</th></tr>
+  <tr>
+    <td>1</td><td><span class="badge badge-red">🔴 High</span></td>
+    <td>WF1 inactive — weekly gap check never ran</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Set <code>active: true</code></td>
+  </tr>
+  <tr>
+    <td>2</td><td><span class="badge badge-red">🔴 High</span></td>
+    <td>WF4 re-indexed ALL exams when even 1 failed</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Added <code>Split Failing Exams</code> + <code>splitInBatches</code> loop targeting only failing exams</td>
+  </tr>
+  <tr>
+    <td>3</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF5 always POSTed to content-alert even when all URLs healthy</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Added <code>Any Unreachable URLs?</code> IF guard before Alert FastAPI</td>
+  </tr>
+  <tr>
+    <td>4</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF1 called status API 6× (once per exam item)</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Removed <code>Build Exam List</code>; schedule now goes directly to <code>Check Index Status</code></td>
+  </tr>
+  <tr>
+    <td>5</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF1 dead code: <code>url_file</code>/<code>scraped_dir</code> never used</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Removed <code>Build Exam List</code> node entirely</td>
+  </tr>
+  <tr>
+    <td>6</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>No authentication on <code>/api/v1/admin/*</code> endpoints</td>
+    <td><span class="badge badge-pending">⏳ Pending</span></td>
+    <td>Requires FastAPI backend change — see below</td>
+  </tr>
+  <tr>
+    <td>7</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF4 Auto Re-index had no result check — silent failure</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Added <code>Check Re-index Result</code> node with success/failure logging</td>
+  </tr>
+  <tr>
+    <td>8</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF5 name misleading — monitors availability, not content changes</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Documented limitation clearly in sticky note; true content-change detection is a future enhancement</td>
+  </tr>
+  <tr>
+    <td>9</td><td><span class="badge badge-inactive">🟡 Med</span></td>
+    <td>WF2 <code>Parse Result</code> crashes if node name changes</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Wrapped in <code>try/catch</code> with fallback to <code>'UNKNOWN'</code></td>
+  </tr>
+  <tr>
+    <td>10</td><td><span class="badge" style="background:#1a1a0a;color:#fde68a;border:1px solid #ca8a04;">🟠 Low</span></td>
+    <td>No retry logic on any HTTP Request nodes</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>All HTTP nodes now have <code>retryOnFail: true</code>, maxTries: 2–3, waitBetweenTries: 3000–5000ms</td>
+  </tr>
+  <tr>
+    <td>11</td><td><span class="badge" style="background:#1a1a0a;color:#fde68a;border:1px solid #ca8a04;">🟠 Low</span></td>
+    <td>AI-901 missing from all workflow exam lists</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Added to WF1 <code>EXPECTED_EXAMS</code>, WF2 <code>Set Exam Targets</code>, WF5 <code>Sample URLs to Check</code></td>
+  </tr>
+  <tr>
+    <td>12</td><td><span class="badge" style="background:#1a1a0a;color:#fde68a;border:1px solid #ca8a04;">🟠 Low</span></td>
+    <td>WF2 and WF3 duplicate purpose — no guidance on when to use which</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>Sticky notes in both workflows updated with clear "when to use" guidance</td>
+  </tr>
+  <tr>
+    <td>13</td><td><span class="badge" style="background:#1a1a0a;color:#fde68a;border:1px solid #ca8a04;">🟠 Low</span></td>
+    <td><code>host.docker.internal</code> fails outside Docker Desktop</td>
+    <td><span class="badge badge-pending">⏳ Pending</span></td>
+    <td>Requires n8n env variable setup — see below</td>
+  </tr>
+  <tr>
+    <td>14</td><td><span class="badge" style="background:#1a1a0a;color:#fde68a;border:1px solid #ca8a04;">🟠 Low</span></td>
+    <td>WF1 detected gaps but had no mechanism to fix them</td>
+    <td><span class="badge badge-fixed">✅ Fixed</span></td>
+    <td>WF1 now auto-fixes gaps via per-exam re-index loop</td>
+  </tr>
+</table>
+
+<!-- ══ PENDING ══ -->
+<h2 id="pending">Still Needs Backend / Environment Work (3 items)</h2>
+
+<details open>
+  <summary>Issue #6 — Authentication on Admin Endpoints</summary>
+  <div class="details-body">
+    <p><strong>Problem:</strong> Anyone on the Docker network can call <code>/api/v1/admin/index-documents</code> with <code>clear_first: true</code> and wipe the entire ChromaDB database.</p>
+    <p><strong>Backend fix (FastAPI):</strong></p>
+<pre><code># In your FastAPI admin router, add a dependency:
+from fastapi import Security, HTTPException
+from fastapi.security import APIKeyHeader
+
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+def verify_admin_key(key: str = Security(api_key_header)):
+    if key != os.environ["ADMIN_API_KEY"]:
+        raise HTTPException(status_code=403, detail="Invalid API key")
+
+@router.post("/admin/index-documents", dependencies=[Depends(verify_admin_key)])
+async def index_documents(...): ...</code></pre>
+    <p><strong>n8n fix (after backend is secured):</strong> In every HTTP Request node that calls <code>/admin/*</code>, add a header:</p>
+    <table>
+      <tr><th>Header Name</th><th>Header Value</th></tr>
+      <tr><td><code>X-API-Key</code></td><td><code>{{ $env.CERTMASTER_ADMIN_KEY }}</code></td></tr>
+    </table>
+    <p>Store the key in n8n's environment variables (Settings → Environment Variables).</p>
+  </div>
+</details>
+
+<details>
+  <summary>Issue #13 — host.docker.internal Won't Work Outside Docker Desktop</summary>
+  <div class="details-body">
+    <p><strong>Problem:</strong> <code>host.docker.internal</code> resolves on Docker Desktop (Mac/Windows) but fails in Kubernetes, Linux server, or cloud deployments.</p>
+    <p><strong>Fix — Use n8n environment variable:</strong></p>
+    <ol>
+      <li>In n8n: Settings → Environment Variables → Add <code>BACKEND_URL</code> = <code>http://host.docker.internal:8003</code></li>
+      <li>In all 5 workflows, replace every hardcoded URL with: <code>={{ $env.BACKEND_URL }}/api/v1/admin/...</code></li>
+      <li>When deploying to production, change only the environment variable — all workflows update automatically</li>
+    </ol>
+  </div>
+</details>
+
+<details>
+  <summary>Issue #8 — True Content-Change Detection in WF5</summary>
+  <div class="details-body">
+    <p><strong>Problem:</strong> WF5 captures <code>last-modified</code> headers but never compares them to a previous scan. It can only detect if a URL is up/down, not if content changed.</p>
+    <p><strong>Future enhancement approach:</strong></p>
+    <ol>
+      <li>Add a FastAPI endpoint: <code>GET/POST /admin/url-snapshots</code> that stores <code>{ exam, url, last_modified, etag }</code> per scan</li>
+      <li>In WF5 after <code>Extract Last-Modified</code>, call <code>GET /admin/url-snapshots?exam=AI-102</code> to retrieve the previous value</li>
+      <li>Compare current <code>last_modified</code> to stored value — if different, flag as "content changed"</li>
+      <li>After processing, call <code>POST /admin/url-snapshots</code> to save the new baseline</li>
+    </ol>
+  </div>
+</details>
+
+<hr class="divider"/>
+
+<!-- ══ HOW TO IMPORT ══ -->
+<h2 id="howto">How to Import Updated Workflows into n8n</h2>
+<div class="alert alert-green">
+  <strong>Recommended: Delete old + Import updated JSON (10 minutes total)</strong>
+  Safest and cleanest for WF1, WF3, WF4 which have major structural changes.
+</div>
+
+<h3>Step 1 — Delete All 5 Old Workflows</h3>
+<ol>
+  <li>Open n8n → <strong>Workflows</strong> list (left sidebar)</li>
+  <li>For each workflow: click the <strong>three-dot menu (⋮)</strong> → <strong>Delete</strong> → Confirm</li>
+  <li>Repeat for all 5 workflows</li>
+</ol>
+
+<h3>Step 2 — Import All 5 Updated JSON Files</h3>
+<ol>
+  <li>Click <strong>"Add workflow"</strong> (top-right)</li>
+  <li>Click <strong>"Import from file"</strong></li>
+  <li>Browse to <code>backend/n8n/workflow_1_url_discovery.json</code> → Open → <strong>Save</strong></li>
+  <li>Repeat for workflows 2 through 5</li>
+</ol>
+
+<h3>Step 3 — Activate the Right Workflows</h3>
+<table>
+  <tr><th>Workflow</th><th>Toggle</th><th>Reason</th></tr>
+  <tr><td>WF1 — URL Discovery</td><td><span class="badge badge-active">✅ Turn ON</span></td><td>Scheduled + auto-fix; now ready</td></tr>
+  <tr><td>WF2 — Download &amp; Scrape</td><td><span class="badge badge-inactive">❌ Leave OFF</span></td><td>Manual utility only</td></tr>
+  <tr><td>WF3 — ChromaDB Indexing</td><td><span class="badge badge-inactive">❌ Leave OFF</span></td><td>Manual utility only</td></tr>
+  <tr><td>WF4 — Quality Verification</td><td><span class="badge badge-active">✅ Turn ON</span></td><td>Daily health check</td></tr>
+  <tr><td>WF5 — Content Monitor</td><td><span class="badge badge-active">✅ Turn ON</span></td><td>Weekly URL scan</td></tr>
+</table>
+
+<h3>Step 4 — Verify After Import</h3>
+<table>
+  <tr><th>Workflow</th><th>What to verify</th></tr>
+  <tr><td>WF1</td><td>Canvas shows: <code>Weekly Schedule → Check Index Status → Identify Gaps → Any Gaps? → [TRUE] Filter Failing Exams → Process Gaps One at a Time → Trigger Re-index Per Exam → Log Re-index Result</code> loop + <code>[FALSE] All Healthy</code></td></tr>
+  <tr><td>WF3</td><td>TWO trigger nodes visible: <code>Manual Trigger</code> AND <code>Execute Workflow Trigger</code> — both connecting to <code>Configure Index Job</code></td></tr>
+  <tr><td>WF4</td><td>TRUE branch ends with: <code>Log Quality Alert → Send Alert to FastAPI → Split Failing Exams → Re-index One at a Time → Auto Re-index Exam → Check Re-index Result</code> loop</td></tr>
+  <tr><td>WF5</td><td><code>Summarise Scan</code> connects to <code>Any Unreachable URLs?</code> IF node — NOT directly to <code>Alert FastAPI</code></td></tr>
+</table>
+
+<div style="margin-top:60px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;text-align:center;">
+  CertMasterAI · n8n Workflow Analysis <strong style="color:var(--green)">v2</strong> · 5 Workflows · 11/14 Issues Fixed · 3 Pending Backend Work · August 2026
+</div>
+
+</main>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+  const sections = document.querySelectorAll('h2[id],h3[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

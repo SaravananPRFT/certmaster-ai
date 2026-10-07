@@ -21,64 +21,147 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build the list of exam codes and their URL list paths\nconst exams = ['ai-102', 'az-104', 'az-305', 'gh-300', 'ab-100', 'ai-103'];\nconst items = exams.map(code => ({\n  json: {\n    exam_code: code.toUpperCase(),\n    url_file: `/home/node/certmasterai/urls/${code}.txt`,\n    scraped_dir: `/home/node/certmasterai/scraped/${code}`\n  }\n}));\nreturn items;"
-      },
-      "id": "node-code-1",
-      "name": "Build Exam List",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [480, 300]
-    },
-    {
-      "parameters": {
         "url": "http://host.docker.internal:8003/api/v1/admin/index/status",
         "method": "GET",
         "options": {
-          "timeout": 10000
+          "timeout": 15000
         }
       },
       "id": "node-http-status",
       "name": "Check Index Status",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [710, 300]
+      "position": [480, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "notes": "FIX: Now called once (was 6× before). Retry: 3 attempts, 3s wait."
     },
     {
       "parameters": {
-        "jsCode": "// Identify which exams have zero chunks and need indexing\nconst status = $input.first().json;\nconst stats = status.chroma_db_stats || {};\nconst needsIndex = Object.entries(stats)\n  .filter(([code, count]) => count === 0)\n  .map(([code]) => ({ json: { exam_code: code, needs_index: true, current_chunks: 0 } }));\nconst healthy = Object.entries(stats)\n  .filter(([code, count]) => count > 0)\n  .map(([code, count]) => ({ json: { exam_code: code, needs_index: false, current_chunks: count } }));\nconsole.log(`Needs indexing: ${needsIndex.map(i => i.json.exam_code).join(', ') || 'none'}`);\nconsole.log(`Healthy: ${healthy.map(i => i.json.exam_code + '(' + i.json.current_chunks + ')').join(', ') || 'none'}`);\nreturn [...needsIndex, ...healthy];"
+        "jsCode": "// FIX: Replaced old Build Exam List + separate Identify Gaps with a single node.\n// Now uses EXPECTED_EXAMS to catch exams missing from chroma_db_stats entirely.\n// Outputs a single item with has_gaps flag + arrays for branching.\nconst status = $input.first().json;\nconst stats = status.chroma_db_stats || {};\nconst EXPECTED_EXAMS = ['AI-102', 'AZ-104', 'AZ-305', 'GH-300', 'AB-100', 'AI-103', 'AI-901'];\n\nconst needsIndex = [];\nconst healthy = [];\n\nfor (const exam of EXPECTED_EXAMS) {\n  const count = stats[exam] !== undefined ? stats[exam] :\n                stats[exam.toLowerCase()] !== undefined ? stats[exam.toLowerCase()] : -1;\n  if (count <= 0) {\n    needsIndex.push({\n      exam_code: exam,\n      needs_index: true,\n      current_chunks: Math.max(0, count),\n      issue: count < 0 ? 'MISSING_FROM_STATS' : 'EMPTY'\n    });\n  } else {\n    healthy.push({ exam_code: exam, needs_index: false, current_chunks: count });\n  }\n}\n\nconsole.log('Needs indexing: ' + (needsIndex.map(i => i.exam_code).join(', ') || 'none'));\nconsole.log('Healthy: ' + (healthy.map(i => i.exam_code + '(' + i.current_chunks + ')').join(', ') || 'none'));\n\nreturn [{\n  json: {\n    needs_index: needsIndex,\n    healthy,\n    has_gaps: needsIndex.length > 0,\n    gap_count: needsIndex.length,\n    checked_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "node-code-2",
       "name": "Identify Gaps",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [940, 300]
+      "position": [710, 300]
     },
     {
       "parameters": {
-        "content": "## Workflow 1 — URL Discovery\n\nChecks the ChromaDB index status for all 6 exams and identifies which ones have zero chunks (need indexing).\n\n**Output:** List of exam codes with `needs_index` flag.\n\n**Next step:** Run Workflow 2 (Download) then Workflow 3 (Index) for any exam with `needs_index: true`.\n\n**Schedule:** Every Sunday at 01:00 AM.",
-        "height": 200,
-        "width": 350
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-has-gaps",
+              "leftValue": "={{ $json.has_gaps }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "node-if-gaps",
+      "name": "Any Gaps?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [940, 300],
+      "notes": "TRUE → auto-fix loop | FALSE → All Healthy (terminal)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the needs_index array and emit one item per failing exam.\n// These feed into the splitInBatches loop below.\nconst data = $input.first().json;\nreturn data.needs_index.map(exam => ({ json: exam }));"
+      },
+      "id": "node-filter-gaps",
+      "name": "Filter Failing Exams",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 200]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "node-split-gaps",
+      "name": "Process Gaps One at a Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1400, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/v1/admin/index-documents",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ exam_code: $json.exam_code, scraped_dir: './data/scraped', clear_first: false }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "node-reindex-gap",
+      "name": "Trigger Re-index Per Exam",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1630, 200],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "Directly calls the same endpoint WF2/WF3 use — no Execute Workflow ID dependency."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check the re-index result and log. Then loop back to splitInBatches.\nconst result = $input.first().json;\nconst exam = $('Process Gaps One at a Time').first().json.exam_code;\nconst r = (result.results && result.results[exam]) || {};\n\nif (r.status && r.status === 'success') {\n  console.log('[WF1 Auto-fix] ' + exam + ': SUCCESS — ' + (r.chunks_indexed || 0) + ' chunks indexed');\n} else {\n  console.error('[WF1 Auto-fix] ' + exam + ': FAILED — ' + (r.reason || 'check backend logs'));\n}\n\nreturn [{ json: { exam_code: exam, status: r.status || 'unknown', chunks_indexed: r.chunks_indexed || 0, reason: r.reason || null } }];"
+      },
+      "id": "node-log-reindex",
+      "name": "Log Re-index Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1860, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconsole.log('[WF1] All exams healthy — ' + data.healthy.length + ' exams OK, checked at ' + data.checked_at);\nreturn [{ json: { status: 'healthy', exam_count: data.healthy.length, checked_at: data.checked_at } }];"
+      },
+      "id": "node-all-healthy",
+      "name": "All Healthy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1170, 400]
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 1 — URL Discovery (v2)\n\nChecks ChromaDB index status for all 7 exams and automatically re-indexes any that are empty or missing.\n\n**Changes from v1:**\n- Removed Build Exam List node (url_file/scraped_dir were dead code)\n- Fixed 6× redundant API calls → now 1 GET\n- Added EXPECTED_EXAMS list (catches exams missing from stats entirely)\n- Added AI-901 to exam tracking\n- Added auto-fix loop: gaps → POST /admin/index-documents per exam\n- Added retry logic on HTTP node\n- Set active: true\n\n**Schedule:** Every Sunday at 01:00 AM\n**Auto-fix:** Yes — re-indexes each failing exam sequentially",
+        "height": 250,
+        "width": 460
       },
       "id": "node-note-1",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [250, 500]
+      "position": [250, 540]
     }
   ],
   "connections": {
     "Weekly Schedule": {
-      "main": [
-        [
-          {
-            "node": "Build Exam List",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Exam List": {
       "main": [
         [
           {
@@ -99,9 +182,82 @@
           }
         ]
       ]
+    },
+    "Identify Gaps": {
+      "main": [
+        [
+          {
+            "node": "Any Gaps?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Gaps?": {
+      "main": [
+        [
+          {
+            "node": "Filter Failing Exams",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "All Healthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Failing Exams": {
+      "main": [
+        [
+          {
+            "node": "Process Gaps One at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Gaps One at a Time": {
+      "main": [
+        [
+          {
+            "node": "Trigger Re-index Per Exam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Re-index Per Exam": {
+      "main": [
+        [
+          {
+            "node": "Log Re-index Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Re-index Result": {
+      "main": [
+        [
+          {
+            "node": "Process Gaps One at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },

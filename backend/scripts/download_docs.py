@@ -28,7 +28,7 @@ except ImportError:
     print("ERROR: Missing dependencies. Run: pip install requests beautifulsoup4 lxml")
     sys.exit(1)
 
-EXAM_CODES = ["ai-102", "az-104", "az-305", "gh-300", "ab-100", "ai-103"]
+EXAM_CODES = ["ai-102", "az-104", "az-305", "gh-300", "ab-100", "ai-103", "ai-901"]
 
 HEADERS = {
     "User-Agent": (

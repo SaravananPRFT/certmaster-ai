@@ -1,0 +1,34 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What is Microsoft Foundry?
+Microsoft Foundry unifies agents, models, and tools under a single management grouping with built-in enterprise-readiness capabilities including tracing, monitoring, evaluations, and customizable enterprise setup configurations. The platform provides streamlined management through unified role-based access control (RBAC), networking, and policies under one Azure resource provider namespace.
+Upgrade your Azure OpenAI resource to a Foundry resource
+while preserving your endpoint, API keys, and existing state.
+Using hub-based projects? Hub-based projects are accessible in the
+. New investments are focused on Foundry projects in the new portal.
+Build your first agent in minutes, or open the portal to explore models and tools.
+Build with models and agents
+in the portal or SDK, or deploy
+that run your own code. Learn more in
+Access more than 1,900 models from Microsoft, OpenAI, Anthropic, Meta, and others. Browse the
+Extend agents with built-in tools, memory, and retrieval from the
+Foundry brings production capabilities to every project:
+Trace, monitor, and evaluate agents and models with built-in dashboards. See
+Apply Microsoft Entra identity, role-based access control, content filters, network isolation, and Azure Policy. See the
+Manage agents, models, and tools as a single Azure resource with unified access control, networking, and policies.
+Foundry consolidates several previous Azure AI services and tools into a unified platform. The following table maps previous concepts to their current equivalents. For detailed guidance on transitioning, see
+Navigate from classic to the new experience
+Azure AI Studio / Azure AI Foundry
+Assistants API (Agents v0.5/v1)
+Hub + Azure OpenAI + Azure AI Services
+Foundry resource (single, with projects)
+against one project endpoint.
+Threads, Messages, Runs, Assistants
+Conversations, Items, Responses, Agent Versions
+What is Foundry Agent Service?
+What's new in Microsoft Foundry
+Microsoft Foundry portal general availability overview
+Upgrade your Azure OpenAI resource to a Foundry resource
+Find hub-based projects in the Foundry (classic) portal
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

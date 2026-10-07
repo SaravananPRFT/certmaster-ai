@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sections 6–7: Azure AI Search &amp; Comparison</title>
+<style>
+  :root { --azure:#0078d4; --azure-dark:#005a9e; --bg:#f4f6f9; --card:#fff; --text:#1a1a2e; --muted:#6b7280; --border:#e5e7eb; --green:#16a34a; --red:#dc2626; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+  nav{width:260px;min-height:100vh;background:var(--azure-dark);color:#fff;padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+  nav .logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:16px;}
+  nav .logo a{color:#fff;text-decoration:none;font-weight:800;font-size:1rem;}
+  nav .logo p{font-size:0.75rem;opacity:0.7;margin-top:4px;}
+  nav ul{list-style:none;padding:0 12px;}
+  nav ul li a{display:block;padding:8px 12px;color:rgba(255,255,255,0.82);text-decoration:none;border-radius:6px;font-size:0.85rem;transition:background 0.15s;}
+  nav ul li a:hover{background:rgba(255,255,255,0.15);color:#fff;}
+  nav .section-label{padding:16px 24px 6px;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;opacity:0.5;}
+  main{flex:1;padding:40px;max-width:900px;}
+  .page-header{background:linear-gradient(135deg,#0078d4,#005a9e);color:#fff;padding:32px 36px;border-radius:12px;margin-bottom:36px;}
+  .page-header .breadcrumb{font-size:0.8rem;opacity:0.75;margin-bottom:8px;}
+  .page-header h1{font-size:1.8rem;font-weight:800;}
+  .page-header p{margin-top:8px;opacity:0.88;font-size:0.95rem;}
+  h2{font-size:1.4rem;font-weight:700;color:var(--azure-dark);margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);}
+  h2::before{content:'';display:inline-block;width:4px;height:1em;background:var(--azure);margin-right:10px;vertical-align:middle;border-radius:2px;}
+  h3{font-size:1.05rem;font-weight:700;margin:24px 0 10px;color:#1e3a5f;}
+  p{line-height:1.7;margin-bottom:14px;font-size:0.95rem;}
+  .diagram{background:#0d1117;color:#c9d1d9;font-family:'Courier New',monospace;font-size:0.78rem;line-height:1.5;padding:24px;border-radius:10px;overflow-x:auto;margin:20px 0;border:1px solid #30363d;}
+  .diagram .hi{color:#58a6ff;} .diagram .gr{color:#3fb950;} .diagram .or{color:#e3b341;}
+  .code-wrap{margin:20px 0;}
+  .code-label{display:inline-block;background:#1e1e1e;color:#9cdcfe;font-size:0.72rem;font-family:monospace;padding:4px 14px;border-radius:6px 6px 0 0;border:1px solid #3e3e3e;border-bottom:none;}
+  pre.code{background:#1e1e1e;color:#d4d4d4;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.6;padding:20px;border-radius:0 8px 8px 8px;overflow-x:auto;margin:0;border:1px solid #3e3e3e;}
+  .kw{color:#569cd6;} .fn{color:#dcdcaa;} .str{color:#ce9178;} .cm{color:#6a9955;} .num{color:#b5cea8;} .cls{color:#4ec9b0;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.88rem;}
+  th{background:var(--azure);color:#fff;padding:10px 14px;text-align:left;}
+  td{padding:9px 14px;border:1px solid var(--border);}
+  tr:nth-child(even) td{background:#f8fafc;}
+  .yes{color:var(--green);font-weight:700;background:#f0fdf4;}
+  .no{color:var(--red);font-weight:700;background:#fef2f2;}
+  .caps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+  .cap-card{border-radius:10px;padding:18px;border:2px solid;}
+  .cap-yes{border-color:#86efac;background:#f0fdf4;}
+  .cap-no{border-color:#fca5a5;background:#fef2f2;}
+  .cap-both{border-color:#93c5fd;background:#eff6ff;}
+  .cap-card h4{font-size:0.9rem;font-weight:700;margin-bottom:6px;}
+  .cap-card p{font-size:0.82rem;margin:0;line-height:1.5;}
+  .cap-card .badge{display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:700;margin-bottom:8px;}
+  .badge-both{background:#bfdbfe;color:var(--azure-dark);}
+  .badge-azure{background:#bbf7d0;color:#15803d;}
+  .badge-no{background:#fecaca;color:#991b1b;}
+  .note{background:#eff6ff;border-left:4px solid var(--azure);border-radius:0 8px 8px 0;padding:14px 18px;margin:20px 0;font-size:0.9rem;color:#1e3a5f;}
+  .page-nav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid var(--border);}
+  .page-nav a{display:inline-flex;align-items:center;gap:8px;color:var(--azure);text-decoration:none;font-weight:600;font-size:0.9rem;padding:10px 18px;border:1px solid var(--azure);border-radius:8px;transition:background 0.15s;}
+  .page-nav a:hover{background:#eff6ff;}
+  section{scroll-margin-top:20px;}
+  @media(max-width:768px){body{flex-direction:column;}nav{width:100%;min-height:auto;height:auto;position:relative;}main{padding:20px;}}
+  @media print{nav{display:none;}main{padding:20px;max-width:100%;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <a href="index.html">← CertMasterAI Guide</a>
+    <p>Sections 6–7</p>
+  </div>
+  <div class="section-label">This Page</div>
+  <ul>
+    <li><a href="#s6">6. Azure AI Search Architecture</a></li>
+    <li><a href="#s6-pipeline">Document Pipeline</a></li>
+    <li><a href="#s6-hybrid">Hybrid Search Flow</a></li>
+    <li><a href="#s7">7. ChromaDB vs Azure AI Search</a></li>
+    <li><a href="#s7-example">Hybrid Search Win Example</a></li>
+  </ul>
+  <div class="section-label">Other Pages</div>
+  <ul>
+    <li><a href="part2-fastapi-chromadb.html">← FastAPI &amp; ChromaDB</a></li>
+    <li><a href="part4-implementation-setup-summary.html">Setup &amp; Summary →</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <div class="breadcrumb">CertMasterAI Technical Guide &rsaquo; Sections 6–7</div>
+  <h1>Azure AI Search &amp; Comparison</h1>
+  <p>Full Azure AI Search architecture, hybrid search internals, semantic reranking. Then a definitive head-to-head comparison with ChromaDB.</p>
+</div>
+
+<!-- SECTION 6 -->
+<section id="s6">
+<h2>Section 6 — Azure AI Search Architecture</h2>
+
+<p>Azure AI Search is a fully managed cloud search service. For CertMasterAI, it's the <strong>Tier 1 production retriever</strong> — it provides hybrid search (keyword + vector), semantic reranking, and enterprise security that ChromaDB cannot match.</p>
+
+<h3>What Azure AI Search Does That ChromaDB Cannot</h3>
+
+<div class="caps-grid">
+  <div class="cap-card cap-both">
+    <span class="badge badge-both">Both Supported</span>
+    <h4>Vector Search (HNSW)</h4>
+    <p>Approximate nearest-neighbor search over high-dimensional embeddings. Same algorithm, different runtime — ChromaDB is in-process, Azure is cloud-managed.</p>
+  </div>
+  <div class="cap-card cap-azure">
+    <span class="badge badge-azure">Azure Only</span>
+    <h4>BM25 Keyword Search</h4>
+    <p>Inverted index, TF-IDF scoring. Finds documents that contain the exact words in the query — essential when precise technical terms like "NSG" or "RBAC" must be matched literally.</p>
+  </div>
+  <div class="cap-card cap-azure">
+    <span class="badge badge-azure">Azure Only</span>
+    <h4>Hybrid Search (RRF Fusion)</h4>
+    <p>Merges BM25 and vector result lists using Reciprocal Rank Fusion. Gets keyword precision AND semantic recall in a single query. Best results for technical content.</p>
+  </div>
+  <div class="cap-card cap-azure">
+    <span class="badge badge-azure">Azure Only</span>
+    <h4>Semantic Reranking</h4>
+    <p>An L2 cross-encoder re-reads the query + top-50 passages and re-scores them with deep semantic understanding. Dramatically improves precision for complex scenario questions.</p>
+  </div>
+  <div class="cap-card cap-both">
+    <span class="badge badge-both">Both Supported</span>
+    <h4>Metadata Filtering</h4>
+    <p>ChromaDB: <code>where=&#123;"exam_code":"AI-102"&#125;</code><br>Azure: <code>$filter=exam_code eq 'AI-102'</code> (OData syntax, composable with vector queries)</p>
+  </div>
+  <div class="cap-card cap-azure">
+    <span class="badge badge-azure">Azure Only</span>
+    <h4>Enterprise Security</h4>
+    <p>Entra ID (MSAL), RBAC, Private Endpoints, Customer-Managed Keys (CMK), network isolation. ChromaDB has no authentication model.</p>
+  </div>
+</div>
+
+<section id="s6-pipeline">
+<h3>Document Pipeline: Source → Index</h3>
+
+<div class="diagram">
+Source Documents
+(Microsoft Learn .txt files)
+            │
+            ▼
+<span class="hi">┌───────────────────────────────────────────────────────────────┐</span>
+<span class="hi">│  DATA SOURCE                                                   │</span>
+<span class="hi">│  Azure Blob Storage / direct upload                           │</span>
+<span class="hi">│  Contains: pre-chunked, pre-embedded JSON records             │</span>
+<span class="hi">└──────────────────────────────┬────────────────────────────────┘</span>
+                               │
+                               ▼
+<span class="hi">┌───────────────────────────────────────────────────────────────┐</span>
+<span class="hi">│  INDEXER (runs on schedule or POST /indexers/{name}/run)      │</span>
+<span class="hi">│                                                               │</span>
+<span class="hi">│  - Reads documents from data source                           │</span>
+<span class="hi">│  - Applies skillset (optional AI enrichment)                  │</span>
+<span class="hi">│  - Maps source fields to index schema fields                  │</span>
+<span class="hi">│  - Handles change detection (incremental updates)             │</span>
+<span class="hi">│  - Tracks errors per document (partial failure support)       │</span>
+<span class="hi">└──────────────────────────────┬────────────────────────────────┘</span>
+                               │
+                               ▼
+<span class="hi">┌───────────────────────────────────────────────────────────────┐</span>
+<span class="hi">│  SKILLSET (optional AI enrichment pipeline)                   │</span>
+<span class="hi">│                                                               │</span>
+<span class="hi">│  Built-in Azure skills you CAN use:                           │</span>
+<span class="hi">│   • SplitSkill        → auto-chunking                        │</span>
+<span class="hi">│   • AzureOpenAIEmbeddingSkill → auto-vectorization           │</span>
+<span class="hi">│   • LanguageDetectionSkill → detect language per doc         │</span>
+<span class="hi">│   • KeyPhraseExtractionSkill → extract key topics            │</span>
+<span class="hi">│                                                               │</span>
+<span class="hi">│  In CertMasterAI: pre-chunk + pre-embed locally,             │</span>
+<span class="hi">│  upload structured records directly (more control,           │</span>
+<span class="hi">│  same embedding model as query time)                         │</span>
+<span class="hi">└──────────────────────────────┬────────────────────────────────┘</span>
+                               │
+                               ▼
+<span class="hi">┌───────────────────────────────────────────────────────────────┐</span>
+<span class="hi">│  SEARCH INDEX: certmaster-ai102                               │</span>
+<span class="hi">│                                                               │</span>
+<span class="hi">│  Index Schema:                                                │</span>
+<span class="hi">│  {                                                            │</span>
+<span class="hi">│    "chunk_id":   string, key=true, retrievable=true          │</span>
+<span class="hi">│    "content":    string, searchable=true, retrievable=true   │</span>
+<span class="hi">│    "title":      string, searchable=true, filterable=true    │</span>
+<span class="hi">│    "url":        string, retrievable=true                    │</span>
+<span class="hi">│    "exam_code":  string, filterable=true, facetable=true     │</span>
+<span class="hi">│    "embedding":  Collection(Single),                         │</span>
+<span class="hi">│                  dimensions=3072,                             │</span>
+<span class="hi">│                  vectorSearchProfile="certmaster-hnsw",      │</span>
+<span class="hi">│                  retrievable=false  ← saves bandwidth        │</span>
+<span class="hi">│  }                                                            │</span>
+<span class="hi">│                                                               │</span>
+<span class="hi">│  Semantic Configuration: certmaster-semantic                  │</span>
+<span class="hi">│    titleField:    "title"                                     │</span>
+<span class="hi">│    contentFields: ["content"]                                 │</span>
+<span class="hi">└──────────────────┬─────────────────────┬─────────────────────┘</span>
+                   │                     │
+                   ▼                     ▼
+<span class="gr">┌─────────────────────┐   ┌─────────────────────────────────┐</span>
+<span class="gr">│  BM25 Inverted Index │   │  HNSW Vector Index               │</span>
+<span class="gr">│                     │   │                                  │</span>
+<span class="gr">│  "key" → [doc5,doc8]│   │  3072-dimensional cosine space   │</span>
+<span class="gr">│  "phrase" → [doc5]  │   │  Approx nearest-neighbor search  │</span>
+<span class="gr">│  "extraction" →     │   │  Configured per vector profile   │</span>
+<span class="gr">│  [doc5,doc9,doc14]  │   │  (m, efConstruction settings)    │</span>
+<span class="gr">└─────────────────────┘   └─────────────────────────────────┘</span>
+</div>
+</section>
+
+<section id="s6-hybrid">
+<h3>Hybrid Search Query Flow</h3>
+
+<div class="diagram">
+User Query: "extract key phrases from customer feedback"
+Embedding:  [0.045, -0.388, 0.712, ...]
+
+                    Azure AI Search Service
+                           │
+             ┌─────────────┴──────────────┐
+             │                            │
+             ▼                            ▼
+       <span class="hi">BM25 Search</span>                 <span class="hi">Vector Search</span>
+  "extract key phrases           Nearest vectors to
+   from customer feedback"       [0.045, -0.388, ...]
+   ↓                             ↓
+  Inverted index lookup          HNSW graph traversal
+  TF-IDF scoring                 Cosine distance scoring
+  Returns: top-50 docs           Returns: top-50 docs
+  ranked by keyword score        ranked by vector similarity
+             │                            │
+             └─────────────┬──────────────┘
+                           │
+                           ▼
+            <span class="hi">Reciprocal Rank Fusion (RRF)</span>
+            ───────────────────────────────
+            RRF score = Σ 1 / (k + rank_i)
+            where k = 60, rank_i = position in each list
+
+            Doc in position 1 of BM25 list: 1/(60+1) = 0.0164
+            Doc in position 3 of vector list: 1/(60+3) = 0.0159
+            Combined RRF: 0.0164 + 0.0159 = 0.0323
+
+            Doc that ranks highly in BOTH lists gets highest RRF score.
+            Returns: merged top-50 by RRF score
+                           │
+                           ▼
+            <span class="hi">Semantic Reranker (L2 Cross-Encoder)</span>
+            ───────────────────────────────────────
+            For each of the top-50 (query, passage) pairs:
+              1. Concatenate: [CLS] query [SEP] passage [SEP]
+              2. Run through transformer cross-encoder
+              3. Score: how semantically relevant is this passage to this query?
+
+            This is EXPENSIVE (50 forward passes) but very accurate.
+            Returns: top-K re-ranked with @search.rerankerScore
+
+                           │
+                           ▼
+            <span class="gr">Final Results:</span>
+            {
+              "value": [
+                {
+                  "chunk_id": "ai102-0047",
+                  "content": "Key phrase extraction identifies...",
+                  "title": "Azure AI Language",
+                  "@search.score": 0.0312,        ← RRF score
+                  "@search.rerankerScore": 3.84    ← semantic score (0-4)
+                }
+              ]
+            }
+</div>
+
+<h3>Azure AI Search API Call (from your retriever)</h3>
+<div class="code-wrap">
+  <div class="code-label">POST /indexes/certmaster-ai102/docs/search</div>
+  <pre class="code">{
+  <span class="str">"search"</span>: <span class="str">"AI-102 Implement Azure AI Language Medium question"</span>,
+
+  <span class="str">"vectorQueries"</span>: [{
+    <span class="str">"kind"</span>:   <span class="str">"vector"</span>,
+    <span class="str">"vector"</span>: [<span class="num">0.023</span>, <span class="num">-0.451</span>, <span class="num">0.892</span>, <span class="str">... 3072 floats ...</span>],
+    <span class="str">"fields"</span>: <span class="str">"embedding"</span>,
+    <span class="str">"k"</span>:      <span class="num">5</span>
+  }],
+
+  <span class="str">"queryType"</span>: <span class="str">"semantic"</span>,
+  <span class="str">"semanticConfiguration"</span>: <span class="str">"certmaster-semantic"</span>,
+
+  <span class="str">"select"</span>: <span class="str">"chunk_id,content,title,url"</span>,
+  <span class="str">"$filter"</span>: <span class="str">"exam_code eq 'AI-102'"</span>,        <span class="cm">// only this exam's docs</span>
+
+  <span class="str">"top"</span>: <span class="num">5</span>
+}</pre>
+</div>
+</section>
+
+</section>
+
+<!-- SECTION 7 -->
+<section id="s7">
+<h2>Section 7 — ChromaDB vs Azure AI Search</h2>
+
+<p>This is the question every architect must answer at design time: <em>when do you use which?</em> The answer is almost never either/or — your project uses both, tiered.</p>
+
+<table>
+  <tr><th>Dimension</th><th>ChromaDB</th><th>Azure AI Search</th></tr>
+  <tr>
+    <td><strong>Deployment Model</strong></td>
+    <td>Embedded Python library, file on disk. Zero infrastructure.</td>
+    <td>Managed cloud service. Azure-hosted, auto-scaled.</td>
+  </tr>
+  <tr>
+    <td><strong>Cost (small scale)</strong></td>
+    <td class="yes">Free (open source)</td>
+    <td>~$73/month (Basic tier)</td>
+  </tr>
+  <tr>
+    <td><strong>Cost (large scale)</strong></td>
+    <td>Infrastructure + ops cost if self-hosted at scale</td>
+    <td>Scales with storage and RU usage; predictable pricing</td>
+  </tr>
+  <tr>
+    <td><strong>Local Development</strong></td>
+    <td class="yes">Perfect — <code>pip install chromadb</code>, works offline</td>
+    <td class="no">Requires Azure account; no local emulator</td>
+  </tr>
+  <tr>
+    <td><strong>Search Types</strong></td>
+    <td>Vector only (cosine/L2/dot)</td>
+    <td class="yes">Vector + BM25 + Hybrid (RRF) + Semantic reranking</td>
+  </tr>
+  <tr>
+    <td><strong>Scalability</strong></td>
+    <td>Single-node; ~1M vectors practical ceiling</td>
+    <td class="yes">Multi-shard, multi-replica; billions of vectors; 99.9% SLA</td>
+  </tr>
+  <tr>
+    <td><strong>Metadata Filtering</strong></td>
+    <td>Yes — <code>where=&#123;"exam_code":"AI-102"&#125;</code></td>
+    <td class="yes">Yes — OData <code>$filter</code>, composable with vector queries</td>
+  </tr>
+  <tr>
+    <td><strong>Security</strong></td>
+    <td class="no">None (filesystem access control only)</td>
+    <td class="yes">Entra ID, RBAC, Private Endpoints, CMK encryption</td>
+  </tr>
+  <tr>
+    <td><strong>Semantic Ranking</strong></td>
+    <td class="no">Not supported</td>
+    <td class="yes">L2 cross-encoder reranker (4 semantic queries/second on Basic)</td>
+  </tr>
+  <tr>
+    <td><strong>Hybrid Search</strong></td>
+    <td class="no">Not supported</td>
+    <td class="yes">BM25 + Vector fused via Reciprocal Rank Fusion</td>
+  </tr>
+  <tr>
+    <td><strong>Incremental Ingest</strong></td>
+    <td>Manual upsert (your code does this: <code>collection.upsert()</code>)</td>
+    <td class="yes">Indexer with change detection; watermark-based incremental</td>
+  </tr>
+  <tr>
+    <td><strong>When to Use</strong></td>
+    <td>Dev, prototyping, CI tests, offline / air-gapped</td>
+    <td class="yes">Production, enterprise, compliance requirements</td>
+  </tr>
+  <tr>
+    <td><strong>Role in CertMasterAI</strong></td>
+    <td>Tier 2 fallback — <code>chroma_retriever.py</code></td>
+    <td class="yes">Tier 1 primary — <code>azure_retriever.py</code></td>
+  </tr>
+</table>
+
+<section id="s7-example">
+<h3>Concrete Example: When Hybrid Search Wins</h3>
+
+<p>Query: <strong>"AZ-104 virtual network NSG deny rule"</strong></p>
+
+<div class="diagram">
+<span class="or">BM25 (keyword) alone:</span>
+  Finds: documents containing "NSG", "deny", "rule"
+  Misses: docs that say "network security group inbound block"
+           because the words don't match exactly
+
+<span class="or">Vector (semantic) alone:</span>
+  Finds: semantically similar content about network security
+  Overincludes: general networking docs ranked too high
+  Misses: docs where the specific term "NSG" is critical
+
+<span class="gr">Hybrid + Semantic Reranking:</span>
+  BM25 finds:  [NSG-doc1, NSG-doc2, firewall-doc, ...]
+  Vector finds:[NSG-doc1, network-doc5, security-doc3, ...]
+  RRF fusion:  NSG-doc1 appears in both → highest combined score
+  Reranker:    Cross-encoder reads each passage against query
+               → Re-ranks, surfaces the most precisely relevant
+
+  Result: 40% better precision for technical Microsoft exam content
+          compared to vector-only search
+
+<span class="hi">Why does this matter for CertMasterAI?</span>
+  Exam questions hinge on precise technical terms:
+    "RBAC" vs "Azure Policy"
+    "NSG" vs "Azure Firewall"
+    "SAS token" vs "managed identity"
+  BM25 ensures these precise terms are never missed.
+  Semantic ranking ensures the overall passage is relevant.
+</div>
+
+<div class="note">
+  <strong>The Right Mental Model:</strong> BM25 = "does the document contain these exact words?" (precision). Vector = "does the document mean the same thing?" (recall). Hybrid = both. Semantic reranking = "of the hybrid results, which is truly most useful?" The four-stage pipeline (BM25 + vector → RRF → reranker) is the state of the art in RAG retrieval as of 2026.
+</div>
+
+<h3>ChromaDB vs Azure AI Search in Your Retriever</h3>
+<div class="code-wrap">
+  <div class="code-label">retriever.py — tiered strategy</div>
+  <pre class="code"><span class="kw">async def</span> <span class="fn">retrieve</span>(<span class="cls">self</span>, query, exam_code, objective, top_k, embedding):
+
+    <span class="cm"># Tier 1: Try Azure AI Search first (production quality)</span>
+    <span class="kw">if</span> settings.AZURE_SEARCH_ENDPOINT:
+        <span class="kw">try</span>:
+            chunks = <span class="kw">await</span> <span class="cls">self</span>.azure_retriever.<span class="fn">retrieve</span>(
+                query=query, exam_code=exam_code, top_k=top_k,
+                embedding=embedding
+            )
+            <span class="kw">if</span> chunks:
+                <span class="kw">return</span> chunks   <span class="cm"># ← use Azure results</span>
+        <span class="kw">except</span> Exception <span class="kw">as</span> e:
+            logger.<span class="fn">warning</span>(<span class="str">"Azure Search failed: %s"</span>, e)
+
+    <span class="cm"># Tier 2: ChromaDB fallback (local, no cloud needed)</span>
+    chunks = chroma_retriever.<span class="fn">retrieve</span>(
+        query=query, exam_code=exam_code, top_k=top_k
+    )
+    <span class="kw">if</span> chunks:
+        <span class="kw">return</span> chunks     <span class="cm"># ← use Chroma results</span>
+
+    <span class="cm"># Tier 3: Fallback document (triggers knowledge-based generation)</span>
+    <span class="kw">return</span> [<span class="cls">self</span>.<span class="fn">_fallback_doc</span>(exam_code, objective)]</pre>
+</div>
+</section>
+
+</section>
+
+<div class="page-nav">
+  <a href="part2-fastapi-chromadb.html">← FastAPI &amp; ChromaDB</a>
+  <a href="part4-implementation-setup-summary.html">Setup &amp; Summary →</a>
+</div>
+
+</main>
+</body>
+</html>

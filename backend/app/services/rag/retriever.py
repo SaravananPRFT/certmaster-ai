@@ -42,6 +42,9 @@ class DocumentRetriever:
         embedding: Optional[list[float]] = None,
     ) -> list[RetrievedChunk]:
         """Retrieve top-K relevant chunks using hybrid search (keyword + vector)."""
+        if not settings.AZURE_SEARCH_KEY or "your-search" in settings.AZURE_SEARCH_ENDPOINT:
+            return await self._try_chroma_or_fallback(query, exam_code, objective, top_k)
+
         try:
             client = self._get_client()
             filter_expr = f"exam_code eq '{exam_code}'"
@@ -81,7 +84,11 @@ class DocumentRetriever:
         except Exception as e:
             logger.warning("Azure AI Search retrieval failed: %s — trying ChromaDB", e)
 
-        # Tier 2: ChromaDB local vector store
+        return await self._try_chroma_or_fallback(query, exam_code, objective, top_k)
+
+    async def _try_chroma_or_fallback(
+        self, query: str, exam_code: str, objective: Optional[str], top_k: int
+    ) -> list[RetrievedChunk]:
         try:
             from app.services.rag.chroma_retriever import chroma_retriever
             chroma_chunks = chroma_retriever.retrieve(query, exam_code, top_k)
@@ -100,7 +107,6 @@ class DocumentRetriever:
         except Exception as chroma_err:
             logger.warning("ChromaDB retrieval failed: %s — using hardcoded fallback", chroma_err)
 
-        # Tier 3: hardcoded 2-sentence fallback (triggers knowledge-based generation)
         return self._fallback_chunks(exam_code, objective)
 
     def _fallback_chunks(self, exam_code: str, objective: Optional[str]) -> list[RetrievedChunk]:

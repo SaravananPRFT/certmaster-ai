@@ -1,0 +1,101 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+What are tools in Foundry Agent Service? (classic)
+This document refers to the Microsoft Foundry (classic) agents.
+View the new tool catalog documentation
+Agents (classic) are now deprecated and will be retired on March 31, 2027. Use the new agents in the generally available
+Microsoft Foundry Agents Service
+To empower your AI agent with grounded data or the capability to take actions and automating workflows, the Foundry Agent Service provides a wide range of built-in tools, such as Grounding with Bing Search, Azure AI Search, Azure Logic Apps, as well as third-party partner tools, such as Tripadvisor. This page is designed to provide an overview of tools provided in the Foundry Agent Service.
+The new Microsoft Foundry portal and agents API provide additional tools. See the
+To keep your AI agent informed with richer context from various data sources. The Foundry Agent Service has covered a wide range of data types:
+: Azure AI Search, File Search, Microsoft Fabric, and more
+: Grounding with Bing Search
+: Tripadvisor, Morningstar
+: Azure AI Search, File Search
+: Microsoft Fabric and more
+To streamline workflows with your AI agent with capabilities to take actions, the Foundry Agent Service provides different action tools for you with different level of flexibility, control, and ease of integration:
+: Web-based integrated deep research pipeline with the
+model and Grounding with Bing Search.
+: Low-code / no-code solution to add a workflow to your AI Agent
+: Bring an existing OpenAPI specification of a service API you want to add to your AI agent, with no or minor changes.
+: Bring an existing Model Context Protocol (MCP) endpoint that you want to add to your AI agent.
+: Write your own custom, stateless functions to define the expected behaviors.
+: Write and manage your own custom, stateful functions.
+: Perform real-world browser tasks through natural language prompts.
+How does a tool work in the Foundry Agent Service?
+Tools are optional capabilities you can add to your AI agent for AI models to decide and pick based on the user query and context. When a user sends a query, the AI model identifies the intent with the context and potentially rewrites the user query. Then the AI model decides which tools to be called for each run. For example, if you add both the Grounding with Bing Search tool and the Azure AI Search tool to your agent and ask "
+what is the weather in Seattle today?
+", the model will identify your intent to ask about real-time information and more likely to invoke the Grounding with Bing Search tool.
+You can add tools at the agent, thread, or run level. By providing tools at a narrower level, the tool resources will
+tool resources at a broader level. For example, tool resources at the run level override tool resources at thread level.
+: You can add multiple tools, but only
+knowledge tool type: File Search, Azure AI Search, Grounding with Bing Search, Grounding with Bing Custom Search, Microsoft Fabric, and other tools under the
+section. To use multiple indexes with Azure AI Search, consider using
+When a user sends a query to the agent, it will create a
+. For each run, the AI model decides what tools to invoke based on the user intent and available tool resources. Based on the tool outputs, the AI model might decide to invoke another tool or call the same tool again to get more context. For example, when you use Grounding with Bing Search tool, you might see multiple Bing Search queries when
+. This means the AI model actually calls the Grounding with Bing Search tool multiple times with different queries to get more information. If you want to learn more about what tools are called and how the AI model invokes them, check the run step details.
+Controlling tool invocation
+There are two main ways to influence how your AI agent invokes tools:
+Deterministic - forces or prevents specific tool use
+You need guaranteed tool invocation or want to disable tools
+Non-deterministic - guides the model's decision
+You want the model to intelligently choose based on context
+parameter is the most deterministic way of controlling which (if any) tool is called by the model. By default, it is set to
+, which means the AI model will decide. If you want to
+the model to call a specific tool, you can provide the specification of this tool, for example
+run = project_client.agents.runs.create_and_process(
+tool_choice={"type": "bing_grounding"}  # specify the tool to use
+parameter is non-deterministic but provides flexible guidance. Use instructions to help the AI model understand your use case and the purposes of each tool. Tell the model what information or actions each tool can provide:
+for product-related information, use the Fabric tool
+for sales-related information.
+Prefer tools over base knowledge
+Use the tool outputs to generate a response, don't use your own knowledge.
+Describe tool capabilities
+The Bing Search tool has access to real-time information including current weather, news, and stock prices.
+Make sure your AI model has enough Tokens-Per-Minute (TPM) allocated. We recommend having a minimum of 30k TPM. You can change the TPM allocation by going to
+The Foundry Agent Service provides the following built-in tools. You can use them with the REST API, SDK, and Microsoft Foundry portal.
+Use an existing Azure AI Search index to ground agents with data in the index, and chat with your data.
+Leverage your Azure Functions to create intelligent, event-driven applications.
+Perform real-world browser tasks through natural language prompts.
+Enable agents to write and run Python code in a sandboxed execution environment.
+Use OpenAI's advanced agentic research capability for analysis and reasoning.
+Augment agents with knowledge from outside its model, such as proprietary product information or documents provided by your users.
+Describe the structure of functions you create to an agent and have them be called when appropriate during the agent's interactions with users.
+Grounding with Bing Search
+Enable your agent to use Grounding with Bing Search to access and return information from the internet.
+Grounding with Bing Custom Search (preview)
+Enhance your Agent response with selected web domains
+Model Context Protocol (preview)
+Give the agent access to tools hosted on an existing MCP endpoint
+Microsoft Fabric (preview)
+Integrate your agent with the
+Microsoft Fabric data agent
+to unlock powerful data analysis capabilities.
+OpenAPI 3.0 Specified tool
+Connect your Azure AI Agent to external APIs using functions with an OpenAPI 3.0 specification.
+The following tools are authored by third-party partners. Use the links below to view the documentation and code samples.
+Your use of connected non-Microsoft services is subject to the terms between you and the service provider. By connecting to a non-Microsoft service, you acknowledge that some of your data, such as prompt content, is passed to the non-Microsoft service, and/or your application might receive data from the non-Microsoft service. You are responsible for your use (and any charges associated with your use) of non-Microsoft services and data.
+The code in these non-Microsoft files were created by third parties, not Microsoft, and have not been tested or verified by Microsoft. Your use of the code samples is subject to the terms provided by the relevant third party. By using any third-party sample in this file, you are acknowledging that Microsoft has no responsibility to you or others with respect to these samples.
+AI-powered workflow automation for institutional finance
+Celonis delivers Process Intelligence to accelerate enterprise AI at scale
+InsureMO Insurance Quotation
+Action APIs for insurance quotations for Car, Home, and Travel
+Legal insights grounded in trusted sources from your jurisdiction.
+Seamless access to LexisNexis content.
+seamless integration with MiHCM's HR functionalities
+Access up-to-date investment research and data such as analyst research, expert commentary, and essential Morningstar data.
+Provide latest duties and past shipment data for trade between multiple countries/regions
+Get travel data, guidance and reviews
+Use system instruction to help model invoke the right tool
+In order for the model to understand which tools to use, you want to provide detailed instruction for the model to describe when and how to use the tool. You might want to consider providing the following information:
+Primary Objective: what is the objective of this agent? what is the goal of related tasks? what are the expected outcomes?
+Your responsibilities: what tasks you expect the agent to perform. For example, calling Grounding with Bing Search tool to get the latest information about local events.
+Inputs you may receive: what inputs do you expect the agent to receive?
+Triggers: when do you expect this tool to be called? What type of information will be searched? What will queries contain?
+For example, you might provide tool instructions like the following for the Grounding with Bing Search tool:
+Grounding with Bing Search tool
+Use: Gather external trends or news to enrich the post with real-time insights.
+The user asks to reference recent data or competitive context.
+Example: "Can you reference the latest industry trends?" or "What are competitors doing?".
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

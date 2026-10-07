@@ -41,6 +41,7 @@ Region availability for Foundry Models sold by Azure
 - Functions, tools, and parallel tool calling.
 - Functions, tools, and parallel tool calling.
 - Functions, tools, and parallel tool calling.
+- Functions, tools, and parallel tool calling.
 You might also see this model referred to by OpenAI as GPT-5.5 Instant or in the OpenAI API as
 . In Microsoft Foundry, the product name for this release is
 . The model continues to follow the existing
@@ -206,7 +207,7 @@ limited access model application
 For model availability across all regions, grouped by deployment category, see
 Region availability for Foundry Models sold by Azure
 Specialized model for use with the
-The Azure OpenAI o-series models are designed to tackle reasoning and problem-solving tasks with increased focus and capability. These models spend more time processing and understanding the user's request, making them exceptionally strong in areas like science, coding, and math, compared to previous iterations.
+The Azure OpenAI O-Series models are designed to tackle reasoning and problem-solving tasks with increased focus and capability. These models spend more time processing and understanding the user's request, making them exceptionally strong in areas like science, coding, and math, compared to previous iterations.
 For model availability across all regions, grouped by deployment category, see
 Region availability for Foundry Models sold by Azure
 - Text and image processing.
@@ -405,10 +406,14 @@ from partners and community
 Microsoft models sold by Azure
 Microsoft models include various model groups such as Model Router, MAI models, Phi models, healthcare AI models, and more. Several Microsoft models are also available
 from partners and community
-To work with MAI image models in Foundry, see
-Deploy and use MAI image models in Microsoft Foundry
+To work with MAI models, see these how-to articles:
+MAI models available in Foundry:
+MAI models available through Azure Speech in Foundry Tools:
 For model availability across all regions, grouped by deployment category, see
 Region availability for Foundry Models sold by Azure
+(with reasoning content). See
+text (up to 64,000 tokens).
+OpenAI Chat Completions compatibility; Encrypted Chain-of-Thought
 Image-to-Image and Text-to-Image. See
 text, image (JPEG or PNG format for image editing workflows)
 High-quality text-to-image generation; Image editing that supports precise, surgical edits without disrupting the rest of the image; Capability to generate more photo-realistic imagery with consistent visual structure than previous models. Well suited for tasks such as concept visualization, creative content generation, image editing workflows, and production design.

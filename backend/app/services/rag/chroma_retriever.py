@@ -4,7 +4,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-EXAM_CODES = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103"]
+EXAM_CODES = ["AI-102", "AZ-104", "AZ-305", "GH-300", "AB-100", "AI-103", "AI-901"]
 
 
 def _coll_name(exam_code: str) -> str:

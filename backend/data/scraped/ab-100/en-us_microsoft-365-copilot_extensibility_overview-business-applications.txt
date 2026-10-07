@@ -1,0 +1,50 @@
+Access to this page requires authorization. You can try
+Access to this page requires authorization. You can try
+Extend the capabilities of your agent
+Features in this article are powered by the
+, which uses the billing options described in
+Licensing for agents powered by the standard harness
+. Learn how to access standard features in
+Access standard agents and agent flows
+Copilot Studio lets you extend the knowledge base and capabilities of agents using various mechanisms. You can extend agent capabilities and performance with:
+Tools and knowledge sources that require accessing another service make use of
+. Connectors let you integrate with data in various enterprise systems and APIs, letting your agents access and use this data effectively. You can use
+to connect to your enterprise data sources.
+Data sources within the productivity cloud in Microsoft 365
+Business data in Dynamics 365
+Analytical data in Microsoft Fabric
+Non-Microsoft enterprise data sources
+Through connectors, you can perform actions and ground your agent responses with multiple enterprise data sources. This allows for more relevant and reliable responses from custom agents and agents for Microsoft 365 Copilot (declarative agents).
+Learn more about using Power Platform connectors as tools, in
+Use Power Platform connectors as tools
+Learn more about supported knowledge sources using connectors in
+Copilot connectors and Power Platform connectors as knowledge sources
+Learn more about Copilot connectors as knowledge sources in
+Add Copilot connectors as a knowledge source
+Learn more about connectors that have enterprise data added using Power Platform connectors in
+Add Power Platform connectors as knowledge (preview)
+When you sign in to Copilot Studio, you can access specific agents based on the license associated with your credentials. The list of agents available to you depends on these permissions. If you don't see the agent you want to extend, verify your credentials. Also try connecting to the agent itself, or try to trigger any jobs that must occur to prepare the agent for use. See the sections detailing the authoring experience for examples.
+A maker starts by selecting the agent whose functionality they wish to extend:
+Other agents that they have maker access to in their organization
+For custom agents, you can add tools and knowledge directly to the agent.
+For Microsoft 365 Copilot, you don't extend functionality directly with tools and knowledge. Instead, you extend Microsoft 365 Copilot with a
+built in Copilot Studio. A declarative agent is an agent intended to be run within the Microsoft 365 Copilot experience. The agent has its own specialized instructions and purpose, and you can add tools and knowledge to it. You can bring tools and knowledge into Microsoft 365 Copilot in a three step process:
+Create a new declarative agent.
+Add tools and knowledge to the agent.
+Publish the agent and make it available to Microsoft 365 Copilot.
+Maker access to the agent to allow you to extend it
+Copilot Studio license for the maker
+Data sources to use to integrate other data
+Information you need to connect to the content sources (connectors, APIs, and so on)
+Credentials for any systems you're connecting to
+Assistance from the administrator of your agent to enable the extension once you publish the agent
+To select an agent to extend, start by selecting
+For a custom agent, select from the list of custom agents on the
+For agents created for Microsoft 365 Copilot, select
+and then select the agent from the Copilot for Microsoft 365 agents list.
+Use tools with custom agents (preview)
+Use Power Platform connectors as tools
+Copilot connectors and Power Platform connectors as knowledge sources
+Extend Microsoft 365 Copilot with agents
+Need help with this topic?
+Want to try using Ask Learn to clarify or guide you through this topic?

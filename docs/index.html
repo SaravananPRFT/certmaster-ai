@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertMasterAI — FastAPI + RAG Technical Guide</title>
+<style>
+  :root {
+    --azure: #0078d4;
+    --azure-dark: #005a9e;
+    --bg: #f4f6f9;
+    --card-bg: #fff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --green: #16a34a;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui,-apple-system,sans-serif; background: var(--bg); color: var(--text); }
+
+  header {
+    background: linear-gradient(135deg, #0078d4 0%, #005a9e 60%, #003d7a 100%);
+    color: #fff; padding: 60px 40px; text-align: center;
+  }
+  header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.5px; }
+  header p { margin-top: 12px; font-size: 1.1rem; opacity: 0.88; }
+  header .badge {
+    display: inline-block; margin-top: 20px; background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35); border-radius: 20px;
+    padding: 6px 18px; font-size: 0.85rem; letter-spacing: 0.5px;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  h2 { font-size: 1.5rem; font-weight: 700; margin: 40px 0 20px; color: var(--azure-dark); }
+  h2::before { content: ''; display: inline-block; width: 4px; height: 1em; background: var(--azure); margin-right: 12px; vertical-align: middle; border-radius: 2px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 10px; }
+
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; box-shadow: var(--shadow); transition: transform 0.15s, box-shadow 0.15s;
+    text-decoration: none; color: inherit; display: block;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,120,212,0.15); border-color: var(--azure); }
+  .card .num { font-size: 0.78rem; font-weight: 700; color: var(--azure); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+  .card .tags { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .card .tag { font-size: 0.75rem; background: #eff6ff; color: var(--azure); border-radius: 20px; padding: 3px 10px; border: 1px solid #bfdbfe; }
+
+  .stack-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
+  .chip { display: flex; align-items: center; gap: 8px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 0.88rem; font-weight: 600; box-shadow: var(--shadow); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-blue { background: #0078d4; }
+  .dot-green { background: #16a34a; }
+  .dot-orange { background: #ea580c; }
+  .dot-purple { background: #7c3aed; }
+
+  .flow {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px; margin: 24px 0; box-shadow: var(--shadow);
+  }
+  .flow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 0; }
+  .flow-step {
+    background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 8px;
+    padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: var(--azure-dark);
+    white-space: nowrap;
+  }
+  .arrow { color: var(--azure); font-size: 1.2rem; padding: 0 6px; }
+
+  .note { background: #eff6ff; border-left: 4px solid var(--azure); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 20px 0; font-size: 0.92rem; color: #1e3a5f; }
+
+  footer { text-align: center; padding: 24px; color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.6rem; }
+    .flow-steps { flex-direction: column; align-items: flex-start; }
+  }
+  @media print {
+    header { background: var(--azure) !important; -webkit-print-color-adjust: exact; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FastAPI + RAG + Azure AI Search</h1>
+  <p>Complete End-to-End Technical Guide for CertMasterAI</p>
+  <div class="badge">10 Sections &nbsp;·&nbsp; 4 Deep-Dive Pages &nbsp;·&nbsp; Anchored to Real Code</div>
+</header>
+
+<main>
+
+  <div class="note">
+    Every concept in this guide is grounded in the actual CertMasterAI codebase:
+    <code>chroma_retriever.py</code>, <code>generator.py</code>, <code>prompts.py</code>.
+    After reading, you will be able to architect a complete FastAPI + RAG solution in a technical design review.
+  </div>
+
+  <h2>Technology Stack</h2>
+  <div class="stack-row">
+    <div class="chip"><span class="dot dot-blue"></span>FastAPI + Pydantic</div>
+    <div class="chip"><span class="dot dot-blue"></span>UV (package manager)</div>
+    <div class="chip"><span class="dot dot-green"></span>ChromaDB (local vector store)</div>
+    <div class="chip"><span class="dot dot-blue"></span>Azure AI Search (production)</div>
+    <div class="chip"><span class="dot dot-orange"></span>Azure OpenAI (GPT-4o + embeddings)</div>
+    <div class="chip"><span class="dot dot-purple"></span>Anthropic Claude</div>
+    <div class="chip"><span class="dot dot-blue"></span>Next.js 14 (frontend)</div>
+    <div class="chip"><span class="dot dot-green"></span>Ollama (local LLM dev)</div>
+  </div>
+
+  <h2>High-Level Data Flow</h2>
+  <div class="flow">
+    <div class="flow-steps">
+      <div class="flow-step">User Request</div><div class="arrow">→</div>
+      <div class="flow-step">FastAPI</div><div class="arrow">→</div>
+      <div class="flow-step">Embed Query</div><div class="arrow">→</div>
+      <div class="flow-step">Vector Search</div><div class="arrow">→</div>
+      <div class="flow-step">Retrieved Chunks</div><div class="arrow">→</div>
+      <div class="flow-step">Prompt + Context</div><div class="arrow">→</div>
+      <div class="flow-step">LLM</div><div class="arrow">→</div>
+      <div class="flow-step">Grounding Gate</div><div class="arrow">→</div>
+      <div class="flow-step">Final Answer</div>
+    </div>
+  </div>
+
+  <h2>Guide Pages</h2>
+  <div class="grid">
+
+    <a class="card" href="part1-architecture-ingestion-query.html">
+      <div class="num">Sections 1 – 3</div>
+      <h3>Architecture, Ingestion &amp; Query Flow</h3>
+      <p>Full system architecture diagram. Document ingestion pipeline with chunking and embeddings. Step-by-step user query trace through the entire system.</p>
+      <div class="tags">
+        <span class="tag">Architecture</span>
+        <span class="tag">Chunking</span>
+        <span class="tag">Embeddings</span>
+        <span class="tag">RAG Pipeline</span>
+      </div>
+    </a>
+
+    <a class="card" href="part2-fastapi-chromadb.html">
+      <div class="num">Sections 4 – 5</div>
+      <h3>FastAPI Implementation &amp; ChromaDB</h3>
+      <p>FastAPI mapped to ASP.NET Core for .NET developers. Pydantic vs Data Annotations. Dependency injection patterns. ChromaDB HNSW architecture and vector operations.</p>
+      <div class="tags">
+        <span class="tag">FastAPI</span>
+        <span class="tag">Pydantic</span>
+        <span class="tag">.NET Mapping</span>
+        <span class="tag">ChromaDB</span>
+        <span class="tag">HNSW</span>
+      </div>
+    </a>
+
+    <a class="card" href="part3-azure-search.html">
+      <div class="num">Sections 6 – 7</div>
+      <h3>Azure AI Search &amp; Comparison</h3>
+      <p>Azure AI Search full architecture: indexers, skillsets, hybrid search, semantic reranking. Head-to-head comparison with ChromaDB across 10 dimensions.</p>
+      <div class="tags">
+        <span class="tag">Azure AI Search</span>
+        <span class="tag">Hybrid Search</span>
+        <span class="tag">Semantic Ranking</span>
+        <span class="tag">BM25</span>
+        <span class="tag">RRF</span>
+      </div>
+    </a>
+
+    <a class="card" href="part4-implementation-setup-summary.html">
+      <div class="num">Sections 8 – 10</div>
+      <h3>E2E Example, Local Dev &amp; Summary</h3>
+      <p>Complete enterprise document assistant walkthrough. Local dev setup with UV + Ollama + ChromaDB. Switching to Azure for production. Visual end-to-end summary with MCP overview.</p>
+      <div class="tags">
+        <span class="tag">Local Dev</span>
+        <span class="tag">UV</span>
+        <span class="tag">Ollama</span>
+        <span class="tag">Deployment</span>
+        <span class="tag">MCP</span>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer>
+  CertMasterAI Technical Guide &nbsp;·&nbsp; FastAPI + RAG + ChromaDB + Azure AI Search &nbsp;·&nbsp; 2026
+</footer>
+
+</body>
+</html>

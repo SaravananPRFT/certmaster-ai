@@ -1,7 +1,16 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, Literal
 from uuid import uuid4
 from datetime import datetime
+
+
+def _to_camel(name: str) -> str:
+    parts = name.split("_")
+    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+
+class CamelModel(BaseModel):
+    model_config = ConfigDict(alias_generator=_to_camel, populate_by_name=True)
 
 QuestionType = Literal[
     "MultipleChoiceSingle",
@@ -34,13 +43,13 @@ class Reference(BaseModel):
     url: str
 
 
-class GroundingInfo(BaseModel):
+class GroundingInfo(CamelModel):
     grounding_score: float = Field(ge=0, le=1)
     citation_coverage: float = Field(ge=0, le=1)
     retrieved_document_ids: list[str] = []
 
 
-class HotspotArea(BaseModel):
+class HotspotArea(CamelModel):
     id: str
     label: str
     x: float
@@ -50,7 +59,7 @@ class HotspotArea(BaseModel):
     is_correct: bool
 
 
-class Question(BaseModel):
+class Question(CamelModel):
     question_id: str = Field(default_factory=lambda: str(uuid4()))
     exam: str
     objective: str

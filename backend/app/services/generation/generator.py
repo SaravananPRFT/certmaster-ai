@@ -74,7 +74,7 @@ EXAM_BLUEPRINTS = {
         ],
     },
     "GH-300": {
-        "name": "Microsoft Certified: GitHub Advanced Security",
+        "name": "GitHub Advanced Security",
         "duration_minutes": 100,
         "passing_score": 700,
         "domains": [
@@ -86,26 +86,34 @@ EXAM_BLUEPRINTS = {
         ],
     },
     "AB-100": {
+        "name": "Agentic AI Business Solutions Architect",
+        "duration_minutes": 120,
+        "passing_score": 700,
+        "domains": [
+            {"name": "Plan AI-powered business solutions", "weight": 28, "objectives": ["Analyze requirements for AI-powered business solutions", "Design overall AI strategy for business solutions", "Evaluate the costs and benefits of an AI-powered business solution"]},
+            {"name": "Design AI-powered business solutions", "weight": 28, "objectives": ["Design AI and agents for business solutions", "Design extensibility of AI solutions with Copilot Studio and Microsoft Foundry", "Orchestrate configuration for prebuilt agents and apps"]},
+            {"name": "Deploy AI-powered business solutions", "weight": 44, "objectives": ["Analyze, monitor, and tune AI-powered business solutions", "Manage the testing of AI-powered business solutions", "Design the ALM process for AI-powered business solutions", "Design responsible AI, security, governance, risk management, and compliance"]},
+        ],
+    },
+    "AI-103": {
+        "name": "Developing AI Apps and Agents on Azure",
+        "duration_minutes": 120,
+        "passing_score": 700,
+        "domains": [
+            {"name": "Plan and manage an Azure AI solution", "weight": 28, "objectives": ["Choose the appropriate Foundry services for generative AI and agents", "Set up AI solutions in Foundry", "Manage, monitor, and secure AI systems", "Implement responsible AI across generative AI and agentic systems"]},
+            {"name": "Implement generative AI and agentic solutions", "weight": 33, "objectives": ["Build generative applications by using Foundry", "Build agents by using Foundry", "Optimize and operationalize generative AI systems"]},
+            {"name": "Implement computer vision solutions", "weight": 13, "objectives": ["Design and implement image- and video-generation solutions", "Design and implement multimodal understanding workflows", "Implement responsible AI for multimodal content"]},
+            {"name": "Implement text analysis solutions", "weight": 13, "objectives": ["Apply language model text analysis", "Implement speech solutions"]},
+            {"name": "Implement information extraction solutions", "weight": 13, "objectives": ["Build retrieval and grounding pipelines", "Extract content from documents using Content Understanding"]},
+        ],
+    },
+    "AI-901": {
         "name": "Microsoft Azure AI Fundamentals",
         "duration_minutes": 65,
         "passing_score": 700,
         "domains": [
-            {"name": "Describe AI Workloads and Considerations", "weight": 20, "objectives": ["Identify features of common AI workloads", "Identify principles of responsible AI", "Describe considerations for AI solutions"]},
-            {"name": "Describe Fundamental Principles of Machine Learning on Azure", "weight": 25, "objectives": ["Identify common machine learning techniques", "Describe core machine learning concepts", "Describe Azure Machine Learning capabilities"]},
-            {"name": "Describe Features of Computer Vision Workloads on Azure", "weight": 15, "objectives": ["Identify common types of computer vision solution", "Identify Azure tools and services for computer vision tasks"]},
-            {"name": "Describe Features of NLP Workloads on Azure", "weight": 25, "objectives": ["Identify features of common NLP workload scenarios", "Identify Azure tools and services for NLP workloads"]},
-            {"name": "Describe Features of Generative AI Workloads on Azure", "weight": 15, "objectives": ["Identify features of generative AI solutions", "Identify capabilities of Azure OpenAI Service", "Describe responsible generative AI practices"]},
-        ],
-    },
-    "AI-103": {
-        "name": "Microsoft Azure AI Engineer Advanced Solutions",
-        "duration_minutes": 120,
-        "passing_score": 700,
-        "domains": [
-            {"name": "Design and Implement Advanced AI Architectures", "weight": 25, "objectives": ["Design multi-modal AI solutions", "Implement AI orchestration pipelines", "Design AI safety and compliance strategies", "Evaluate and select foundation models"]},
-            {"name": "Implement Advanced RAG and Knowledge Solutions", "weight": 25, "objectives": ["Design enterprise RAG architectures", "Implement hybrid search strategies", "Optimize retrieval pipelines", "Implement knowledge graphs with AI"]},
-            {"name": "Implement Advanced Generative AI Solutions", "weight": 25, "objectives": ["Implement agentic AI systems", "Apply advanced prompt engineering", "Fine-tune and evaluate language models", "Implement AI Gateway patterns"]},
-            {"name": "Govern and Operate AI Solutions at Scale", "weight": 25, "objectives": ["Implement MLOps for generative AI", "Monitor AI solution performance and cost", "Implement responsible AI at enterprise scale", "Design AI security and data privacy"]},
+            {"name": "Identify AI concepts and capabilities", "weight": 43, "objectives": ["Identify features of common AI workloads", "Identify guiding principles for responsible AI", "Describe capabilities of computer vision workloads", "Describe capabilities of NLP workloads", "Describe capabilities of generative AI workloads"]},
+            {"name": "Implement AI solutions by using Microsoft Foundry", "weight": 57, "objectives": ["Implement Azure AI services using Microsoft Foundry", "Deploy and consume AI models in Foundry", "Implement generative AI solutions in Foundry", "Implement NLP and vision solutions using Foundry Tools"]},
         ],
     },
 }
@@ -155,6 +163,8 @@ class QuestionGenerator:
         return self._anthropic_client
 
     async def get_embedding(self, text: str) -> Optional[list[float]]:
+        if not settings.AZURE_OPENAI_KEY or not settings.AZURE_OPENAI_ENDPOINT:
+            return None
         try:
             client = self._get_openai_client()
             resp = await client.embeddings.create(
@@ -369,7 +379,11 @@ class QuestionGenerator:
                 return random.choice(objectives) if objectives else domain["name"]
         return domains[-1]["name"]
 
-    async def generate_question(self, request: QuestionGenerationRequest) -> Optional[Question]:
+    async def generate_question(
+        self,
+        request: QuestionGenerationRequest,
+        previously_generated: list[Question] | None = None,
+    ) -> Optional[Question]:
         """Full RAG pipeline: retrieve → context → generate → validate."""
         objective = self._select_objective(request.exam_code, request.objective)
         difficulty = request.difficulty or "Medium"
@@ -389,13 +403,16 @@ class QuestionGenerator:
         context, doc_ids = retriever.build_context(chunks, max_tokens=settings.MAX_CONTEXT_TOKENS)
         is_fallback = "fallback-001" in doc_ids
 
+        prior_stems = [q.question[:80] for q in (previously_generated or [])]
+
         if is_fallback:
-            logger.info("Azure AI Search unavailable — using knowledge-based generation for %s / %s", request.exam_code, objective)
+            logger.info("Using knowledge-based generation for %s / %s", request.exam_code, objective)
             prompt = build_fallback_prompt(
                 exam_code=request.exam_code,
                 objective=objective,
                 difficulty=difficulty,
                 question_type=question_type,
+                already_generated=prior_stems or None,
             )
             raw = await self._llm_generate(FALLBACK_SYSTEM_PROMPT, prompt)
         else:
@@ -406,6 +423,7 @@ class QuestionGenerator:
                 question_type=question_type,
                 context=context,
                 doc_ids=doc_ids,
+                already_generated=prior_stems or None,
             )
             raw = await self._llm_generate(SYSTEM_PROMPT, prompt)
 
@@ -414,19 +432,39 @@ class QuestionGenerator:
         if question:
             quality_result = validator.score_quality(question)
             question.quality_score = quality_result.score
+            if not quality_result.passed:
+                logger.warning("Question failed quality gate (%.2f): %s", quality_result.score, quality_result.issues)
+                return None
 
         return question
 
     async def generate_batch(self, request: QuestionGenerationRequest) -> list[Question]:
-        """Generate multiple questions concurrently."""
-        tasks = [self.generate_question(request) for _ in range(request.count)]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        questions = []
-        for r in results:
-            if isinstance(r, Exception):
-                logger.error("Generation task failed: %s", r)
-            elif r is not None:
+        """Generate questions in parallel waves, feeding prior stems between waves."""
+        questions: list[Question] = []
+        remaining = request.count
+        wave_size = 4
+
+        while remaining > 0 and len(questions) < request.count:
+            batch = min(wave_size, remaining)
+            tasks = [
+                self.generate_question(request, previously_generated=questions)
+                for _ in range(batch)
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for r in results:
+                if isinstance(r, Exception):
+                    logger.error("Generation task failed: %s", r)
+                    continue
+                if r is None:
+                    continue
+                if validator.check_duplicate(r, questions):
+                    logger.info("Duplicate detected, skipping")
+                    continue
                 questions.append(r)
+
+            remaining -= batch
+
         return questions
 
 

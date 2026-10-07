@@ -9,6 +9,20 @@ from datetime import datetime
 from app.models.question import SessionCreate, SessionSubmit, QuestionGenerationRequest
 from app.services.generation.generator import generator, EXAM_BLUEPRINTS
 
+
+def _to_camel(snake: str) -> str:
+    parts = snake.split("_")
+    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+
+def _camelify(obj):
+    """Recursively convert dict keys from snake_case to camelCase."""
+    if isinstance(obj, dict):
+        return {_to_camel(k): _camelify(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_camelify(item) for item in obj]
+    return obj
+
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 _sessions: dict[str, dict] = {}
@@ -33,20 +47,21 @@ async def create_session(req: SessionCreate):
         raise HTTPException(status_code=422, detail="Could not generate questions for this session")
 
     duration = blueprint.get("duration_minutes", 100) if req.mode == "certification" else 0
+    session_id = str(uuid4())
     session = {
-        "session_id": str(uuid4()),
+        "session_id": session_id,
         "exam_code": req.exam_code,
         "mode": req.mode,
         "started_at": datetime.utcnow().isoformat(),
         "duration_minutes": duration,
-        "questions": [q.model_dump() for q in questions],
+        "questions": [q.model_dump(by_alias=True) for q in questions],
         "answers": {},
         "marked_for_review": [],
         "current_question_index": 0,
         "submitted": False,
     }
-    _sessions[session["session_id"]] = session
-    return session
+    _sessions[session_id] = session
+    return _camelify(session)
 
 
 @router.get("/{session_id}")
@@ -54,7 +69,7 @@ async def get_session(session_id: str):
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    return session
+    return _camelify(session)
 
 
 @router.patch("/{session_id}/answers/{question_id}")

@@ -1,0 +1,65 @@
+Dynamics 365 guidance documentation and other resources
+Find proven guidance and best practices to help you implement and manage business solutions with Dynamics 365 apps.
+What is Dynamics 365 guidance?
+What is Dynamics 365 guidance?
+Introduction to Success by Design
+Copilot experiences in Dynamics 365
+End-to-end business processes
+About and how to use the business process guides
+Business processes, steps, and how to find things
+Glossary of terms in business processes
+What's new in the business process catalog
+What is the Dynamics 365 implementation guide?
+Introduction to the implementation guide
+Learn about Success by Design
+What is the Implementation Portal?
+BI, reporting, and analytics
+Reporting and analytics strategy
+Application life management
+Migrate from Dynamics CRM (on-premises)
+Copilot in Customer Service architecture
+Saga pattern with Dataverse or Dynamics 365
+Dynamics 365 for travel and hospitality
+Scheduled data exports from Dynamics 365 customer engagement apps to CSV file
+Dynamics 365 Project Operations to Field Service integration architecture
+Introduction to reference architectures for digital contact centers
+Guidance to help admins prepare and manage business solutions with Dynamics 365.
+Dynamics 365 implementation guidance
+Introduction to Success by Design
+Implementing cloud solutions
+Solution architecture design pillars
+Integrate with other solutions
+Business intelligence, reporting, and analytics
+Implementation optimization resources
+Find links to documentation and tools to help more efficient implementation projects.
+Finance, Project Operations, Human Resources
+Testing and getting user feedback
+This section provides an overview of end-to-end business processes that Dynamics 365 supports.
+About and how to use the business process guides
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+End-to-end business process
+Documentation and training
+Navigate to documentation for Dynamics 365 and Power Platform apps and components.
+Dynamics 365 documentation
+Hub page with links to documentation and training for each app.
+Power Platform documentation
+Analyze data, build solutions, automate processes, and create virtual agents.
+Provides information to help you create and implement the business and technology strategies necessary for your organization to succeed with Microsoft Power Platform.
+Find free e-learning content from Microsoft here.
+Troubleshooting guide for Dynamics 365
+Landing page with links to content for troubleshooting and answers to frequently asked questions across Dynamics 365 apps.
+Privacy and personal data for Microsoft Dynamics 365
+Landing page for compliance and Dynamics 365.

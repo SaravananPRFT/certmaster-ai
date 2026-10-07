@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Python Interview Guide — CertMasterAI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css" media="(prefers-color-scheme: light)">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb; --surface: #fff; --surface-2: #edf2f8; --text: #1e293b;
+      --muted: #5b687a; --accent: #2366d1; --border: #d9e1ec; --code: #f0f4fa;
+      --shadow: 0 8px 28px rgb(20 40 80 / 8%);
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1220; --surface: #121d2d; --surface-2: #1b2a3e; --text: #e6edf7;
+      --muted: #a8b6c9; --accent: #82b4ff; --border: #2b3b50; --code: #0e1827;
+      --shadow: 0 8px 28px rgb(0 0 0 / 25%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .layout { min-height: 100vh; }
+    aside {
+      position: fixed; inset: 0 auto 0 0; z-index: 5; width: 290px; overflow-y: auto;
+      padding: 24px 18px; background: var(--surface); border-right: 1px solid var(--border);
+    }
+    .brand { margin: 0 0 4px; font-size: 1.05rem; }
+    .subtitle { margin: 0 0 18px; color: var(--muted); font-size: .85rem; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 20px; }
+    button {
+      border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px;
+      color: var(--text); background: var(--surface-2); cursor: pointer; font: inherit;
+    }
+    button:hover { border-color: var(--accent); }
+    nav { display: grid; gap: 4px; }
+    nav a { padding: 6px 9px; border-radius: 7px; color: var(--muted); text-decoration: none; font-size: .9rem; line-height: 1.4; }
+    nav a:hover, nav a.active { color: var(--accent); background: var(--surface-2); }
+    nav a.sub { padding-left: 20px; font-size: .82rem; }
+    main { margin-left: 290px; padding: 44px clamp(22px, 6vw, 88px) 80px; }
+    article { max-width: 940px; margin: 0 auto; padding: clamp(24px, 5vw, 58px); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+    h1, h2, h3, h4 { line-height: 1.25; scroll-margin-top: 24px; }
+    h1 { margin-top: 0; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -.035em; }
+    h2 { margin-top: 2.5em; padding-bottom: .45em; border-bottom: 1px solid var(--border); font-size: 1.65rem; }
+    h3 { margin-top: 1.9em; font-size: 1.2rem; }
+    p, li { color: var(--text); }
+    a { color: var(--accent); }
+    blockquote { margin: 1em 0; padding: 12px 18px; border-left: 4px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; }
+    code { padding: .12em .35em; border-radius: 5px; background: var(--code); font: .9em ui-monospace, SFMono-Regular, Consolas, monospace; }
+    pre { overflow-x: auto; padding: 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--code); }
+    pre code { padding: 0; background: transparent; }
+    table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: .94rem; }
+    th, td { padding: 10px 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--surface-2); }
+    .priority { color: #9a5b00; background: #fff0c2; border-radius: 5px; padding: 2px 7px; font-weight: 750; font-size: .78em; white-space: nowrap; }
+    [data-theme="dark"] .priority { color: #ffd979; background: #4c3712; }
+    .flashcard { perspective: 900px; display: inline-block; width: min(100%, 340px); min-height: 150px; margin: 10px 12px 10px 0; cursor: pointer; }
+    .flashcard-inner { position: relative; min-height: 150px; transition: transform .55s; transform-style: preserve-3d; }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back { position: absolute; inset: 0; display: grid; place-items: center; padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); backface-visibility: hidden; text-align: center; }
+    .flashcard-back { transform: rotateY(180deg); background: var(--surface); }
+    .diagram { overflow-x: auto; text-align: center; }
+    footer { max-width: 940px; margin: 22px auto 0; color: var(--muted); text-align: center; font-size: .85rem; }
+    @media (max-width: 850px) {
+      aside { position: sticky; inset: 0 0 auto; width: 100%; max-height: 42vh; border-right: 0; border-bottom: 1px solid var(--border); }
+      main { margin-left: 0; padding: 20px 12px 48px; }
+      article { padding: 24px 19px; }
+    }
+    @media print {
+      aside, .toolbar, footer { display: none; }
+      main { margin: 0; padding: 0; }
+      article { max-width: none; box-shadow: none; border: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h2 class="brand">Python Interview Guide</h2>
+      <p class="subtitle">CertMasterAI project walkthrough</p>
+      <div class="toolbar">
+        <button id="theme-toggle" type="button" aria-label="Toggle theme">🌙 Theme</button>
+        <button id="print-page" type="button">Print / PDF</button>
+      </div>
+      <nav id="sidebar-nav" aria-label="Guide contents"></nav>
+    </aside>
+    <main>
+      <article id="content" aria-live="polite"></article>
+      <footer>Built from the Python interview guide for the CertMasterAI project.</footer>
+    </main>
+  </div>
+  <script type="text/markdown" id="md-source"># Python interview guide using CertMasterAI
+
+> A project-based path from Python fundamentals to async APIs. Topics marked **HIGH PRIORITY** are especially prominent in this codebase and worth prioritizing for interviews.
+
+## 1. Project architecture and execution flow
+
+CertMasterAI is a full-stack Microsoft certification practice platform. Its Python backend provides an HTTP API and AI question-generation pipeline; the frontend is a Next.js app that calls the API for exam sessions.
+
+| Area | Responsibility |
+|---|---|
+| App startup | Creates the FastAPI app, configures middleware, registers routes, and verifies the search index during startup in `backend/app/main.py`. |
+| API composition | Combines endpoint routers under `/api/v1` in `backend/app/api/v1/router.py`. |
+| HTTP endpoints | Handle question generation, exam sessions, exams, administration, study planning, and assistant requests in `backend/app/api/v1/endpoints/`. |
+| Data models | Define question, request, session, and related schemas with Pydantic in `backend/app/models/question.py`. |
+| Business logic | Generate questions, retrieve reference material, index documents, and validate questions in `backend/app/services/`. |
+| Configuration | Loads environment-based settings in `backend/app/core/config.py`. |
+| Offline data preparation | Scrapes reference pages and indexes text in `backend/scripts/`. |
+
+### Typical request flow
+
+1. The exam page calls the API to start a session from `frontend/src/app/exam/[examCode]/page.tsx`; the API client is in `frontend/src/lib/api.ts`.
+2. FastAPI routes the request to `backend/app/api/v1/endpoints/sessions.py`, which validates the incoming Pydantic model and asks the generator to make questions.
+3. `backend/app/services/generation/generator.py` selects an exam objective, retrieves reference content, requests a question from an available LLM provider, parses and validates the result, and filters duplicates.
+4. `backend/app/services/rag/retriever.py` uses Azure AI Search when configured, otherwise tries local Chroma retrieval and then a development fallback.
+5. The session endpoint stores the questions and answers in Python dictionaries and scores the submission.
+
+To prepare the knowledge base, `backend/scripts/download_docs.py` downloads and cleans documentation, and `backend/scripts/index_docs.py` chunks, embeds, and indexes it.
+
+**Persistence note:** exam sessions and question stores are in-memory dictionaries, so they do not survive a backend restart. Chroma and Azure AI Search store retrieved knowledge; the project does not use a relational database or ORM for sessions.
+
+```mermaid
+flowchart TD
+  A[Browser / Next.js] -->|HTTP request| B[FastAPI app]
+  B --> C[API router and endpoint]
+  C --> D[Pydantic request model]
+  C --> E[QuestionGenerator]
+  E --> F[Retriever: Azure Search / Chroma / fallback]
+  E --> G[LLM provider chain]
+  E --> H[Parse and validate Question]
+  H --> I[Session endpoint and in-memory store]
+  I -->|JSON response| A
+```
+
+## 2. Variables, data types, strings, and collections — **HIGH PRIORITY**
+
+### → Simple explanation
+
+Python variables are names that refer to objects. They do not need declared types: a variable can refer to a string now and another type later. Lists and dictionaries are mutable; strings, numbers, and tuples are immutable.
+
+### → Where it is used in this project
+
+The generator uses a dictionary of exam blueprints and a list of weighted question types in `backend/app/services/generation/generator.py`. The session handler uses dictionaries for sessions and answers, and sets for comparing selected and correct answers in `backend/app/api/v1/endpoints/sessions.py`.
+
+The model layer uses strings, numbers, lists, dictionaries, and optional values extensively in `backend/app/models/question.py`.
+
+### → Code walkthrough
+
+In the generator:
+
+- A **list** holds question-type/weight pairs.
+- A **tuple** is the natural shape of each pair, for example `("YesNo", 10)`.
+- A **dictionary** maps exam codes to exam details.
+- **Strings** hold exam codes, objectives, prompts, and questions.
+- **Numbers** represent weights, scores, token budgets, and counts.
+
+The session submission converts selected options and correct answers into **sets** before comparing them. Set equality ignores order, so `{"A", "B"} == {"B", "A"}` is true—appropriate when answer order does not matter.
+
+Strings are also built with f-strings, such as `f"{exam_code} {objective} {difficulty} question"`, which interpolate values into a template.
+
+### → Why it is used
+
+Each collection has a useful role:
+
+- Use a **list** when order matters or duplicates are allowed.
+- Use a **tuple** for a small fixed group of values, such as a type and its weight.
+- Use a **set** for uniqueness and membership or order-independent comparison.
+- Use a **dictionary** for fast key-based lookup, such as `sessions[session_id]`.
+
+### → Simple standalone example
+
+```python
+name = "Mina"
+scores = [80, 95, 88]
+profile = {"name": name, "scores": scores}
+unique_scores = set(scores)
+coordinates = (10, 20)
+
+average = sum(scores) / len(scores)
+message = f"{profile['name']} averaged {average:.1f}"
+```
+
+### → Important interview points
+
+- `list` and `dict` are mutable; `tuple`, `str`, `int`, and `float` are immutable.
+- A dictionary lookup by key is typically O(1) on average; finding a list item is O(n).
+- Set elements and dictionary keys must be hashable.
+- `==` compares values; `is` checks object identity.
+- A variable name is not the object itself; it refers to an object.
+
+**Interview Q: What is the difference between a list and a tuple?**  
+**Answer:** A list is mutable and typically represents a collection that will change. A tuple is immutable and is useful for fixed groups of values.
+
+**Interview Q: When would you use a set?**  
+**Answer:** When I need unique elements, fast membership checks, or order-independent set operations.
+
+### → Common mistakes / follow-up questions
+
+- Don’t use `is` to compare ordinary values; use `==`.
+- Don’t assume a set preserves meaningful ordering.
+- Be cautious with mutable defaults in function parameters. For Pydantic models, prefer explicit factories such as `Field(default_factory=list)` for clarity.
+
+## 3. Conditions, loops, and comprehensions — **HIGH PRIORITY**
+
+### → Simple explanation
+
+`if`, `elif`, and `else` choose between paths. `for` iterates over items; `while` repeats while a condition is true. Comprehensions create collections concisely from an iterable.
+
+### → Where it is used in this project
+
+The generator uses conditions to choose retrieval/generation behavior and loops to generate batches. The session code loops over questions when scoring. The validator uses comprehensions to build filtered lists and uses loops for duplicate checks in `backend/app/services/validation/validator.py`.
+
+### → Code walkthrough
+
+In session scoring, a loop processes each question. A set comparison checks whether the answer is correct. The skipped-question count is calculated with a generator expression passed to `sum()`.
+
+The generator’s `generate_batch()` uses a `while` loop to create batches until it has enough questions or has exhausted its remaining attempts.
+
+A typical project list comprehension looks like:
+
+```python
+questions = [q for q in questions if q.exam == exam]
+```
+
+It creates a new list containing only questions for the requested exam.
+
+### → Why it is used
+
+Comprehensions are compact for simple mapping and filtering. Regular loops are clearer when the body has multiple steps, logging, or error handling.
+
+### → Simple standalone example
+
+```python
+temperatures = [12, 19, 25, 8]
+
+labels = [
+    "warm" if temp >= 18 else "cool"
+    for temp in temperatures
+]
+
+for label in labels:
+    print(label)
+```
+
+### → Important interview points
+
+- `break` exits the nearest loop.
+- `continue` skips to the next iteration.
+- `pass` is a no-op placeholder; it does not skip an iteration.
+- A comprehension creates a new collection; it is not always more readable than a loop.
+- A generator expression, such as `(x * x for x in values)`, computes values lazily.
+
+**Interview Q: What is the difference between `break` and `continue`?**  
+**Answer:** `break` exits the loop. `continue` skips the rest of the current iteration and proceeds to the next one.
+
+**Interview Q: What is a list comprehension?**  
+**Answer:** A compact expression that builds a list by transforming or filtering an iterable.
+
+### → Common mistakes / follow-up questions
+
+- Don’t modify a list while iterating over it unless the behavior is deliberate.
+- A comprehension with deeply nested conditions can be harder to read than a normal loop.
+- A `while` loop must make progress toward its stopping condition, or it can run forever.
+
+## 4. Functions, parameters, return values, and control flow — **HIGH PRIORITY**
+
+### → Simple explanation
+
+A function is a reusable block of code. **Parameters** are names in its definition; **arguments** are the values supplied when it is called. `return` sends a result back to the caller. If a function reaches its end without returning, Python returns `None`.
+
+### → Where it is used in this project
+
+The project has ordinary and asynchronous functions throughout its services and endpoints. For example, `generate_question()` accepts a request and optionally previously generated questions; `build_context()` accepts retrieved chunks and a token limit. See `backend/app/services/generation/generator.py` and `backend/app/services/rag/retriever.py`.
+
+### → Code walkthrough
+
+In `generate_question(request, previously_generated=None)`:
+
+- `request` is a required parameter.
+- `previously_generated` is optional.
+- A value is returned when a valid question passes validation.
+- `None` signals that generation or quality checks did not produce a usable question.
+
+The generator’s `generate_batch()` calls `generate_question()` multiple times, collects valid results, and returns a `list[Question]`.
+
+### → Why it is used
+
+Functions separate responsibilities: an endpoint handles HTTP concerns, while a service function handles generation logic. This organization makes the code easier to reuse and reason about.
+
+### → Simple standalone example
+
+```python
+def calculate_total(price: float, quantity: int = 1) -> float:
+    return price * quantity
+
+subtotal = calculate_total(12.5, quantity=3)
+```
+
+### → Important interview points
+
+- Default arguments are evaluated once when the function is defined. Avoid mutable defaults such as `items=[]`; use `None` and create a new list inside, or use an appropriate factory.
+- Keyword arguments make calls more explicit.
+- Python functions are objects: they can be passed to other functions, returned, and stored in variables.
+- `return` exits the function immediately.
+
+**Interview Q: What is the difference between a parameter and an argument?**  
+**Answer:** A parameter appears in the function definition; an argument is the value passed when calling it.
+
+**Interview Q: What does a function return if there is no `return` statement?**  
+**Answer:** It returns `None`.
+
+### → `*args` and `**kwargs`
+
+The project passes a dictionary of search options with `client.search(**search_kwargs)` in `backend/app/services/rag/retriever.py`. That is **dictionary unpacking** into keyword arguments. The code does not define its own `*args` or `**kwargs` function.
+
+```python
+def describe(first, *args, **kwargs):
+    print(first)   # one positional argument
+    print(args)    # remaining positional arguments as a tuple
+    print(kwargs)  # named arguments as a dictionary
+
+describe("report", 1, 2, format="json")
+```
+
+**Interview answer:** `*args` collects extra positional arguments into a tuple; `**kwargs` collects extra keyword arguments into a dictionary. In a call, `*items` and `**options` unpack iterables and mappings.
+
+### → `yield`, `break`, `continue`, and `pass`
+
+`yield` appears in the app lifespan function in `backend/app/main.py`, where it separates startup work from shutdown work under `asynccontextmanager`. That is not a typical user-defined data generator. The indexing script uses `break` and `continue` to stop processing or skip unsuitable files in `backend/scripts/index_docs.py`. A `pass` appears in an exception branch in `backend/app/services/rag/chroma_retriever.py`.
+
+A normal generator example:
+
+```python
+def count_up_to(limit):
+    number = 1
+    while number <= limit:
+        yield number
+        number += 1
+
+for number in count_up_to(3):
+    print(number)
+```
+
+**Interview answer:** `yield` returns one value at a time while preserving the function’s state; `return` exits the function. Generators can save memory for large or streaming data.
+
+**Mistake to avoid:** Don’t use `pass` to silently swallow an error in production code. Log, handle, or re-raise it as appropriate.
+
+## 5. Classes, objects, Pydantic models, and OOP — **HIGH PRIORITY**
+
+### → Simple explanation
+
+A class describes the data and behavior its objects have. An object is an instance of a class. `__init__` initializes an instance; `self` refers to that specific instance.
+
+### → Where it is used in this project
+
+`backend/app/models/question.py` defines Pydantic model classes such as `Question` and `QuestionGenerationRequest`. Service classes such as `QuestionGenerator`, `DocumentRetriever`, and `QuestionValidator` encapsulate related work in `backend/app/services/generation/generator.py`, `backend/app/services/rag/retriever.py`, and `backend/app/services/validation/validator.py`.
+
+### → Code walkthrough
+
+`QuestionGenerator.__init__()` sets up client attributes such as `self._openai_client`. They start as `None`; helper methods create the external client when needed and retain it for reuse.
+
+`Question` inherits from Pydantic’s `BaseModel`. Pydantic validates field values and can serialize a model into a dictionary for API output.
+
+The `_to_camel()` helper and `CamelModel` configure aliases so Python-side snake_case fields can be represented as camelCase in serialized data.
+
+### → Why it is used
+
+Models give the API a consistent data shape. Service objects group related state and operations—for example, a retriever can keep a reusable client rather than creating one for every request.
+
+### → Simple standalone example
+
+```python
+class Dog:
+    def __init__(self, name: str):
+        self.name = name
+
+    def speak(self) -> str:
+        return f"{self.name} says woof"
+
+dog = Dog("Pip")
+print(dog.speak())
+```
+
+### → Important interview points
+
+- `self` is the instance passed as the first argument to an instance method; it is a naming convention, not a keyword.
+- `__init__` initializes an already-created instance; it is not technically the object-construction method (`__new__` is).
+- Pydantic is a library built on Python classes; its models add validation and serialization behavior.
+
+**Interview Q: What is the difference between a class and an object?**  
+**Answer:** A class defines a type; an object is a particular instance of that type with its own state.
+
+**Interview Q: What does `self` mean?**  
+**Answer:** It refers to the instance on which an instance method is being called.
+
+### → Common mistakes / follow-up questions
+
+- Don’t confuse class attributes (shared through the class) with instance attributes (belonging to an instance).
+- Python’s underscore naming convention communicates that an attribute is internal; it does not enforce strict privacy.
+- The project uses inheritance from Pydantic `BaseModel`, but does not define a broad domain-class inheritance hierarchy.
+
+## 6. Encapsulation, inheritance, polymorphism, and methods
+
+### → Simple explanation
+
+- **Encapsulation:** Keep related state and behavior together, and make internal details clearly distinguishable.
+- **Inheritance:** Define a class in terms of a parent class, reusing or extending its behavior.
+- **Polymorphism:** Use a common operation with different implementations, depending on the object or provider.
+
+### → Where it is used in this project
+
+The clearest inheritance example is the Pydantic model classes inheriting from `BaseModel` in `backend/app/models/question.py`.
+
+The generator has provider-specific methods for Portkey, Azure OpenAI, and Anthropic, and chooses among them in `_llm_generate()` in `backend/app/services/generation/generator.py`. This resembles a **strategy/fallback** design, but it is not implemented as a formal hierarchy of interchangeable provider classes.
+
+Attributes such as `self._client` use the leading-underscore convention to signal internal state.
+
+### → Why it is used
+
+Provider-specific functions let the application use different external LLM services while keeping the generation flow in one place. The fallback order keeps the system usable when a preferred provider is unavailable.
+
+### → Simple standalone example
+
+```python
+class Shape:
+    def area(self) -> float:
+        raise NotImplementedError
+
+class Square(Shape):
+    def __init__(self, side: float):
+        self.side = side
+
+    def area(self) -> float:
+        return self.side ** 2
+
+def print_area(shape: Shape) -> None:
+    print(shape.area())
+```
+
+### → Important interview points
+
+- Composition (“has a”) is often preferable to inheritance (“is a”) when sharing implementation would create a rigid hierarchy.
+- Duck typing means an object can be used if it provides the operations the caller needs, even without a shared parent class.
+- Instance methods receive `self`. Class methods use `@classmethod` and receive `cls`; static methods use `@staticmethod` and receive neither automatically.
+
+**Interview Q: Does Python support polymorphism?**  
+**Answer:** Yes. It supports polymorphism through overriding, duck typing, and calling the same interface on different objects.
+
+### → Common mistakes / follow-up questions
+
+- Don’t call a provider fallback a formal Strategy pattern unless the design actually uses interchangeable strategy objects or a defined interface.
+- No abstract base class, `@classmethod`, or `@staticmethod` is a major pattern in this backend. Know what they do, but prioritize the project’s service classes and Pydantic models.
+
+## 7. Decorators and lambda functions
+
+### → Simple explanation
+
+A **decorator** takes a function or class and returns a modified or wrapped one. A **lambda** is a small anonymous function, usually used for a short operation.
+
+### → Where it is used in this project
+
+FastAPI route decorators such as `@router.post(...)` register endpoint functions with the API. `@asynccontextmanager` in `backend/app/main.py` adapts an async generator to a lifespan context manager. `@dataclass` in `backend/app/services/validation/validator.py` generates standard data-container methods.
+
+A lambda sorts retrieved chunks by score in `backend/app/services/rag/retriever.py`.
+
+### → Why it is used
+
+Decorators let frameworks register or augment behavior without putting framework mechanics inside the function body. A lambda is convenient as a one-use sorting key.
+
+### → Simple standalone example
+
+```python
+def announce(function):
+    def wrapper():
+        print("Starting")
+        result = function()
+        print("Finished")
+        return result
+    return wrapper
+
+@announce
+def work():
+    return "done"
+
+values = [("a", 2), ("b", 1)]
+ordered = sorted(values, key=lambda item: item[1])
+```
+
+### → Important interview points
+
+- `@announce` is approximately equivalent to `work = announce(work)`.
+- A decorator wrapper should usually preserve the original function’s metadata with `functools.wraps`.
+- `lambda` expressions contain one expression, not a block of statements.
+
+**Interview Q: What is a decorator?**  
+**Answer:** A callable that accepts another function or class and returns a wrapped or modified one; it is commonly used for cross-cutting behavior or framework registration.
+
+### → Common mistakes / follow-up questions
+
+- A route decorator does not mean the project defines its own decorator implementation; FastAPI supplies the decorator.
+- Avoid complex logic in lambdas; use a named function when it improves readability.
+
+## 8. Exceptions, JSON, and file handling
+
+### → Simple explanation
+
+Exceptions represent errors or unusual conditions. `try` marks code that may fail; `except` handles selected failures; `raise` signals an error. The `json` library converts between Python data and JSON text. Context-managed files are closed automatically.
+
+### → Where it is used in this project
+
+The generator parses LLM output with `json.loads()` and handles `JSONDecodeError` in `backend/app/services/generation/generator.py`. Endpoints use `raise HTTPException(...)` for API errors in `backend/app/api/v1/endpoints/questions.py`.
+
+The data scripts use `Path.read_text()`/`write_text()` and `with open(...)` for metadata in `backend/scripts/index_docs.py` and `backend/scripts/download_docs.py`.
+
+### → Code walkthrough
+
+`json.loads(cleaned)` turns an LLM’s JSON string into Python dictionaries and lists. The generator then constructs Pydantic models from the parsed values. `json.dumps(...)` turns Python data back into a JSON string.
+
+In file code, `with open(path, encoding="utf-8") as f:` obtains a file handle and closes it when the block exits, including if an exception occurs.
+
+### → Why it is used
+
+LLMs return text, but the rest of the application needs structured fields. JSON parsing plus Pydantic validation is a boundary between untrusted text and typed application data. Context-managed files reduce resource leaks.
+
+### → Simple standalone example
+
+```python
+import json
+from pathlib import Path
+
+record = {"name": "Mina", "active": True}
+text = json.dumps(record)
+
+parsed = json.loads(text)
+Path("record.json").write_text(text, encoding="utf-8")
+```
+
+### → Important interview points
+
+- `json.loads()` parses a string; `json.load()` reads JSON from a file-like object.
+- `json.dumps()` returns a string; `json.dump()` writes to a file-like object.
+- `raise` can re-raise an active exception using bare `raise` inside an `except` block.
+- `else` and `finally` are useful parts of `try` structures: `else` runs if no exception occurred; `finally` runs regardless. The project uses `try`/`except` extensively, but not `try`/`else`/`finally` as a core pattern.
+
+**Interview Q: Why use `with open(...)`?**  
+**Answer:** It guarantees the file is closed when the block exits, even if an error occurs.
+
+**Interview Q: What is the difference between `json.load` and `json.loads`?**  
+**Answer:** `load` reads from a file-like object; `loads` parses a string.
+
+### → Common mistakes / follow-up questions
+
+- Catch specific exceptions when practical. Catching `Exception` broadly can hide programming errors unless the code logs, handles, or re-raises them appropriately.
+- Don’t confuse valid JSON with valid application data; parsing JSON does not by itself validate required fields or business rules.
+- Specify text encoding explicitly for portable file handling.
+
+## 9. Type hints, `Optional`, `Literal`, and Pydantic — **HIGH PRIORITY**
+
+### → Simple explanation
+
+Type hints document the kinds of values a function or field expects. Python does not enforce most annotations by itself at runtime. Pydantic uses model annotations to validate and serialize data.
+
+### → Where it is used in this project
+
+The project uses annotations such as `list[str]`, `dict[str, str]`, `Optional[str]`, and `str | None`. `Literal` restricts values like question type and difficulty. `Field` adds constraints and defaults in `backend/app/models/question.py`.
+
+The app’s settings inherit from `BaseSettings` in `backend/app/core/config.py`.
+
+### → Code walkthrough
+
+A request model can declare `count: int = Field(default=1, ge=1, le=100)`. This states that `count` is an integer with a default of 1 and requires it to be between 1 and 100. A `Literal` type restricts a field to a specified set of string values.
+
+Pydantic checks these constraints when it constructs a model from incoming request data. That is runtime validation, unlike a plain Python annotation on an ordinary function.
+
+### → Why it is used
+
+Type hints make APIs easier to understand and support editor/type-checker assistance. Pydantic turns annotations into runtime request validation and consistent serialization.
+
+### → Simple standalone example
+
+```python
+from typing import Optional
+
+def find_user(user_id: int) -> Optional[str]:
+    if user_id == 7:
+        return "Mina"
+    return None
+```
+
+Equivalent modern syntax is `str | None`. A list annotation might be `list[int]`; a mapping might be `dict[str, float]`.
+
+### → Important interview points
+
+- `Optional[T]` means `T | None`; it does not itself mean the argument has a default.
+- In Pydantic v2, a field annotated as optional but lacking a default can still be required to appear in the input. Use `= None` when omission should be allowed.
+- `Literal["Easy", "Medium", "Hard"]` narrows allowed values.
+- `Field(ge=..., le=...)` expresses numeric bounds that Pydantic validates.
+- `Union[A, B]` means a value may match either type; `A | B` is modern syntax.
+
+**Interview Q: Do Python type hints enforce types at runtime?**  
+**Answer:** Not generally. Python does not enforce ordinary annotations on its own. Libraries such as Pydantic can inspect annotations and perform runtime validation.
+
+**Interview Q: What does `Optional[str]` mean?**  
+**Answer:** The value can be a string or `None`. It does not automatically make a function parameter or model field optional to omit.
+
+### → Common mistakes / follow-up questions
+
+- A type hint is not a substitute for input validation.
+- Be consistent about `Optional[T]` versus `T | None`; they express the same union concept in different styles.
+- Prefer `Field(default_factory=list)` or `Field(default_factory=dict)` for mutable Pydantic defaults; it makes per-instance intent explicit.
+
+## 10. Async, `await`, context managers, and APIs — **HIGH PRIORITY**
+
+### → Simple explanation
+
+An `async def` function is a coroutine function. `await` pauses that coroutine while an asynchronous operation is pending, allowing the event loop to run other work. Async I/O helps when a program spends time waiting on networks or other external services.
+
+### → Where it is used in this project
+
+FastAPI endpoint handlers and LLM service calls use `async def` and `await`. The generator creates question tasks and uses `asyncio.gather()` to run them concurrently in `backend/app/services/generation/generator.py`.
+
+The app lifecycle uses `@asynccontextmanager` with `yield` in `backend/app/main.py`. FastAPI endpoint decorators define HTTP methods, paths, and response models in `backend/app/api/v1/endpoints/questions.py`.
+
+### → Code walkthrough
+
+`generate_batch()` creates several coroutine calls to `generate_question()` and awaits `asyncio.gather(...)`. This allows overlapping I/O, such as embedding and model calls. The result collection handles exceptions as results so one failed task need not prevent all other results from being processed.
+
+At startup, the lifespan function performs setup, reaches `yield` while the app is serving requests, then continues into shutdown logic after the app stops.
+
+### → Why it is used
+
+Calls to language models and search services spend much of their time waiting for network responses. Async code can serve other requests while those waits are in progress.
+
+### → Simple standalone example
+
+```python
+import asyncio
+
+async def fetch_name():
+    await asyncio.sleep(0.1)  # represents waiting for I/O
+    return "Mina"
+
+async def main():
+    name = await fetch_name()
+    print(name)
+
+asyncio.run(main())
+```
+
+### → Important interview points
+
+- `await` works on an awaitable, normally inside `async def`.
+- `asyncio.gather()` schedules multiple awaitables and returns results in input order.
+- Async concurrency is not the same as CPU parallelism. CPU-heavy work usually needs multiprocessing, native code, or another execution strategy.
+- A synchronous, blocking call inside an async handler can block the event loop. For example, the retriever’s Azure `SearchClient.search()` call is synchronous even though `retrieve()` is async; this is worth recognizing when reasoning about scalability.
+- `with` manages synchronous context managers; `async with` manages asynchronous ones.
+
+**Interview Q: Does `async` automatically make code faster?**  
+**Answer:** No. It helps with concurrent I/O waits. It does not automatically speed up CPU-bound code, and blocking calls can still stall the event loop.
+
+**Interview Q: What does `await` do?**  
+**Answer:** It suspends the current coroutine until an awaitable produces a result, allowing the event loop to run other tasks in the meantime.
+
+### → Common mistakes / follow-up questions
+
+- Don’t call `asyncio.run()` inside an already-running event loop.
+- Don’t forget to `await` a coroutine.
+- `asyncio.gather()` can propagate exceptions by default; the project opts into collecting exceptions with `return_exceptions=True` and checks each result.
+- Concurrency may overload an external provider; production systems often need explicit limits, timeouts, and retry policies.
+
+### → API concepts in this project
+
+FastAPI connects Python callables to HTTP endpoints. For example, `@router.post("/generate", response_model=list[Question])` registers a POST route, parses/validates the request, and serializes the response model. `HTTPException` communicates HTTP error status and detail. `APIRouter` groups endpoints so they can be composed under a versioned prefix.
+
+**Standalone example:**
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/hello")
+async def hello(name: str = "there"):
+    return {"message": f"Hello, {name}"}
+```
+
+The Python handler returns ordinary Python data; FastAPI encodes it as JSON for the HTTP response.
+
+## 11. Modules, packages, imports, and design patterns
+
+### → Simple explanation
+
+A module is a Python file. A package is a directory structure Python can import from. Imports let a module reuse names defined elsewhere.
+
+### → Where it is used in this project
+
+The `app` package separates API, core configuration, models, and services into subpackages. The router imports endpoint modules, and endpoints import the relevant models and service objects. See `backend/app/api/v1/router.py`.
+
+The standalone indexing script adjusts `sys.path` so it can import `app.*` when run from the backend directory in `backend/scripts/index_docs.py`.
+
+### → Why it is used
+
+The package structure separates HTTP concerns from business logic and data models. That makes individual components easier to understand and reuse.
+
+### → Simple standalone example
+
+```python
+# math_helpers.py
+def double(value: int) -> int:
+    return value * 2
+
+# another file
+from math_helpers import double
+print(double(4))
+```
+
+### → Important interview points
+
+Patterns visible in this project:
+
+- **Layered architecture:** API handlers call services, which use models and external clients.
+- **Pipeline:** retrieval → context building → generation → parsing → validation.
+- **Fallback chain:** configured LLM providers are attempted in order.
+- **Module-level shared service objects:** instances such as the retriever and generator are created once and imported elsewhere. This is singleton-like behavior, not a formally enforced Singleton class.
+- **Router composition:** separate routers are combined into one versioned API.
+
+**Interview Q: Why split API handlers from service logic?**  
+**Answer:** It separates transport concerns from business rules, reduces duplication, and makes services easier to test and reuse.
+
+### → Common mistakes / follow-up questions
+
+- Avoid circular imports: module A importing B while B imports A can create partially initialized modules.
+- A module-level instance is shared within the Python process; it is not shared between separate worker processes.
+- The project does not implement a formal dependency-injection container or abstract provider hierarchy.
+
+## 12. Environment variables, logging, dependencies, and virtual environments
+
+### → Simple explanation
+
+Environment variables configure an application outside its source code. Logging records runtime events. Dependency manifests list third-party packages; virtual environments isolate installed packages between projects.
+
+### → Where it is used in this project
+
+`Settings` in `backend/app/core/config.py` loads values from environment variables and `.env`. The example names are in `backend/.env.example`.
+
+The app and services use Python’s `logging` module for startup, fallback, validation, and error messages. Dependencies are listed in `backend/requirements.txt`.
+
+### → Why it is used
+
+Credentials and deployment-specific values should not be hard-coded in source. Settings centralize configuration, while logs help diagnose which stage failed.
+
+### → Simple standalone example
+
+```python
+import logging
+import os
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+environment = os.getenv("APP_ENV", "development")
+logger.info("Running in %s mode", environment)
+```
+
+### → Important interview points
+
+- A virtual environment isolates Python packages; it does not isolate environment variables or external services.
+- A dependency file specifies what to install; a virtual environment is where those packages are installed.
+- Log levels commonly include `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`.
+- Never commit real API keys or passwords. Keep local `.env` files private and use secret management in deployments.
+
+**Interview Q: What problem does a virtual environment solve?**  
+**Answer:** It isolates installed packages for a project so one project’s dependency versions don’t interfere with another’s.
+
+### → Common mistakes / follow-up questions
+
+- Don’t assume a value from `.env.example` is a production value.
+- Settings are instantiated at module import in this project, so environment configuration should be present before the app loads.
+- Logging a full secret or sensitive request body can leak credentials or personal data.
+
+## 13. Topics to know, but not heavily represented in this code
+
+| Topic | How it relates to CertMasterAI |
+|---|---|
+| **Custom iterators / generators** | The code uses ordinary iteration and a lifespan `yield`, but not a custom iterator class or a typical data-stream generator. |
+| **`try`/`else`/`finally`** | `try`/`except` is common. Learn `else` and `finally` for interviews, but they are not key patterns in the backend. |
+| **`*args` / function-defined `**kwargs`** | The backend uses dictionary unpacking for a search call, but does not define a core function with variadic parameters. |
+| **Class/static methods** | Not a significant pattern here. Know the distinction from instance methods. |
+| **Abstract classes** | No explicit `ABC` / abstract base class is central to the code. |
+| **Database/ORM** | No relational database or ORM is used for sessions/questions. In-memory Python dictionaries hold this application state; Azure AI Search and Chroma serve document retrieval. |
+| **Redis** | It appears in configuration and dependencies, but is not the session storage pattern described above. |
+| **`finally` and custom context managers** | `with` and async lifespan context management are visible; there is no custom general-purpose context manager central to the application. |
+| **`raise`** | Used to signal API errors via `HTTPException` and to raise runtime errors in some service code. |
+| **`pass`** | Present as a no-op in an exception path; it is syntax to know, but generally should not hide errors silently. |
+
+## Quick interview flashcards
+
+<div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front"><strong>Question</strong><br>What is the difference between a coroutine and a thread?</div><div class="flashcard-back"><strong>Answer</strong><br>A coroutine cooperatively yields at await points on an event loop; a thread is scheduled by the operating system and can execute blocking work independently.</div></div></div>
+
+<div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front"><strong>Question</strong><br>Do Python type hints validate input automatically?</div><div class="flashcard-back"><strong>Answer</strong><br>No. Python does not enforce ordinary annotations at runtime. Pydantic or another validation library can inspect annotations and validate data.</div></div></div>
+
+<div class="flashcard"><div class="flashcard-inner"><div class="flashcard-front"><strong>Question</strong><br>Why use a set to compare chosen answers?</div><div class="flashcard-back"><strong>Answer</strong><br>Set equality ignores order, which is useful when answer selection is order-independent; sets also remove duplicates.</div></div></div>
+
+## Suggested interview-preparation order
+
+1. **HIGH PRIORITY:** collections, mutability, loops, comprehensions, functions, and return values.
+2. **HIGH PRIORITY:** classes, `self`, Pydantic models, type hints, and validation.
+3. **HIGH PRIORITY:** async/await, coroutine concurrency, API request flow, and exception handling.
+4. **HIGH PRIORITY:** imports, configuration, logging, and dependency/virtual-environment basics.
+5. Review less-used language features—`*args`, `**kwargs`, `yield`, `classmethod`, `staticmethod`, abstract classes, and `try`/`else`/`finally`—with small examples, while keeping clear which features the project actually uses.
+
+### Final project takeaways
+
+- The most interview-relevant Python foundation here is **collections + functions + classes + typing/Pydantic + async I/O**.
+- Trace a generated-question request end to end: FastAPI route → Pydantic request → generator → retriever/provider → JSON parsing → Pydantic response.
+- Be ready to discuss trade-offs: in-memory session storage is simple but not persistent; async improves I/O concurrency but synchronous calls can block the event loop; provider fallbacks improve availability but should be paired with clear logging, timeouts, and tests.
+- Distinguish what exists from what is only configured: Redis settings do not themselves implement caching, and a package dependency does not prove that its service is wired into the request flow.
+
+## 14. First-Time Application Startup and End-to-End Execution Flow
+
+This section traces what the current code actually does, from launching the backend to handling a frontend request. “First run” does **not** mean the app automatically downloads or indexes all knowledge documents: the checked-in Python code keeps those data-preparation steps in separate commands.
+
+### 14.1 First-time launch commands
+
+The repository README's manual backend command is run from `backend/`:
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+# Add valid service credentials to .env when using Azure/LLM services.
+uvicorn app.main:app --reload --port 8000
+```
+
+The application launch command is `uvicorn app.main:app --reload --port 8000`. Uvicorn imports the module `app.main`, then reads its module-level `app` object. On Windows, the checked-in `backend/start.bat` uses port **8003**; `backend/start.sh` and `docker-compose.yml` also use **8003**. The README manual command and frontend's default API base URL use **8000**. When using an 8003 launch, configure the frontend's `NEXT_PUBLIC_API_URL` accordingly; Docker Compose already sets it to `http://backend:8003/api/v1`.
+
+The virtual environment and `pip install` are developer setup steps, not code run by FastAPI at each startup. `.env` is read by `pydantic-settings` when the settings object is constructed, as the app imports `app.core.config`.
+
+### 14.2 Exact Python startup order
+
+#### Step A — Uvicorn imports the application module
+
+`uvicorn app.main:app` resolves the Python package/module and imports `backend/app/main.py`. With `--reload`, Uvicorn also runs a file watcher; when files change, the serving process is restarted and the application module is imported again.
+
+At module import, `main.py` imports FastAPI, the middleware classes, `asynccontextmanager`, `settings`, and `api_router`. Python executes imported modules before it proceeds past each import.
+
+#### Step B — Settings load during the configuration import
+
+`backend/app/core/config.py` defines `Settings(BaseSettings)` and runs `settings = Settings()` at module scope. Pydantic Settings reads environment variables and the configured `.env` file (`env_file = ".env"`), applies defaults for omitted values, and ignores extra settings. The result is a shared settings object imported by application and service modules.
+
+This happens during module import, before the FastAPI app object is built. It does **not** create any Azure, Redis, database, or Chroma connection.
+
+#### Step C — Router imports load endpoints and service singletons
+
+`main.py` imports `api_router` from `backend/app/api/v1/router.py`. That router imports the endpoint modules (`questions`, `sessions`, `admin`, `exams`, `planner`, `assistant`).
+
+The session and question endpoint modules import the module-level `generator` from `backend/app/services/generation/generator.py`. Importing that file defines blueprint/prompt/provider logic and constructs `generator = QuestionGenerator()`. Its `__init__()` only initializes three client attributes to `None`; it does not yet connect to an LLM.
+
+The generator also imports the module-level `retriever` and `validator`, which instantiate `DocumentRetriever()` and `QuestionValidator()`. `DocumentRetriever.__init__()` sets its Azure Search client to `None`; neither it nor the validator connects to a service. The indexing endpoint/import path likewise makes the indexer module available only when needed at startup or an indexing request.
+
+FastAPI decorators such as `@router.post(...)` register endpoint functions on their local `APIRouter` objects as those endpoint modules load.
+
+#### Step D — `main.py` builds and configures the FastAPI app
+
+After imports, `backend/app/main.py` configures Python logging and creates `app = FastAPI(...)`, passing the `lifespan` async context manager. It adds CORS and GZip middleware and calls `app.include_router(api_router)`. This mounts the already-assembled versioned routes before the server is marked ready.
+
+#### Step E — Startup lifespan tries to ensure the Azure Search index
+
+Before accepting requests, FastAPI enters `lifespan()` in `main.py`. The lifespan function imports `indexer` from `backend/app/services/indexing/indexer.py` and awaits `indexer.ensure_index()`.
+
+`ensure_index()` lazily creates an Azure `SearchIndexClient` in `_get_index_client()` and calls `create_or_update_index(INDEX_SCHEMA)`. This startup attempt requires correctly configured Azure Search settings and network access. `ensure_index()` catches and logs its own errors; it does not raise them. The outer lifespan also has a catch for unexpected errors, then yields so the app can serve requests. No local document ingestion is invoked here.
+
+#### Step F — The server becomes ready
+
+After the lifespan reaches `yield`, Uvicorn serves requests. The `/health` endpoint is defined directly in `main.py`; the versioned API routes are mounted under `/api/v1`.
+
+### 14.3 Backend startup sequence diagram
+
+```mermaid
+flowchart TD
+  A["Developer launch command<br/>uvicorn app.main:app"] --> B["Uvicorn imports app.main"]
+  B --> C["Import app.core.config<br/>construct settings = Settings()"]
+  B --> D["Import api.v1.router"]
+  D --> E["Import endpoint modules"]
+  E --> F["Import services<br/>construct generator, retriever, validator"]
+  F --> G["Clients remain lazy / None"]
+  C --> H["main.py builds FastAPI app"]
+  G --> H
+  H --> I["Add CORS and GZip middleware"]
+  I --> J["include_router(api_router)<br/>routes mounted at /api/v1"]
+  J --> K["FastAPI enters lifespan()"]
+  K --> L["indexer.ensure_index()"]
+  L --> M["Lazily create Azure SearchIndexClient"]
+  M --> N["create_or_update_index(INDEX_SCHEMA)<br/>or log failure and continue"]
+  N --> O["lifespan yields; Uvicorn serves requests"]
+```
+
+### 14.4 What is and is not initialized at startup
+
+| Resource | Actual behavior and timing |
+|---|---|
+| `.env` settings | Loaded when `settings = Settings()` runs during `app.core.config` import. `.env.example` is a template; the README asks the developer to copy it to `.env` and configure credentials. |
+| FastAPI routes/middleware | Built and mounted during import of `app.main`; endpoint modules and their route decorators are imported before `include_router()`. |
+| Azure AI Search index | `ensure_index()` calls `create_or_update_index(INDEX_SCHEMA)` during every application lifespan startup. It is an ensure/create-or-update operation, not a document-ingestion job. |
+| Relational database | **Not present in this request/session path.** There is no ORM or database startup connection. Sessions and question stores are Python dictionaries in process memory. |
+| Redis | A URL and dependency are configured, and Docker Compose can start a Redis container. The backend request flow inspected here does not instantiate a Redis client or use it for session storage. |
+| ChromaDB | **Not initialized at application startup.** The `PersistentClient` is created lazily by `ChromaRetriever._get_client()` only when local retrieval/indexing is attempted. A local collection is read with `get_collection()`; missing data leads to a fallback. |
+| Chroma collection and documents | Not automatically created or populated on app startup. `scripts/index_docs.py` / `ChromaRetriever.index_chunks()` or an explicit admin indexing route performs ingestion; indexing uses `get_or_create_collection()` and `upsert()`. |
+| Local sentence-transformer | Not loaded at app startup. `LocalEmbedder._get_model()` constructs `SentenceTransformer("all-MiniLM-L6-v2")` on the first local embed call (Chroma retrieval or indexing). The library may download model files on first use if not cached. The model is cached on the `LocalEmbedder` instance for that process. |
+| Azure OpenAI, Portkey, Anthropic clients | Not constructed at app startup. `QuestionGenerator._get_openai_client()`, `_get_portkey_client()`, and `_get_anthropic_client()` construct clients only when the corresponding operation/provider is first called. |
+| Document scraping/initial ingestion | Not run by `main.py` or the startup lifespan. The separate `python scripts/download_docs.py --all` and `python scripts/index_docs.py --all` commands are explicit workflows, not automatic first-run actions. |
+
+### 14.5 First startup versus later startups
+
+| First startup / first use | Subsequent startup / use |
+|---|---|
+| Create a virtual environment and install the `requirements.txt` packages once for that environment; supply `.env` configuration. | Reuse the installed environment and current environment/`.env` values. Uvicorn `--reload` re-imports the application after code edits. |
+| Lifespan still attempts Azure Search `create_or_update_index`; if it is absent and credentials work, Azure creates/updates the schema. If Azure Search is unavailable, the error is logged and app startup continues. | The same ensure operation runs again on every server startup; Azure Search applies its create-or-update behavior to the index. |
+| Chroma persistence files/collections are created only if the Chroma client/indexing code is invoked. A missing local collection is not auto-ingested by startup. | A previously persisted Chroma store can be reused at `CHROMA_DB_PATH`; retrieval still checks for a collection and nonzero count. |
+| The local embedding package may download model artifacts on the first local embed if not already cached. | The model artifact may be available in the machine's model cache, but a new backend process still creates a new in-memory `SentenceTransformer` object when first needed. |
+| A provider SDK client is constructed on first use in the process. | The same module-level `QuestionGenerator` instance reuses its client for later calls in that process; a restarted process constructs it again lazily. |
+| Session/question dictionaries begin empty. | They remain in memory for that process only; a process restart loses them. |
+
+**First-run ingestion, if desired:** run `python scripts/download_docs.py --all` from `backend/` to populate scraped files, then `python scripts/index_docs.py --all` to chunk, locally embed, and upsert content into Chroma. These commands require the relevant dependencies and network/model access. Neither is called automatically by Uvicorn.
+
+### 14.6 Representative request: start an exam session
+
+The representative request is the frontend's call to start a session. It exercises request validation, service orchestration, retrieval/generation, session storage, and the response path.
+
+#### Frontend entry point and URL
+
+In `frontend/src/app/exam/[examCode]/page.tsx`, the `load()` function inside `useEffect()` calls:
+
+```ts
+examApi.startSession(examCode, mode, Math.min(count, isGuest ? 5 : 100))
+```
+
+`frontend/src/lib/api.ts` implements `examApi.startSession()` as an Axios `POST` to `/sessions/`, sending `{ exam_code: examCode, mode, count }`. Its `baseURL` is `NEXT_PUBLIC_API_URL` or defaults to `http://localhost:8000/api/v1`; therefore the default complete URL is:
+
+```text
+POST http://localhost:8000/api/v1/sessions/
+```
+
+For a backend launched on port 8003, configure the frontend API base URL to use that port. The browser receives the returned session in the promise, the Axios response interceptor recursively converts snake_case keys to camelCase, and the page calls `setSession(backendSession)`. If the API call throws, the page records the error and uses `getMockSession(...)` instead.
+
+#### Backend execution, in sequence
+
+| # | File / class / function | Work performed and data passed onward |
+|---:|---|---|
+| 1 | `backend/app/main.py` — `app.include_router(api_router)` | The `/api/v1` router has already been mounted. Uvicorn dispatches the incoming `POST /api/v1/sessions/` request to the matching route. |
+| 2 | `backend/app/api/v1/router.py` — `api_router` | The router has included `sessions.router`; that router's prefix is `/sessions`. The endpoint path is `/`, giving `/api/v1/sessions/`. |
+| 3 | `backend/app/api/v1/endpoints/sessions.py` — `create_session(req: SessionCreate)` | FastAPI parses the JSON body and constructs `SessionCreate`. It checks `exam_code`, the `mode` Literal (`certification`, `practice`, or `study`), and `count` (default 20; constrained to 5–100), plus optional difficulty/domain/type fields. Invalid input is rejected by FastAPI/Pydantic before the function body runs. |
+| 4 | `sessions.py` — `create_session()` | Looks up `EXAM_BLUEPRINTS[req.exam_code]`; an unknown code raises HTTP 404. It constructs `QuestionGenerationRequest` from exam code, difficulty, type, and count. |
+| 5 | `backend/app/services/generation/generator.py` — `QuestionGenerator.generate_batch(request)` | Creates concurrent calls to `generate_question()` in waves of at most four using `asyncio.gather(..., return_exceptions=True)`. Exceptions and `None` results are logged/skipped; duplicate questions are filtered with `validator.check_duplicate()`. Returns `list[Question]`. |
+| 6 | `generator.py` — `QuestionGenerator.generate_question()` and `_select_objective()` | Selects a requested or blueprint-weighted exam objective, default difficulty (`Medium`), and requested or weighted question type. Builds query text like `"{exam_code} {objective} {difficulty} question"`. |
+| 7 | `generator.py` — `get_embedding(query)` | If Azure OpenAI endpoint/key are configured, lazily creates `AsyncAzureOpenAI` via `_get_openai_client()` and requests an embedding. Otherwise returns `None`; embedding call failures are logged and also return `None`. The query and optional vector proceed to retrieval. |
+| 8 | `backend/app/services/rag/retriever.py` — `DocumentRetriever.retrieve(...)` | With usable Azure Search config, lazily creates `SearchClient` via `_get_client()` and runs keyword search, optionally adding a vector query. Azure SDK search in this method is synchronous. If Azure Search is unconfigured or fails, it tries `_try_chroma_or_fallback()`. |
+| 9 | `backend/app/services/rag/chroma_retriever.py` — `ChromaRetriever.retrieve()` | On this fallback path, lazily creates `chromadb.PersistentClient(path=settings.CHROMA_DB_PATH)`, then looks for the exam collection. If collection exists and has items, it embeds the query with `app/services/embedding/local_embedder.py` (`LocalEmbedder.embed()` → lazy `_get_model()` → `SentenceTransformer.encode()`), queries top-K chunks, and converts cosine distance to a similarity score. Missing/empty collection or retrieval failure returns no Chroma chunks. |
+| 10 | `retriever.py` — `_try_chroma_or_fallback()` / `_fallback_chunks()` | If Chroma returns no chunks, creates one hardcoded development reference chunk with `doc_id="fallback-001"`. This is a code fallback, not database content. The resulting chunks proceed to context construction. |
+| 11 | `retriever.py` — `DocumentRetriever.build_context(chunks, max_tokens)` | Sorts chunks by score, estimates tokens, stops at the configured budget, and returns `(context_text, doc_ids)`. |
+| 12 | `generator.py` — `build_generation_prompt()` or `build_fallback_prompt()` from `backend/app/services/generation/prompts.py` | If the returned document IDs contain `fallback-001`, constructs the knowledge-based fallback prompt; otherwise includes retrieved context and document IDs in the grounded prompt. Both also include exam, objective, difficulty, question type, type instructions, examples, and output JSON schema. |
+| 13 | `generator.py` — `QuestionGenerator._llm_generate(system, user)` | Tries configured Portkey first, Azure OpenAI next, then Anthropic; each client is constructed lazily and the prompt is sent to its chat/messages API. Provider errors are logged and the next configured option is attempted. If none is configured/succeeds, `_mock_response()` supplies mock JSON. |
+| 14 | `generator.py` — `_parse_question(raw, request, bypass_grounding=...)` | Strips optional Markdown fences, uses `json.loads()`, checks blocked/grounding/citation thresholds unless this is the static fallback path, then constructs nested `QuestionOption`, `MatchPair`, `Reference`, `GroundingInfo`, and `Question` Pydantic models. Invalid JSON/schema construction returns `None` with logging. |
+| 15 | `backend/app/services/validation/validator.py` — `QuestionValidator.score_quality(question)` | Checks question length, options/answers, explanation, references, and grounding. Adds `quality_score`; a failed quality gate makes `generate_question()` return `None`. |
+| 16 | `generator.py` — `generate_batch()` | Checks duplicates against questions already produced in this batch and collects the remaining valid questions. If none survive, returns an empty list. |
+| 17 | `sessions.py` — `create_session()` | If question generation returned an empty list, raises HTTP 422. Otherwise creates a UUID session ID and timestamp, serializes each question using `q.model_dump(by_alias=True)`, builds answer/review state, and stores the session in the module-level `_sessions` dictionary. `_camelify()` recursively converts remaining snake_case dictionary keys. |
+| 18 | FastAPI response serialization → Axios response interceptor | The endpoint returns a Python dictionary; FastAPI serializes it as JSON. Axios receives `r.data` and recursively camelizes keys, then the frontend promise resolves with the session object. |
+| 19 | `frontend/src/app/exam/[examCode]/page.tsx` — `load()` | Calls `setSession(backendSession)` to place the response in frontend state. On request failure, it stores the error and switches to sample data from `getMockSession()`. |
+
+`create_session()` does not declare an explicit FastAPI `response_model`; response serialization is from the returned dictionary. Nested question objects are already dumped using their Pydantic aliases, while `_camelify()` handles keys in the surrounding session dictionary.
+
+### 14.7 End-to-end request sequence diagram
+
+```mermaid
+sequenceDiagram
+  participant UI as Exam page
+  participant AX as Axios client
+  participant API as Sessions endpoint
+  participant GEN as Question generator
+  participant RAG as Retriever
+  participant STORE as Search or Chroma
+  participant LLM as Model provider
+  participant VAL as Quality validator
+
+  UI->>AX: startSession examCode mode count
+  AX->>API: POST api/v1/sessions with JSON
+  API->>API: Validate SessionCreate request
+  API->>GEN: generate_batch generation request
+  loop Up to four questions per wave
+    GEN->>GEN: Select objective difficulty and type
+    GEN->>RAG: retrieve query and optional embedding
+    RAG->>STORE: Search Azure index when configured
+    alt Azure Search unavailable
+      RAG->>STORE: Query local Chroma collection
+    end
+    STORE-->>RAG: Matching document chunks or no results
+    RAG-->>GEN: Chunks or development fallback
+    GEN->>GEN: Build context and document IDs
+    GEN->>LLM: Send grounded or fallback prompt
+    LLM-->>GEN: Return JSON response text
+    GEN->>GEN: Parse JSON into Question model
+    GEN->>VAL: score_quality question
+    VAL-->>GEN: Score and pass or fail
+  end
+  GEN-->>API: Valid nonduplicate questions
+  API->>API: Create session ID and store in memory
+  API-->>AX: Return session as HTTP JSON
+  AX->>AX: Convert response keys to camelCase
+  AX-->>UI: Resolve session response
+  UI->>UI: setSession backendSession
+```
+
+### 14.8 File-to-file execution map
+
+```text
+Launch:
+backend/start.bat OR backend/start.sh OR README manual command
+  → uvicorn app.main:app
+    → backend/app/main.py
+      → backend/app/core/config.py (settings = Settings())
+      → backend/app/api/v1/router.py
+        → backend/app/api/v1/endpoints/sessions.py
+          → backend/app/services/generation/generator.py
+            → backend/app/services/rag/retriever.py
+            → backend/app/services/validation/validator.py
+        → other endpoint modules included in api_router
+      → FastAPI app + CORS/GZip + include_router()
+      → lifespan() → backend/app/services/indexing/indexer.py
+        → ensure_index() → Azure Search create_or_update_index()
+      → Uvicorn ready
+
+Request:
+frontend/src/app/exam/[examCode]/page.tsx load()
+  → frontend/src/lib/api.ts examApi.startSession()
+  → POST /api/v1/sessions/
+  → backend/app/api/v1/router.py
+  → backend/app/api/v1/endpoints/sessions.py create_session()
+    → backend/app/models/question.py SessionCreate validation
+    → QuestionGenerationRequest
+    → backend/app/services/generation/generator.py generate_batch()
+      → generate_question()
+        → get_embedding() [Azure OpenAI when configured]
+        → backend/app/services/rag/retriever.py retrieve()
+          → Azure Search SearchClient
+          → fallback: backend/app/services/rag/chroma_retriever.py
+            → backend/app/services/embedding/local_embedder.py (lazy local model)
+          → static fallback chunk if no retrieval results
+        → backend/app/services/rag/retriever.py build_context()
+        → backend/app/services/generation/prompts.py prompt builder
+        → configured LLM client(s) or mock JSON
+        → JSON parse → Pydantic Question construction
+        → backend/app/services/validation/validator.py score_quality()
+      → duplicate check; return questions
+    → create/store session in _sessions; return dictionary
+  → FastAPI JSON response
+  → Axios response camelization
+  → page.tsx setSession() (or mock session if API failed)
+```
+
+### 14.9 Accuracy notes and interview takeaways
+
+- **No SQL/relational database startup is present** in this path. The session/question stores are in-memory dictionaries; they are lost when the process exits.
+- **Chroma is an optional lazy fallback**, not a guaranteed startup component. The application does not create its collections or automatically load the scraped documentation during startup.
+- **The local embedding model is lazy.** It is used when Chroma retrieval/indexing needs it; its first use may download model files. Azure OpenAI embeddings are a separate request-time path.
+- **LLM clients are lazy.** Importing `generator.py` constructs the `QuestionGenerator` object, not its network clients.
+- **Azure Search index ensure is startup-time; search and LLM generation are request-time.** Index schema setup does not imply that source documents were indexed.
+- **The `SearchClient.search()` call is synchronous** inside an `async def retrieve()`. This is a code-level distinction to mention when discussing event-loop blocking and potential scalability improvements.
+- **Port values differ in checked-in launch configurations:** README manual/default frontend use 8000, whereas start scripts and Docker Compose use 8003. Configure the frontend base URL to match the backend you actually start.
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script>
+    (() => {
+      const source = document.getElementById("md-source").textContent;
+      const content = document.getElementById("content");
+      const renderer = new marked.Renderer();
+      renderer.code = ({ text, lang }) => {
+        if (lang === "mermaid") return `<div class="mermaid diagram">${text}</div>`;
+        const language = lang && hljs.getLanguage(lang) ? lang : "plaintext";
+        const highlighted = language === "plaintext" ? text : hljs.highlight(text, { language }).value;
+        return `<pre><code class="hljs language-${language}">${highlighted}</code></pre>`;
+      };
+      content.innerHTML = marked.parse(source, { renderer, gfm: true, breaks: false });
+
+      content.querySelectorAll("h1, h2, h3").forEach((heading, index) => {
+        if (!heading.id) heading.id = `section-${index}`;
+      });
+      const nav = document.getElementById("sidebar-nav");
+      content.querySelectorAll("h1, h2, h3").forEach((heading) => {
+        const link = document.createElement("a");
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent;
+        if (heading.tagName === "H3") link.className = "sub";
+        nav.appendChild(link);
+      });
+      content.querySelectorAll("strong").forEach((item) => {
+        if (item.textContent.includes("HIGH PRIORITY")) item.classList.add("priority");
+      });
+      content.querySelectorAll(".flashcard").forEach((card) => {
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", "Flip interview flashcard");
+        card.addEventListener("click", () => card.classList.toggle("flipped"));
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            card.classList.toggle("flipped");
+          }
+        });
+      });
+      mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "strict" });
+      mermaid.run({ querySelector: ".mermaid" });
+
+      const root = document.documentElement;
+      const savedTheme = localStorage.getItem("guide-theme");
+      if (savedTheme) root.dataset.theme = savedTheme;
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+        localStorage.setItem("guide-theme", root.dataset.theme);
+      });
+      document.getElementById("print-page").addEventListener("click", () => window.print());
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          nav.querySelectorAll("a").forEach((link) => link.classList.toggle("active", link.hash === `#${entry.target.id}`));
+        });
+      }, { rootMargin: "-12% 0px -78% 0px" });
+      content.querySelectorAll("h1, h2, h3").forEach((heading) => observer.observe(heading));
+    })();
+  </script>
+</body>
+</html>

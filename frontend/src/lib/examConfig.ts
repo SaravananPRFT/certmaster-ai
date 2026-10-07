@@ -1,0 +1,97 @@
+import { ExamBlueprint } from "@/types/exam";
+
+export const EXAM_BLUEPRINTS: Record<string, ExamBlueprint> = {
+  "AI-102": {
+    examCode: "AI-102",
+    examName: "Designing and Implementing a Microsoft Azure AI Solution",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 100,
+    domains: [
+      { id: "ai102-1", name: "Plan and Manage an Azure AI Solution", weight: 15, objectives: ["Select Azure AI services", "Plan Azure AI environment", "Manage billing", "Implement logging", "Monitor AI services"] },
+      { id: "ai102-2", name: "Implement Content Moderation Solutions", weight: 10, objectives: ["Implement Azure AI Content Safety", "Detect content violations"] },
+      { id: "ai102-3", name: "Implement Computer Vision Solutions", weight: 15, objectives: ["Analyze images", "Implement Image Analysis", "Implement Azure AI Vision", "Implement Custom Vision"] },
+      { id: "ai102-4", name: "Implement Natural Language Processing Solutions", weight: 30, objectives: ["Analyze text", "Translate text", "Implement conversational language understanding", "Build question answering solutions", "Implement Azure AI Language"] },
+      { id: "ai102-5", name: "Implement Knowledge Mining and Document Intelligence Solutions", weight: 10, objectives: ["Implement Azure AI Search solution", "Implement document intelligence solution"] },
+      { id: "ai102-6", name: "Implement Generative AI Solutions", weight: 20, objectives: ["Use Azure OpenAI Service", "Implement RAG with Azure AI Search", "Use prompt engineering techniques", "Deploy and consume OpenAI models"] },
+    ],
+  },
+  "AZ-104": {
+    examCode: "AZ-104",
+    examName: "Microsoft Azure Administrator",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 100,
+    domains: [
+      { id: "az104-1", name: "Manage Azure Identities and Governance", weight: 20, objectives: ["Manage Microsoft Entra users and groups", "Manage subscriptions and governance", "Manage Azure RBAC"] },
+      { id: "az104-2", name: "Implement and Manage Storage", weight: 15, objectives: ["Configure storage accounts", "Configure Blob Storage", "Configure Azure Files", "Configure file and folder backups"] },
+      { id: "az104-3", name: "Deploy and Manage Azure Compute Resources", weight: 20, objectives: ["Automate deployment", "Create and configure VMs", "Create and configure containers", "Create and configure App Service"] },
+      { id: "az104-4", name: "Implement and Manage Virtual Networking", weight: 25, objectives: ["Configure virtual networks", "Configure network routing and endpoints", "Configure Azure DNS", "Configure network security groups"] },
+      { id: "az104-5", name: "Monitor and Maintain Azure Resources", weight: 20, objectives: ["Monitor resources with Azure Monitor", "Implement backup and recovery", "Configure and implement backup storage"] },
+    ],
+  },
+  "AZ-305": {
+    examCode: "AZ-305",
+    examName: "Designing Microsoft Azure Infrastructure Solutions",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 120,
+    domains: [
+      { id: "az305-1", name: "Design Identity, Governance, and Monitoring Solutions", weight: 25, objectives: ["Design identity and access solutions", "Design governance solutions", "Design monitoring solutions"] },
+      { id: "az305-2", name: "Design Data Storage Solutions", weight: 25, objectives: ["Design data storage solutions for relational data", "Design data storage solutions for semi-structured and unstructured data", "Design data integration solutions"] },
+      { id: "az305-3", name: "Design Business Continuity Solutions", weight: 15, objectives: ["Design solutions for backup and disaster recovery", "Design for high availability"] },
+      { id: "az305-4", name: "Design Infrastructure Solutions", weight: 35, objectives: ["Design compute solutions", "Design network solutions", "Design application architecture", "Design migrations"] },
+    ],
+  },
+  "GH-300": {
+    examCode: "GH-300",
+    examName: "GitHub Advanced Security",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 100,
+    domains: [
+      { id: "gh300-1", name: "Describe GitHub Advanced Security Features", weight: 20, objectives: ["Describe secret scanning", "Describe Dependabot", "Describe code scanning"] },
+      { id: "gh300-2", name: "Configure and Use Secret Scanning", weight: 20, objectives: ["Enable secret scanning", "Configure custom patterns", "Manage alerts"] },
+      { id: "gh300-3", name: "Configure and Use Dependabot", weight: 20, objectives: ["Configure Dependabot alerts", "Configure Dependabot security updates", "Configure Dependabot version updates"] },
+      { id: "gh300-4", name: "Configure and Use Code Scanning", weight: 20, objectives: ["Configure code scanning with CodeQL", "Interpret code scanning results", "Manage code scanning alerts"] },
+      { id: "gh300-5", name: "Use GitHub Advanced Security in GitHub Actions", weight: 20, objectives: ["Integrate GHAS in CI/CD", "Configure security policies", "Use security workflows"] },
+    ],
+  },
+  "AB-100": {
+    examCode: "AB-100",
+    examName: "Agentic AI Business Solutions Architect",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 120,
+    domains: [
+      { id: "ab100-1", name: "Plan AI-powered business solutions", weight: 28, objectives: ["Analyze requirements for AI-powered business solutions", "Design overall AI strategy for business solutions", "Evaluate the costs and benefits of an AI-powered business solution"] },
+      { id: "ab100-2", name: "Design AI-powered business solutions", weight: 28, objectives: ["Design AI and agents for business solutions", "Design extensibility of AI solutions with Copilot Studio and Microsoft Foundry", "Orchestrate configuration for prebuilt agents and apps"] },
+      { id: "ab100-3", name: "Deploy AI-powered business solutions", weight: 44, objectives: ["Analyze, monitor, and tune AI-powered business solutions", "Manage the testing of AI-powered business solutions", "Design the ALM process for AI-powered business solutions", "Design responsible AI, security, governance, risk management, and compliance"] },
+    ],
+  },
+  "AI-103": {
+    examCode: "AI-103",
+    examName: "Developing AI Apps and Agents on Azure",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 120,
+    domains: [
+      { id: "ai103-1", name: "Plan and manage an Azure AI solution", weight: 28, objectives: ["Choose the appropriate Foundry services for generative AI and agents", "Set up AI solutions in Foundry", "Manage, monitor, and secure AI systems", "Implement responsible AI across generative AI and agentic systems"] },
+      { id: "ai103-2", name: "Implement generative AI and agentic solutions", weight: 33, objectives: ["Build generative applications by using Foundry", "Build agents by using Foundry", "Optimize and operationalize generative AI systems"] },
+      { id: "ai103-3", name: "Implement computer vision solutions", weight: 13, objectives: ["Design and implement image- and video-generation solutions", "Design and implement multimodal understanding workflows", "Implement responsible AI for multimodal content"] },
+      { id: "ai103-4", name: "Implement text analysis solutions", weight: 13, objectives: ["Apply language model text analysis", "Implement speech solutions"] },
+      { id: "ai103-5", name: "Implement information extraction solutions", weight: 13, objectives: ["Build retrieval and grounding pipelines", "Extract content from documents using Content Understanding"] },
+    ],
+  },
+  "AI-901": {
+    examCode: "AI-901",
+    examName: "Microsoft Azure AI Fundamentals",
+    totalQuestions: 40,
+    passingScore: 700,
+    durationMinutes: 65,
+    domains: [
+      { id: "ai901-1", name: "Identify AI concepts and capabilities", weight: 43, objectives: ["Identify features of common AI workloads", "Identify guiding principles for responsible AI", "Describe capabilities of computer vision workloads", "Describe capabilities of NLP workloads", "Describe capabilities of generative AI workloads"] },
+      { id: "ai901-2", name: "Implement AI solutions by using Microsoft Foundry", weight: 57, objectives: ["Implement Azure AI services using Microsoft Foundry", "Deploy and consume AI models in Foundry", "Implement generative AI solutions in Foundry", "Implement NLP and vision solutions using Foundry Tools"] },
+    ],
+  },
+};

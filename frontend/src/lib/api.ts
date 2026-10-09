@@ -77,10 +77,10 @@ export const examApi = {
     api.patch(`/sessions/${sessionId}/answers/${questionId}`, { selectedOptions }).then((r) => r.data),
 
   submitFeedback: (feedback: QuestionFeedback) =>
-    api.post("/feedback", feedback).then((r) => r.data),
+    api.post("/questions/feedback", feedback).then((r) => r.data),
 
-  getProgress: (userId: string, examCode: string) =>
-    api.get<StudyProgress>(`/progress/${userId}/${examCode}`).then((r) => r.data),
+  getProgress: (examCode: string) =>
+    api.get<StudyProgress>(`/progress/${examCode}`).then((r) => r.data),
 
   getExams: () =>
     api.get<ExamBlueprint[]>("/exams").then((r) => r.data),

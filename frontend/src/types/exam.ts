@@ -66,10 +66,10 @@ export interface Question {
   hotspotAreas?: HotspotArea[];
   imageUrl?: string;
   codeSnippet?: string;
-  correctAnswer: string[];
-  explanation: string;
-  whyCorrect: string;
-  whyIncorrect: Record<string, string>;
+  correctAnswer?: string[];
+  explanation?: string;
+  whyCorrect?: string;
+  whyIncorrect?: Record<string, string>;
   references: Reference[];
   grounding: GroundingInfo;
   caseStudyId?: string;

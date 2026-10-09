@@ -106,7 +106,8 @@ export default function ExamPlayerPage() {
 
     try {
       const result = await examApi.submitSession(session.sessionId, answersMap);
-      setSession({ ...session, submitted: true, score: result });
+      const fullQuestions = result.questions ?? session.questions;
+      setSession({ ...session, submitted: true, score: result, questions: fullQuestions });
     } catch {
       // Fallback: client-side scoring if backend is unavailable
     }
@@ -149,9 +150,10 @@ export default function ExamPlayerPage() {
       const answers = session.answers;
       const correct = session.questions.filter((q) => {
         const ans = answers[q.questionId];
-        if (!ans || ans.selectedOptions.length === 0) return false;
-        return q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
-          ans.selectedOptions.every((a) => q.correctAnswer.includes(a));
+        const ca = q.correctAnswer ?? [];
+        if (!ans || ans.selectedOptions.length === 0 || ca.length === 0) return false;
+        return ca.every((a) => ans.selectedOptions.includes(a)) &&
+          ans.selectedOptions.every((a) => ca.includes(a));
       }).length;
       const skipped = session.questions.filter((q) => !answers[q.questionId]?.selectedOptions?.length).length;
       const incorrect = session.questions.length - correct - skipped;
@@ -339,9 +341,10 @@ function buildDomainScores(questions: Question[], answers: Record<string, UserAn
     if (!map[q.objective]) map[q.objective] = { correct: 0, total: 0 };
     map[q.objective].total++;
     const ans = answers[q.questionId];
-    if (ans?.selectedOptions?.length &&
-      q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
-      ans.selectedOptions.every((a) => q.correctAnswer.includes(a))) {
+    const ca = q.correctAnswer ?? [];
+    if (ans?.selectedOptions?.length && ca.length > 0 &&
+      ca.every((a) => ans.selectedOptions.includes(a)) &&
+      ans.selectedOptions.every((a) => ca.includes(a))) {
       map[q.objective].correct++;
     }
   }

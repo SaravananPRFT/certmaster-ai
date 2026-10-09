@@ -12,7 +12,8 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.models.db_models import GeneratedQuestionRow
+from app.core.deps import get_current_user
+from app.models.db_models import GeneratedQuestionRow, User
 from app.services.indexing.indexer import indexer
 from app.services.generation.generator import generator
 
@@ -23,13 +24,20 @@ _ALERTS_FILE = Path("./data/alerts.json")
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+def _require_admin(user: User) -> None:
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+
 @router.get("/questions")
 async def get_questions(
     status: Optional[str] = None,
     exam: Optional[str] = None,
     page: int = 1,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    _require_admin(user)
     query = select(GeneratedQuestionRow)
     if status:
         query = query.where(GeneratedQuestionRow.status == status)
@@ -50,7 +58,8 @@ async def get_questions(
 
 
 @router.patch("/questions/{question_id}/approve")
-async def approve_question(question_id: str, db: AsyncSession = Depends(get_db)):
+async def approve_question(question_id: str, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
     result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
     row = result.scalar_one_or_none()
     if not row:
@@ -64,7 +73,8 @@ async def approve_question(question_id: str, db: AsyncSession = Depends(get_db))
 
 
 @router.patch("/questions/{question_id}/reject")
-async def reject_question(question_id: str, body: dict, db: AsyncSession = Depends(get_db)):
+async def reject_question(question_id: str, body: dict, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
     result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
     row = result.scalar_one_or_none()
     if not row:
@@ -79,7 +89,8 @@ async def reject_question(question_id: str, body: dict, db: AsyncSession = Depen
 
 
 @router.post("/questions/{question_id}/regenerate")
-async def regenerate_question(question_id: str, db: AsyncSession = Depends(get_db)):
+async def regenerate_question(question_id: str, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
     result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
     row = result.scalar_one_or_none()
     if not row:
@@ -116,7 +127,9 @@ async def index_documents(
     files: list[UploadFile] = File(...),
     exam_code: str = "AI-102",
     objective: str = "General",
+    user: User = Depends(get_current_user),
 ):
+    _require_admin(user)
     """Upload and index documents into Azure AI Search."""
     results = []
     await indexer.ensure_index()
@@ -141,14 +154,16 @@ async def index_documents(
 
 
 @router.post("/reindex")
-async def reindex_all():
+async def reindex_all(user: User = Depends(get_current_user)):
     """Trigger a full reindex of all documents."""
+    _require_admin(user)
     await indexer.ensure_index()
     return {"message": "Reindex triggered", "status": "running"}
 
 
 @router.post("/index-documents")
-async def index_documents_chroma(body: dict):
+async def index_documents_chroma(body: dict, user: User = Depends(get_current_user)):
+    _require_admin(user)
     """
     Chunk, embed, and index scraped docs into ChromaDB.
     Called by n8n workflow_3_index or manually.
@@ -226,8 +241,9 @@ async def index_documents_chroma(body: dict):
 
 
 @router.get("/index/status")
-async def index_status():
+async def index_status(user: User = Depends(get_current_user)):
     """Return ChromaDB chunk counts for all exam collections."""
+    _require_admin(user)
     from app.services.rag.chroma_retriever import chroma_retriever
     stats = chroma_retriever.get_stats()
     total = sum(stats.values())
@@ -239,7 +255,8 @@ async def index_status():
 
 
 @router.post("/content-alert")
-async def content_alert(body: dict):
+async def content_alert(body: dict, user: User = Depends(get_current_user)):
+    _require_admin(user)
     alert = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         **body,
@@ -254,7 +271,8 @@ async def content_alert(body: dict):
 
 
 @router.get("/content-alerts")
-async def get_content_alerts():
+async def get_content_alerts(user: User = Depends(get_current_user)):
+    _require_admin(user)
     return {"alerts": _load_alerts()}
 
 
@@ -273,7 +291,8 @@ def _save_alerts(alerts: list) -> None:
 
 
 @router.get("/metrics")
-async def get_metrics(db: AsyncSession = Depends(get_db)):
+async def get_metrics(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
     total = (await db.execute(select(func.count()).select_from(GeneratedQuestionRow))).scalar() or 0
     approved = (await db.execute(
         select(func.count()).select_from(GeneratedQuestionRow).where(GeneratedQuestionRow.status == "approved")

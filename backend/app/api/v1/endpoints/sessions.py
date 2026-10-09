@@ -31,6 +31,14 @@ def _camelify(obj):
     return obj
 
 
+_ANSWER_FIELDS = {"correctAnswer", "explanation", "whyCorrect", "whyIncorrect",
+                   "correct_answer", "why_correct", "why_incorrect"}
+
+
+def _strip_answers(questions: list[dict]) -> list[dict]:
+    return [{k: v for k, v in q.items() if k not in _ANSWER_FIELDS} for q in questions]
+
+
 def _session_to_dict(row: ExamSessionRow, answer_rows: list[SessionAnswerRow]) -> dict:
     answers = {}
     for a in answer_rows:
@@ -101,13 +109,15 @@ async def create_session(
     db.add(row)
     await db.commit()
 
+    client_questions = questions_data if req.mode == "study" else _strip_answers(questions_data)
+
     session = {
         "session_id": session_id,
         "exam_code": req.exam_code,
         "mode": req.mode,
         "started_at": row.started_at.isoformat(),
         "duration_minutes": duration,
-        "questions": questions_data,
+        "questions": client_questions,
         "answers": {},
         "marked_for_review": [],
         "current_question_index": 0,
@@ -133,7 +143,12 @@ async def get_session(
         select(SessionAnswerRow).where(SessionAnswerRow.session_id == session_id)
     )
     answer_rows = list(answers_result.scalars().all())
-    return _camelify(_session_to_dict(row, answer_rows))
+    session_dict = _session_to_dict(row, answer_rows)
+
+    if not row.submitted and row.mode != "study":
+        session_dict["questions"] = _strip_answers(session_dict["questions"])
+
+    return _camelify(session_dict)
 
 
 @router.patch("/{session_id}/answers/{question_id}")
@@ -266,4 +281,5 @@ async def submit_session(
     row.score_json = json.dumps(score_result)
     await db.commit()
 
-    return score_result
+    score_result["questions"] = questions
+    return _camelify(score_result)

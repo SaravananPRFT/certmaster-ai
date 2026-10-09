@@ -13,8 +13,9 @@ interface Props {
 }
 
 export function ExplanationPanel({ question, selectedAnswer }: Props) {
-  const isCorrect = question.correctAnswer.every((a) => selectedAnswer.includes(a)) &&
-    selectedAnswer.every((a) => question.correctAnswer.includes(a));
+  const correctAns = question.correctAnswer ?? [];
+  const isCorrect = correctAns.every((a) => selectedAnswer.includes(a)) &&
+    selectedAnswer.every((a) => correctAns.includes(a));
 
   return (
     <div className="space-y-4 mt-6">
@@ -30,7 +31,7 @@ export function ExplanationPanel({ question, selectedAnswer }: Props) {
           </p>
           {!isCorrect && (
             <p className="text-sm text-muted-foreground">
-              Correct answer: <strong className="text-green-400">{question.correctAnswer.join(", ")}</strong>
+              Correct answer: <strong className="text-green-400">{correctAns.join(", ")}</strong>
             </p>
           )}
         </div>
@@ -44,11 +45,11 @@ export function ExplanationPanel({ question, selectedAnswer }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground leading-relaxed">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.whyCorrect}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.whyCorrect ?? ""}</ReactMarkdown>
         </CardContent>
       </Card>
 
-      {Object.keys(question.whyIncorrect || {}).length > 0 && (
+      {Object.keys(question.whyIncorrect ?? {}).length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -57,7 +58,7 @@ export function ExplanationPanel({ question, selectedAnswer }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {Object.entries(question.whyIncorrect).map(([optId, reason]) => (
+            {Object.entries(question.whyIncorrect ?? {}).map(([optId, reason]) => (
               <div key={optId} className="flex gap-2 text-sm">
                 <span className="font-bold text-muted-foreground shrink-0">{optId}:</span>
                 <span className="text-muted-foreground">{reason}</span>
@@ -75,7 +76,7 @@ export function ExplanationPanel({ question, selectedAnswer }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground leading-relaxed">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.explanation}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.explanation ?? ""}</ReactMarkdown>
         </CardContent>
       </Card>
 

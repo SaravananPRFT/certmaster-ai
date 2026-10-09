@@ -33,7 +33,7 @@ export function QuestionRenderer({ question, answer, onAnswer, showResult = fals
     }
   };
 
-  const isCorrect = (optionId: string) => question.correctAnswer.includes(optionId);
+  const isCorrect = (optionId: string) => (question.correctAnswer ?? []).includes(optionId);
   const isSelected = (optionId: string) => selected.includes(optionId);
 
   const getOptionStyle = (optionId: string) => {
@@ -162,7 +162,7 @@ export function QuestionRenderer({ question, answer, onAnswer, showResult = fals
           selected={selected}
           onAnswer={(items) => onAnswer({ questionId: question.questionId, selectedOptions: items, timeSpent: 0, flagged: false })}
           showResult={showResult}
-          correct={question.correctAnswer}
+          correct={question.correctAnswer ?? []}
         />
       )}
 
@@ -172,7 +172,7 @@ export function QuestionRenderer({ question, answer, onAnswer, showResult = fals
           selected={selected}
           onAnswer={(pairs) => onAnswer({ questionId: question.questionId, selectedOptions: pairs, timeSpent: 0, flagged: false })}
           showResult={showResult}
-          correct={question.correctAnswer}
+          correct={question.correctAnswer ?? []}
         />
       )}
 
@@ -183,7 +183,7 @@ export function QuestionRenderer({ question, answer, onAnswer, showResult = fals
           selected={selected}
           onAnswer={(ans) => onAnswer({ questionId: question.questionId, selectedOptions: ans, timeSpent: 0, flagged: false })}
           showResult={showResult}
-          correct={question.correctAnswer}
+          correct={question.correctAnswer ?? []}
         />
       )}
     </div>

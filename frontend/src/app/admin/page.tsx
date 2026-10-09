@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieCha
 import {
   Database, FileText, CheckCircle, XCircle, RefreshCw, Eye, Edit3,
   BarChart3, AlertTriangle, Upload, Shield, Zap, Activity, Users,
-  TrendingUp, Search, ThumbsUp, ThumbsDown,
+  TrendingUp, Search, ThumbsUp, ThumbsDown, Lock, LogIn,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const MOCK_QUESTIONS = [
   { id: "q-001", exam: "AI-102", objective: "Implement NLP Solutions", type: "MultipleChoiceSingle", difficulty: "Medium", status: "pending", qualityScore: 0.87, groundingScore: 0.94, citationCoverage: 0.91, successRate: 0.68 },
@@ -41,9 +43,40 @@ const INDEX_DOCS = [
 ];
 
 export default function AdminPage() {
+  const { isAuthenticated, role } = useAuth();
   const [questions, setQuestions] = useState(MOCK_QUESTIONS);
   const [uploading, setUploading] = useState(false);
   const [reindexing, setReindexing] = useState(false);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)]">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
+            <h2 className="text-xl font-bold">Admin Access Required</h2>
+            <p className="text-sm text-muted-foreground">Sign in with an admin account to access this page.</p>
+            <Link href="/login"><Button variant="azure" className="gap-2"><LogIn className="h-4 w-4" /> Sign In</Button></Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (role !== "admin") {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)]">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <Shield className="h-12 w-12 text-muted-foreground mx-auto" />
+            <h2 className="text-xl font-bold">Insufficient Permissions</h2>
+            <p className="text-sm text-muted-foreground">Your account does not have admin privileges.</p>
+            <Link href="/dashboard"><Button variant="outline">Go to Dashboard</Button></Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleApprove = (id: string) => {
     setQuestions((prev) => prev.map((q) => q.id === id ? { ...q, status: "approved" } : q));

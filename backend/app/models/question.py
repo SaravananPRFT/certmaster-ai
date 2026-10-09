@@ -140,9 +140,21 @@ class SessionCreate(BaseModel):
     exam_code: str
     mode: Literal["certification", "practice", "study"]
     count: int = Field(default=20, ge=5, le=100)
-    difficulty: Optional[Difficulty] = None
+    difficulty: Optional[Literal["Easy", "Medium", "Hard", "Mixed"]] = None
     domain: Optional[str] = None
-    question_type: Optional[QuestionType] = None
+    question_type: Optional[Literal[
+        "MultipleChoiceSingle",
+        "MultipleChoiceMultiple",
+        "DragAndDrop",
+        "CaseStudy",
+        "Hotspot",
+        "YesNo",
+        "MatchFollowing",
+        "BestAnswer",
+        "ScenarioArchitecture",
+        "BuildList",
+        "Mixed",
+    ]] = None
 
 
 class SessionSubmit(BaseModel):

@@ -34,6 +34,7 @@ async def get_progress(
             "exam_code": exam_code,
             "total_attempted": 0,
             "average_score": 0,
+            "best_score": 0,
             "last_attempt": None,
             "domain_progress": [],
             "weak_areas": [],
@@ -56,6 +57,7 @@ async def get_progress(
             domain_totals[ds["domain"]]["total"] += ds["total"]
 
     avg_score = round(sum(scores) / len(scores)) if scores else 0
+    best_score = max(scores, default=0)
     last_attempt = sessions[0].submitted_at.isoformat() if sessions[0].submitted_at else None
 
     domain_progress = []
@@ -82,6 +84,7 @@ async def get_progress(
         "exam_code": exam_code,
         "total_attempted": len(sessions),
         "average_score": avg_score,
+        "best_score": best_score,
         "last_attempt": last_attempt,
         "domain_progress": domain_progress,
         "weak_areas": weak_areas,

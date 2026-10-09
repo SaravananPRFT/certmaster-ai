@@ -81,10 +81,15 @@ async def create_session(
 
     effective_count = min(req.count, 5) if not user else req.count
 
+    selected_domain = req.domain
+    if selected_domain and selected_domain.casefold() in {"all", "all domains"}:
+        selected_domain = None
+
     gen_request = QuestionGenerationRequest(
         exam_code=req.exam_code,
-        difficulty=req.difficulty,
-        question_type=req.question_type,
+        difficulty=req.difficulty if req.difficulty != "Mixed" else None,
+        question_type=req.question_type if req.question_type != "Mixed" else None,
+        objective=selected_domain,
         count=effective_count,
     )
     questions = await generator.generate_batch(gen_request)

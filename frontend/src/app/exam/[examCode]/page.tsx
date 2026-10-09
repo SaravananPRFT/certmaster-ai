@@ -13,7 +13,7 @@ import { FeedbackModal } from "@/components/exam/FeedbackModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Flag, ChevronLeft, ChevronRight, Send, Maximize2, Minimize2, Lightbulb, BookOpen, MessageSquare, Loader2, Eye, LogIn } from "lucide-react";
+import { Flag, ChevronLeft, ChevronRight, Send, Maximize2, Minimize2, Lightbulb, MessageSquare, Loader2, Eye, LogIn } from "lucide-react";
 import Link from "next/link";
 import { getMockSession } from "@/lib/mockData";
 import { useAuth } from "@/lib/auth";
@@ -26,6 +26,12 @@ export default function ExamPlayerPage() {
   const examCode = String(params.examCode);
   const mode = (searchParams.get("mode") || "practice") as ExamMode;
   const count = Number(searchParams.get("count") || 20);
+  const difficultyParam = searchParams.get("difficulty") || undefined;
+  const domainParam = searchParams.get("domain") || undefined;
+  const questionTypeParam = searchParams.get("type") || undefined;
+  const difficulty = difficultyParam === "Mixed" ? undefined : difficultyParam;
+  const domain = domainParam && !["All", "All Domains"].includes(domainParam) ? domainParam : undefined;
+  const questionType = questionTypeParam === "Mixed" ? undefined : questionTypeParam;
 
   const { isGuest } = useAuth();
   const { session, currentIndex, setSession, setCurrentIndex, setAnswer, toggleMarkForReview, isFullscreen, setFullscreen, showExplanation, setShowExplanation, clearSession } = useExamStore();
@@ -40,50 +46,40 @@ export default function ExamPlayerPage() {
     const load = async () => {
       setLoading(true);
       setLoadError(null);
+      const effectiveCount = Math.min(count, isGuest ? 5 : 100);
       try {
-        const backendSession = await examApi.startSession(examCode, mode, Math.min(count, isGuest ? 5 : 100));
+        const backendSession = await examApi.startSession(examCode, mode, effectiveCount, { difficulty, domain, questionType });
         setSession(backendSession);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         console.warn("[ExamPlayer] Backend unavailable, using sample questions:", msg);
         setLoadError(msg);
-        const mockSession = getMockSession(examCode, mode, count);
+        const mockSession = getMockSession(examCode, mode, effectiveCount);
         setSession(mockSession);
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [examCode, mode, count, isGuest]);
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === "PageDown") handleNext();
-      if (e.key === "ArrowLeft" || e.key === "PageUp") handlePrev();
-      if (e.key === "m" || e.key === "M") handleToggleMark();
-      if (e.key === "F11") { e.preventDefault(); setFullscreen(!isFullscreen); }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [currentIndex, session, isFullscreen]);
+  }, [examCode, mode, count, difficulty, domain, questionType, isGuest, setSession]);
 
   const handleNext = useCallback(() => {
     if (!session) return;
     if (currentIndex < session.questions.length - 1) setCurrentIndex(currentIndex + 1);
     setShowExplanation(false);
     setShowHintPanel(false);
-  }, [session, currentIndex]);
+  }, [session, currentIndex, setCurrentIndex, setShowExplanation, setShowHintPanel]);
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
     setShowExplanation(false);
     setShowHintPanel(false);
-  }, [currentIndex]);
+  }, [currentIndex, setCurrentIndex, setShowExplanation, setShowHintPanel]);
 
   const handleToggleMark = useCallback(() => {
     if (!session) return;
     toggleMarkForReview(session.questions[currentIndex].questionId);
-  }, [session, currentIndex]);
+  }, [session, currentIndex, toggleMarkForReview]);
 
   const handleAnswer = useCallback((ans: UserAnswer) => {
     setAnswer(ans.questionId, ans);
@@ -93,7 +89,7 @@ export default function ExamPlayerPage() {
       examApi.saveAnswer(session.sessionId, ans.questionId, ans.selectedOptions)
         .catch(() => {});
     }
-  }, [mode, session?.sessionId]);
+  }, [mode, session, setAnswer, setShowExplanation]);
 
   const handleSubmit = useCallback(async () => {
     if (!session) return;
@@ -112,7 +108,18 @@ export default function ExamPlayerPage() {
       // Fallback: client-side scoring if backend is unavailable
     }
     setSubmitted(true);
-  }, [session]);
+  }, [session, setSession]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") handleNext();
+      if (e.key === "ArrowLeft" || e.key === "PageUp") handlePrev();
+      if (e.key === "m" || e.key === "M") handleToggleMark();
+      if (e.key === "F11") { e.preventDefault(); setFullscreen(!isFullscreen); }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [handleNext, handlePrev, handleToggleMark, isFullscreen, setFullscreen]);
 
   if (loading) {
     return (
@@ -212,8 +219,9 @@ export default function ExamPlayerPage() {
       </header>
 
       {loadError && (
-        <div className="flex items-center justify-between bg-yellow-500/8 border-b border-yellow-500/20 px-4 py-1.5 text-xs text-yellow-500/80">
-          <span>Backend offline — showing sample questions for preview. Start the backend for AI-generated questions.</span>
+        <div className="flex items-center gap-2 bg-yellow-500/8 border-b border-yellow-500/20 px-4 py-2 text-xs text-yellow-600 dark:text-yellow-400">
+          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span><strong>Preview mode:</strong> Using sample questions because the backend is unavailable. Answers and scores will not be saved. Start the backend for AI-generated, RAG-grounded questions.</span>
         </div>
       )}
 

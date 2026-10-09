@@ -64,8 +64,8 @@ export const examApi = {
   getBlueprint: (examCode: string) =>
     api.get<ExamBlueprint>(`/exams/${examCode}/blueprint`).then((r) => r.data),
 
-  startSession: (examCode: string, mode: string, count: number) =>
-    api.post<ExamSession>("/sessions/", { exam_code: examCode, mode, count }).then((r) => r.data),
+  startSession: (examCode: string, mode: string, count: number, opts?: { difficulty?: string; domain?: string; questionType?: string }) =>
+    api.post<ExamSession>("/sessions/", { exam_code: examCode, mode, count, difficulty: opts?.difficulty, domain: opts?.domain, question_type: opts?.questionType }).then((r) => r.data),
 
   getSession: (sessionId: string) =>
     api.get<ExamSession>(`/sessions/${sessionId}`).then((r) => r.data),

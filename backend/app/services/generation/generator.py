@@ -4,6 +4,9 @@ Question generation service — orchestrates RAG pipeline.
 import json
 import logging
 import asyncio
+import random
+import time
+from collections import OrderedDict
 from typing import Optional
 from uuid import uuid4
 
@@ -137,6 +140,9 @@ class QuestionGenerator:
         self._openai_client: Optional[AsyncAzureOpenAI] = None
         self._portkey_client: Optional[AsyncOpenAI] = None
         self._anthropic_client: Optional[anthropic.AsyncAnthropic] = None
+        self._embedding_cache: OrderedDict[str, tuple[float, list[float]]] = OrderedDict()
+        self._embedding_tasks: dict[str, asyncio.Task[Optional[list[float]]]] = {}
+        self._embedding_lock = asyncio.Lock()
 
     def _get_openai_client(self) -> AsyncAzureOpenAI:
         if not self._openai_client:
@@ -165,16 +171,45 @@ class QuestionGenerator:
     async def get_embedding(self, text: str) -> Optional[list[float]]:
         if not settings.AZURE_OPENAI_KEY or not settings.AZURE_OPENAI_ENDPOINT:
             return None
+        cache_key = f"{settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT}:{text}"
+        now = time.monotonic()
+        async with self._embedding_lock:
+            cached = self._embedding_cache.get(cache_key)
+            if cached and cached[0] > now:
+                self._embedding_cache.move_to_end(cache_key)
+                return cached[1]
+            if cached:
+                del self._embedding_cache[cache_key]
+
+            task = self._embedding_tasks.get(cache_key)
+            if task is None:
+                task = asyncio.create_task(self._fetch_and_cache_embedding(cache_key, text))
+                self._embedding_tasks[cache_key] = task
+        return await asyncio.shield(task)
+
+    async def _fetch_and_cache_embedding(
+        self, cache_key: str, text: str
+    ) -> Optional[list[float]]:
         try:
             client = self._get_openai_client()
             resp = await client.embeddings.create(
                 model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
                 input=text,
             )
-            return resp.data[0].embedding
+            embedding = resp.data[0].embedding
         except Exception as e:
             logger.warning("Embedding generation failed: %s", e)
-            return None
+            embedding = None
+
+        async with self._embedding_lock:
+            self._embedding_tasks.pop(cache_key, None)
+            if embedding:
+                ttl = max(0, settings.CACHE_TTL_SECONDS)
+                self._embedding_cache[cache_key] = (time.monotonic() + ttl, embedding)
+                self._embedding_cache.move_to_end(cache_key)
+                while len(self._embedding_cache) > 512:
+                    self._embedding_cache.popitem(last=False)
+        return embedding
 
     async def generate_with_openai(self, system: str, user: str) -> str:
         client = self._get_openai_client()
@@ -361,13 +396,16 @@ class QuestionGenerator:
         return random.choices(types, weights=weights, k=1)[0]
 
     def _select_objective(self, exam_code: str, requested_objective: Optional[str]) -> str:
-        if requested_objective:
-            return requested_objective
         blueprint = EXAM_BLUEPRINTS.get(exam_code, {})
         domains = blueprint.get("domains", [])
+        if requested_objective:
+            for domain in domains:
+                if requested_objective.casefold() == domain["name"].casefold():
+                    objectives = domain.get("objectives", [])
+                    return random.choice(objectives) if objectives else domain["name"]
+            return requested_objective
         if not domains:
             return "General"
-        import random
         weights = [d["weight"] for d in domains]
         total = sum(weights)
         r = random.uniform(0, total)
@@ -386,11 +424,11 @@ class QuestionGenerator:
     ) -> Optional[Question]:
         """Full RAG pipeline: retrieve → context → generate → validate."""
         objective = self._select_objective(request.exam_code, request.objective)
-        difficulty = request.difficulty or "Medium"
+        difficulty = request.difficulty or random.choice(("Easy", "Medium", "Hard"))
         question_type = self._select_question_type(request.question_type)
 
         query = f"{request.exam_code} {objective} {difficulty} question"
-        embedding = await self.get_embedding(query)
+        embedding = await self.get_embedding(query) if retriever.uses_azure_search else None
 
         chunks = await retriever.retrieve(
             query=query,

@@ -160,7 +160,8 @@ export interface StudyProgress {
   examCode: string;
   totalAttempted: number;
   averageScore: number;
-  lastAttempt: string;
+  bestScore: number;
+  lastAttempt: string | null;
   domainProgress: DomainScore[];
   weakAreas: string[];
   strongAreas: string[];

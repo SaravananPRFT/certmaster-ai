@@ -41,12 +41,16 @@ class ChromaRetriever:
             from app.services.embedding.local_embedder import embedder
 
             collection = self._get_collection(exam_code)
-            if collection is None or collection.count() == 0:
+            if collection is None:
+                logger.debug("ChromaDB: no data for %s", exam_code)
+                return []
+            collection_size = collection.count()
+            if collection_size == 0:
                 logger.debug("ChromaDB: no data for %s", exam_code)
                 return []
 
             query_vec = embedder.embed(query)
-            n = min(top_k, collection.count())
+            n = min(top_k, collection_size)
             results = collection.query(
                 query_embeddings=[query_vec],
                 n_results=n,

@@ -183,23 +183,10 @@ class DocumentRetriever:
                     for c in chroma_chunks
                 ]
         except Exception as chroma_err:
-            logger.warning("ChromaDB retrieval failed: %s — using hardcoded fallback", chroma_err)
+            logger.warning("ChromaDB retrieval failed: %s", chroma_err)
 
-        return self._fallback_chunks(exam_code, objective)
-
-    def _fallback_chunks(self, exam_code: str, objective: Optional[str]) -> list[RetrievedChunk]:
-        """Return static reference chunks when search is unavailable (dev mode)."""
-        return [
-            RetrievedChunk(
-                doc_id="fallback-001",
-                content=f"Microsoft documentation context for {exam_code} — {objective or 'general'}. "
-                        "Azure AI services provide cloud-based cognitive capabilities including language understanding, "
-                        "computer vision, speech processing, and generative AI via Azure OpenAI Service.",
-                title="Azure AI Services Documentation",
-                url="https://learn.microsoft.com/azure/ai-services/",
-                score=0.85,
-            )
-        ]
+        logger.warning("No indexed RAG chunks available for %s; skipping generation", exam_code)
+        return []
 
     def build_context(self, chunks: list[RetrievedChunk], max_tokens: int = 4096) -> tuple[str, list[str]]:
         """Concatenate chunks into a context string within token budget."""

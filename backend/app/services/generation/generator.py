@@ -20,8 +20,7 @@ from app.models.question import (
 )
 from app.services.rag.retriever import retriever, RetrievedChunk
 from app.services.generation.prompts import (
-    SYSTEM_PROMPT, FALLBACK_SYSTEM_PROMPT,
-    build_generation_prompt, build_fallback_prompt,
+    SYSTEM_PROMPT, build_generation_prompt,
 )
 from app.services.validation.validator import validator
 
@@ -263,51 +262,9 @@ class QuestionGenerator:
         except Exception as e:
             logger.warning("Anthropic generation failed: %s", e)
 
-        return self._mock_response()
+        raise RuntimeError("Question generation failed because all configured LLM providers were unavailable")
 
-    def _mock_response(self) -> str:
-        """Return a development mock when no LLM is configured."""
-        return json.dumps({
-            "question_id": str(uuid4()),
-            "exam": "AI-102",
-            "objective": "Implement Natural Language Processing Solutions",
-            "difficulty": "Medium",
-            "type": "MultipleChoiceSingle",
-            "question": "You are developing a solution to analyze customer feedback and extract key phrases. Which Azure AI Language feature should you use?",
-            "context": None,
-            "options": [
-                {"id": "A", "text": "Custom text classification"},
-                {"id": "B", "text": "Key phrase extraction"},
-                {"id": "C", "text": "Conversational Language Understanding"},
-                {"id": "D", "text": "Named entity recognition"},
-            ],
-            "drag_items": None,
-            "drop_zones": None,
-            "match_pairs": None,
-            "build_items": None,
-            "code_snippet": None,
-            "correct_answer": ["B"],
-            "explanation": "Key phrase extraction identifies the main concepts in text without requiring training data.",
-            "why_correct": "Key phrase extraction is a pre-built capability in Azure AI Language that identifies important phrases from text without any model training required.",
-            "why_incorrect": {
-                "A": "Custom text classification categorizes documents into user-defined categories and requires training data.",
-                "C": "CLU is for building conversational AI applications that understand user intents.",
-                "D": "NER identifies and categorizes named entities (people, places, organizations) in text.",
-            },
-            "references": [
-                {"title": "Azure AI Language Key Phrase Extraction", "url": "https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview"},
-            ],
-            "grounding": {
-                "grounding_score": 0.92,
-                "citation_coverage": 0.88,
-                "retrieved_document_ids": ["fallback-001"],
-            },
-            "tags": ["NLP", "Language Service"],
-            "blocked": False,
-            "block_reason": None,
-        })
-
-    def _parse_question(self, raw: str, request: QuestionGenerationRequest, bypass_grounding: bool = False) -> Optional[Question]:
+    def _parse_question(self, raw: str, request: QuestionGenerationRequest) -> Optional[Question]:
         try:
             # Strip markdown fences that some models add despite instructions.
             # split("```", 2) → ['', 'json\n{...}\n', ''] so index [1] is the content.
@@ -327,16 +284,15 @@ class QuestionGenerator:
         grounding_score = grounding.get("grounding_score", 0.0)
         citation_coverage = grounding.get("citation_coverage", 0.0)
 
-        if not bypass_grounding:
-            if data.get("blocked"):
-                logger.warning("Question blocked by grounding validator: %s", data.get("block_reason"))
-                return None
-            if grounding_score < settings.MIN_GROUNDING_SCORE:
-                logger.warning("Question blocked: grounding_score %.2f < %.2f", grounding_score, settings.MIN_GROUNDING_SCORE)
-                return None
-            if citation_coverage < settings.MIN_CITATION_COVERAGE:
-                logger.warning("Question blocked: citation_coverage %.2f < %.2f", citation_coverage, settings.MIN_CITATION_COVERAGE)
-                return None
+        if data.get("blocked"):
+            logger.warning("Question blocked by grounding validator: %s", data.get("block_reason"))
+            return None
+        if grounding_score < settings.MIN_GROUNDING_SCORE:
+            logger.warning("Question blocked: grounding_score %.2f < %.2f", grounding_score, settings.MIN_GROUNDING_SCORE)
+            return None
+        if citation_coverage < settings.MIN_CITATION_COVERAGE:
+            logger.warning("Question blocked: citation_coverage %.2f < %.2f", citation_coverage, settings.MIN_CITATION_COVERAGE)
+            return None
 
         try:
             options = None
@@ -437,35 +393,24 @@ class QuestionGenerator:
             top_k=settings.TOP_K_RETRIEVAL,
             embedding=embedding,
         )
+        if not chunks:
+            logger.warning("Skipping generation because no RAG chunks were retrieved for %s", request.exam_code)
+            return None
 
         context, doc_ids = retriever.build_context(chunks, max_tokens=settings.MAX_CONTEXT_TOKENS)
-        is_fallback = "fallback-001" in doc_ids
 
         prior_stems = [q.question[:80] for q in (previously_generated or [])]
-
-        if is_fallback:
-            logger.info("Using knowledge-based generation for %s / %s", request.exam_code, objective)
-            prompt = build_fallback_prompt(
-                exam_code=request.exam_code,
-                objective=objective,
-                difficulty=difficulty,
-                question_type=question_type,
-                already_generated=prior_stems or None,
-            )
-            raw = await self._llm_generate(FALLBACK_SYSTEM_PROMPT, prompt)
-        else:
-            prompt = build_generation_prompt(
-                exam_code=request.exam_code,
-                objective=objective,
-                difficulty=difficulty,
-                question_type=question_type,
-                context=context,
-                doc_ids=doc_ids,
-                already_generated=prior_stems or None,
-            )
-            raw = await self._llm_generate(SYSTEM_PROMPT, prompt)
-
-        question = self._parse_question(raw, request, bypass_grounding=is_fallback)
+        prompt = build_generation_prompt(
+            exam_code=request.exam_code,
+            objective=objective,
+            difficulty=difficulty,
+            question_type=question_type,
+            context=context,
+            doc_ids=doc_ids,
+            already_generated=prior_stems or None,
+        )
+        raw = await self._llm_generate(SYSTEM_PROMPT, prompt)
+        question = self._parse_question(raw, request)
 
         if question:
             quality_result = validator.score_quality(question)
@@ -489,11 +434,14 @@ class QuestionGenerator:
                 for _ in range(batch)
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = [result for result in results if isinstance(result, Exception)]
+            if errors:
+                logger.error("Question generation infrastructure failed: %s", errors[0])
+                raise RuntimeError(
+                    "Question generation failed. Check RAG and LLM provider availability."
+                ) from errors[0]
 
             for r in results:
-                if isinstance(r, Exception):
-                    logger.error("Generation task failed: %s", r)
-                    continue
                 if r is None:
                     continue
                 if validator.check_duplicate(r, questions):

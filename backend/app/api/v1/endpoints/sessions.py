@@ -100,7 +100,7 @@ async def create_session(
     duration = blueprint.get("duration_minutes", 100) if req.mode == "certification" else 0
     session_id = str(uuid4())
 
-    questions_data = [q.model_dump(by_alias=True) for q in questions]
+    questions_data = [q.model_dump(mode="json", by_alias=True) for q in questions]
 
     row = ExamSessionRow(
         id=session_id,

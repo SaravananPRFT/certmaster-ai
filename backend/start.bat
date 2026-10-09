@@ -7,4 +7,4 @@ if not exist ".venv\Scripts\python.exe" (
     echo   .venv\Scripts\python.exe -m pip install -r requirements.txt
     exit /b 1
 )
-".venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+".venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

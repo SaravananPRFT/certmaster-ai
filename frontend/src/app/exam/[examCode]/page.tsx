@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Flag, ChevronLeft, ChevronRight, Send, Maximize2, Minimize2, Lightbulb, MessageSquare, Loader2, Eye, LogIn } from "lucide-react";
 import Link from "next/link";
-import { getMockSession } from "@/lib/mockData";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -52,16 +51,15 @@ export default function ExamPlayerPage() {
         setSession(backendSession);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.warn("[ExamPlayer] Backend unavailable, using sample questions:", msg);
+        console.error("[ExamPlayer] Failed to create exam session:", msg);
+        clearSession();
         setLoadError(msg);
-        const mockSession = getMockSession(examCode, mode, effectiveCount);
-        setSession(mockSession);
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [examCode, mode, count, difficulty, domain, questionType, isGuest, setSession]);
+  }, [examCode, mode, count, difficulty, domain, questionType, isGuest, setSession, clearSession]);
 
   const handleNext = useCallback(() => {
     if (!session) return;
@@ -128,12 +126,30 @@ export default function ExamPlayerPage() {
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <div>
             <p className="font-semibold text-lg">Generating Questions</p>
-            <p className="text-sm text-muted-foreground mt-1">Retrieving from Azure AI Search · Grounding with Microsoft docs...</p>
+            <p className="text-sm text-muted-foreground mt-1">Searching indexed exam content · Grounding with Microsoft docs...</p>
           </div>
           <div className="flex gap-2 justify-center flex-wrap text-xs text-muted-foreground">
             {["Analyzing blueprint", "Retrieving chunks", "Building context", "Generating", "Validating"].map((step) => (
               <Badge key={step} variant="outline">{step}</Badge>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center p-6">
+        <div className="max-w-lg space-y-4 text-center">
+          <h1 className="text-xl font-semibold">Could not start your exam</h1>
+          <p className="text-sm text-muted-foreground">
+            The backend did not create a session. Check that it is running and that question generation succeeded, then try again.
+          </p>
+          <p className="text-xs text-muted-foreground" role="status">{loadError}</p>
+          <div className="flex justify-center gap-3">
+            <Button variant="outline" onClick={() => router.push("/exams")}>Back to Exams</Button>
+            <Button variant="azure" onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </div>
       </div>
@@ -217,13 +233,6 @@ export default function ExamPlayerPage() {
           </Button>
         </div>
       </header>
-
-      {loadError && (
-        <div className="flex items-center gap-2 bg-yellow-500/8 border-b border-yellow-500/20 px-4 py-2 text-xs text-yellow-600 dark:text-yellow-400">
-          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span><strong>Preview mode:</strong> Using sample questions because the backend is unavailable. Answers and scores will not be saved. Start the backend for AI-generated, RAG-grounded questions.</span>
-        </div>
-      )}
 
       <div className="flex flex-1 overflow-hidden">
         <QuestionNavigator

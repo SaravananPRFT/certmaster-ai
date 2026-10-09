@@ -33,13 +33,10 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("certmaster-user");
-      if (stored) {
-        const user = JSON.parse(stored);
-        if (user?.email) config.headers.Authorization = `Bearer ${user.email}`;
-      }
-    } catch {}
+    const token = localStorage.getItem("certmaster-token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -126,6 +123,16 @@ export const assistantApi = {
     exam_code?: string;
     conversation_history: { role: string; content: string }[];
   }) => api.post("/assistant/chat", req).then((r) => r.data),
+};
+
+export const authApi = {
+  login: (email: string, password: string) =>
+    api.post("/auth/login", { email, password }).then((r) => r.data),
+
+  register: (name: string, email: string, password: string) =>
+    api.post("/auth/register", { name, email, password }).then((r) => r.data),
+
+  me: () => api.get("/auth/me").then((r) => r.data),
 };
 
 export default api;

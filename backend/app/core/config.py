@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     AZURE_STORAGE_CONNECTION_STRING: str = ""
     AZURE_STORAGE_CONTAINER: str = "certmaster-docs"
 
+    # Database
+    DATABASE_URL: str = "sqlite+aiosqlite:///./certmaster.db"
+
     # Redis
     REDIS_URL: str = "redis://localhost:6379"
     CACHE_TTL_SECONDS: int = 3600

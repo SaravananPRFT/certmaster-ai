@@ -25,8 +25,9 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push("/dashboard");
-    } catch {
-      setError("Invalid credentials. Try any email/password for demo.");
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setError(status === 401 ? "Invalid email or password." : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,7 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded">Demo: enter any email + password to sign in</p>
+                <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded">Sign in with your registered account or create one free</p>
                 <Button type="submit" variant="azure" className="w-full gap-2 cursor-pointer" disabled={loading}>
                   {loading ? "Signing in..." : "Sign In"} {!loading && <ArrowRight className="h-4 w-4" />}
                 </Button>

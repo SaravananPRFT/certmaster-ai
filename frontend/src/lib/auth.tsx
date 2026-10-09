@@ -1,9 +1,11 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { authApi } from "@/lib/api";
 
 export type UserRole = "guest" | "student" | "admin";
 
 export interface AuthUser {
+  id?: string;
   name: string;
   email: string;
   role: UserRole;
@@ -16,6 +18,7 @@ interface AuthContextValue {
   isGuest: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   loginAsGuest: () => void;
   logout: () => void;
 }
@@ -32,12 +35,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  const login = useCallback(async (email: string, _password: string) => {
-    const name = email.split("@")[0] || "User";
-    const initials = name.slice(0, 2).toUpperCase();
-    const u: AuthUser = { name, email, role: "student", initials };
-    setUser(u);
+  const login = useCallback(async (email: string, password: string) => {
+    const data = await authApi.login(email, password);
+    const u: AuthUser = {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role as UserRole,
+      initials: data.user.initials,
+    };
+    localStorage.setItem("certmaster-token", data.accessToken);
     localStorage.setItem("certmaster-user", JSON.stringify(u));
+    setUser(u);
+  }, []);
+
+  const register = useCallback(async (name: string, email: string, password: string) => {
+    const data = await authApi.register(name, email, password);
+    const u: AuthUser = {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role as UserRole,
+      initials: data.user.initials,
+    };
+    localStorage.setItem("certmaster-token", data.accessToken);
+    localStorage.setItem("certmaster-user", JSON.stringify(u));
+    setUser(u);
   }, []);
 
   const loginAsGuest = useCallback(() => {
@@ -49,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem("certmaster-user");
+    localStorage.removeItem("certmaster-token");
     sessionStorage.removeItem("certmaster-guest");
   }, []);
 
@@ -59,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isGuest: !user || user.role === "guest",
       isAuthenticated: !!user && user.role !== "guest",
       login,
+      register,
       loginAsGuest,
       logout,
     }}>

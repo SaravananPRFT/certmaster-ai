@@ -88,12 +88,29 @@ export default function ExamPlayerPage() {
   const handleAnswer = useCallback((ans: UserAnswer) => {
     setAnswer(ans.questionId, ans);
     if (mode === "study") setShowExplanation(true);
-  }, [mode]);
+
+    if (session?.sessionId) {
+      examApi.saveAnswer(session.sessionId, ans.questionId, ans.selectedOptions)
+        .catch(() => {});
+    }
+  }, [mode, session?.sessionId]);
 
   const handleSubmit = useCallback(async () => {
     if (!session) return;
-    setSubmitted(true);
     setSubmitConfirm(false);
+
+    const answersMap: Record<string, string[]> = {};
+    for (const [qid, ans] of Object.entries(session.answers)) {
+      answersMap[qid] = ans.selectedOptions;
+    }
+
+    try {
+      const result = await examApi.submitSession(session.sessionId, answersMap);
+      setSession({ ...session, submitted: true, score: result });
+    } catch {
+      // Fallback: client-side scoring if backend is unavailable
+    }
+    setSubmitted(true);
   }, [session]);
 
   if (loading) {
@@ -123,16 +140,24 @@ export default function ExamPlayerPage() {
   const markedForReview = new Set<string>(markedForReviewArr);
 
   if (submitted) {
-    const answers = session.answers;
-    const correct = session.questions.filter((q) => {
-      const ans = answers[q.questionId];
-      if (!ans || ans.selectedOptions.length === 0) return false;
-      return q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
-        ans.selectedOptions.every((a) => q.correctAnswer.includes(a));
-    }).length;
-    const skipped = session.questions.filter((q) => !answers[q.questionId]?.selectedOptions?.length).length;
-    const incorrect = session.questions.length - correct - skipped;
-    const score = Math.round((correct / session.questions.length) * 1000);
+    const serverScore = session.score;
+    let scoreData;
+
+    if (serverScore) {
+      scoreData = serverScore;
+    } else {
+      const answers = session.answers;
+      const correct = session.questions.filter((q) => {
+        const ans = answers[q.questionId];
+        if (!ans || ans.selectedOptions.length === 0) return false;
+        return q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
+          ans.selectedOptions.every((a) => q.correctAnswer.includes(a));
+      }).length;
+      const skipped = session.questions.filter((q) => !answers[q.questionId]?.selectedOptions?.length).length;
+      const incorrect = session.questions.length - correct - skipped;
+      const score = Math.round((correct / session.questions.length) * 1000);
+      scoreData = { totalQuestions: session.questions.length, correct, incorrect, skipped, score, passed: score >= 700, passingScore: 700, timeSpent: 0, domainScores: buildDomainScores(session.questions, session.answers) };
+    }
 
     return (
       <div className="flex flex-col min-h-[calc(100vh-56px)]">
@@ -149,7 +174,7 @@ export default function ExamPlayerPage() {
           </div>
         )}
         <ResultScreen
-          score={{ totalQuestions: session.questions.length, correct, incorrect, skipped, score, passed: score >= 700, passingScore: 700, timeSpent: 0, domainScores: buildDomainScores(session.questions, answers) }}
+          score={scoreData}
           examCode={examCode}
           onRetry={() => { clearSession(); setSubmitted(false); router.refresh(); }}
           onReview={() => setSubmitted(false)}

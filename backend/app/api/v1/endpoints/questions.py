@@ -1,34 +1,29 @@
 """
 Question generation and management endpoints.
 """
+import json
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
 from app.models.question import (
     Question, QuestionGenerationRequest, QuestionFeedback,
     QuestionType, Difficulty,
 )
+from app.models.db_models import GeneratedQuestionRow
 from app.services.generation.generator import generator
 
 router = APIRouter(prefix="/questions", tags=["questions"])
 
-_question_store: dict[str, Question] = {}
-_feedback_store: list[QuestionFeedback] = []
-
 
 @router.post("/generate", response_model=list[Question])
-async def generate_questions(request: QuestionGenerationRequest):
-    """
-    Generate blueprint-aligned, RAG-grounded questions.
-
-    Pipeline:
-    1. Analyze exam + objective
-    2. Retrieve top-K chunks from Azure AI Search
-    3. Build compressed context
-    4. Generate question via LLM
-    5. Validate grounding + quality
-    6. Return JSON
-    """
+async def generate_questions(
+    request: QuestionGenerationRequest,
+    db: AsyncSession = Depends(get_db),
+):
     questions = await generator.generate_batch(request)
     if not questions:
         raise HTTPException(
@@ -37,16 +32,24 @@ async def generate_questions(request: QuestionGenerationRequest):
                    "This may indicate the requested topic has insufficient indexed documentation.",
         )
     for q in questions:
-        _question_store[q.question_id] = q
+        row = GeneratedQuestionRow(
+            id=q.question_id,
+            exam_code=q.exam,
+            question_json=q.model_dump_json(by_alias=True),
+            status=q.status,
+        )
+        db.add(row)
+    await db.commit()
     return questions
 
 
 @router.get("/{question_id}", response_model=Question)
-async def get_question(question_id: str):
-    q = _question_store.get(question_id)
-    if not q:
+async def get_question(question_id: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Question not found")
-    return q
+    return Question.model_validate_json(row.question_json)
 
 
 @router.get("/", response_model=list[Question])
@@ -56,22 +59,42 @@ async def list_questions(
     difficulty: Optional[Difficulty] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
 ):
-    questions = list(_question_store.values())
+    query = select(GeneratedQuestionRow)
     if exam:
-        questions = [q for q in questions if q.exam == exam]
+        query = query.where(GeneratedQuestionRow.exam_code == exam)
     if status:
-        questions = [q for q in questions if q.status == status]
-    if difficulty:
-        questions = [q for q in questions if q.difficulty == difficulty]
-    start = (page - 1) * page_size
-    return questions[start:start + page_size]
+        query = query.where(GeneratedQuestionRow.status == status)
+    query = query.offset((page - 1) * page_size).limit(page_size)
+
+    result = await db.execute(query)
+    rows = result.scalars().all()
+
+    questions = []
+    for row in rows:
+        q = Question.model_validate_json(row.question_json)
+        if difficulty and q.difficulty != difficulty:
+            continue
+        questions.append(q)
+    return questions
 
 
 @router.post("/feedback", response_model=dict)
-async def submit_feedback(feedback: QuestionFeedback):
-    question = _question_store.get(feedback.question_id)
-    if feedback.issue_type in ("inaccurate", "outdated") and question:
-        question.status = "flagged"
-    _feedback_store.append(feedback)
-    return {"message": "Feedback submitted successfully", "feedback_id": str(len(_feedback_store))}
+async def submit_feedback(
+    feedback: QuestionFeedback,
+    db: AsyncSession = Depends(get_db),
+):
+    if feedback.issue_type in ("inaccurate", "outdated"):
+        result = await db.execute(
+            select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == feedback.question_id)
+        )
+        row = result.scalar_one_or_none()
+        if row:
+            row.status = "flagged"
+            q_data = json.loads(row.question_json)
+            q_data["status"] = "flagged"
+            row.question_json = json.dumps(q_data)
+            await db.commit()
+
+    return {"message": "Feedback submitted successfully"}

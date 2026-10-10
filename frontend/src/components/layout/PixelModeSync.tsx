@@ -1,17 +1,13 @@
 "use client";
 import { useEffect } from "react";
-import { useAppStore } from "@/lib/store";
+import { useGameMode } from "@/lib/game-mode";
 
 export function PixelModeSync() {
-  const pixelMode = useAppStore((s) => s.pixelMode);
+  const { isGameMode } = useGameMode();
 
   useEffect(() => {
-    if (pixelMode) {
-      document.body.classList.add("pixel-mode");
-    } else {
-      document.body.classList.remove("pixel-mode");
-    }
-  }, [pixelMode]);
+    document.body.classList.toggle("game-mode", isGameMode);
+  }, [isGameMode]);
 
   return null;
 }

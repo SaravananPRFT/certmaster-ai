@@ -1,10 +1,12 @@
 """Study plan generation endpoint."""
 import json
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from app.services.generation.generator import generator, EXAM_BLUEPRINTS
 from app.core.config import settings
+from app.core.deps import get_current_user
+from app.models.db_models import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/planner", tags=["planner"])
@@ -67,7 +69,7 @@ async def _llm_generate_large(system: str, user: str) -> str:
 
 
 @router.post("/generate")
-async def generate_study_plan(req: StudyPlanRequest):
+async def generate_study_plan(req: StudyPlanRequest, user: User = Depends(get_current_user)):
     blueprint = EXAM_BLUEPRINTS.get(req.exam_code)
     if not blueprint:
         raise HTTPException(status_code=404, detail=f"Exam {req.exam_code} not found")

@@ -13,9 +13,8 @@ import { FeedbackModal } from "@/components/exam/FeedbackModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Flag, ChevronLeft, ChevronRight, Send, Maximize2, Minimize2, Lightbulb, BookOpen, MessageSquare, Loader2, Eye, LogIn } from "lucide-react";
+import { Flag, ChevronLeft, ChevronRight, Send, Maximize2, Minimize2, Lightbulb, MessageSquare, Loader2, Eye, LogIn } from "lucide-react";
 import Link from "next/link";
-import { getMockSession } from "@/lib/mockData";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +25,12 @@ export default function ExamPlayerPage() {
   const examCode = String(params.examCode);
   const mode = (searchParams.get("mode") || "practice") as ExamMode;
   const count = Number(searchParams.get("count") || 20);
+  const difficultyParam = searchParams.get("difficulty") || undefined;
+  const domainParam = searchParams.get("domain") || undefined;
+  const questionTypeParam = searchParams.get("type") || undefined;
+  const difficulty = difficultyParam === "Mixed" ? undefined : difficultyParam;
+  const domain = domainParam && !["All", "All Domains"].includes(domainParam) ? domainParam : undefined;
+  const questionType = questionTypeParam === "Mixed" ? undefined : questionTypeParam;
 
   const { isGuest } = useAuth();
   const { session, currentIndex, setSession, setCurrentIndex, setAnswer, toggleMarkForReview, isFullscreen, setFullscreen, showExplanation, setShowExplanation, clearSession } = useExamStore();
@@ -40,21 +45,68 @@ export default function ExamPlayerPage() {
     const load = async () => {
       setLoading(true);
       setLoadError(null);
+      const effectiveCount = Math.min(count, isGuest ? 5 : 100);
       try {
-        const backendSession = await examApi.startSession(examCode, mode, Math.min(count, isGuest ? 5 : 100));
+        const backendSession = await examApi.startSession(examCode, mode, effectiveCount, { difficulty, domain, questionType });
         setSession(backendSession);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.warn("[ExamPlayer] Backend unavailable, using sample questions:", msg);
+        console.error("[ExamPlayer] Failed to create exam session:", msg);
+        clearSession();
         setLoadError(msg);
-        const mockSession = getMockSession(examCode, mode, count);
-        setSession(mockSession);
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [examCode, mode, count, isGuest]);
+  }, [examCode, mode, count, difficulty, domain, questionType, isGuest, setSession, clearSession]);
+
+  const handleNext = useCallback(() => {
+    if (!session) return;
+    if (currentIndex < session.questions.length - 1) setCurrentIndex(currentIndex + 1);
+    setShowExplanation(false);
+    setShowHintPanel(false);
+  }, [session, currentIndex, setCurrentIndex, setShowExplanation, setShowHintPanel]);
+
+  const handlePrev = useCallback(() => {
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    setShowExplanation(false);
+    setShowHintPanel(false);
+  }, [currentIndex, setCurrentIndex, setShowExplanation, setShowHintPanel]);
+
+  const handleToggleMark = useCallback(() => {
+    if (!session) return;
+    toggleMarkForReview(session.questions[currentIndex].questionId);
+  }, [session, currentIndex, toggleMarkForReview]);
+
+  const handleAnswer = useCallback((ans: UserAnswer) => {
+    setAnswer(ans.questionId, ans);
+    if (mode === "study") setShowExplanation(true);
+
+    if (session?.sessionId) {
+      examApi.saveAnswer(session.sessionId, ans.questionId, ans.selectedOptions)
+        .catch(() => {});
+    }
+  }, [mode, session, setAnswer, setShowExplanation]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!session) return;
+    setSubmitConfirm(false);
+
+    const answersMap: Record<string, string[]> = {};
+    for (const [qid, ans] of Object.entries(session.answers)) {
+      answersMap[qid] = ans.selectedOptions;
+    }
+
+    try {
+      const result = await examApi.submitSession(session.sessionId, answersMap);
+      const fullQuestions = result.questions ?? session.questions;
+      setSession({ ...session, submitted: true, score: result, questions: fullQuestions });
+    } catch {
+      // Fallback: client-side scoring if backend is unavailable
+    }
+    setSubmitted(true);
+  }, [session, setSession]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -65,36 +117,7 @@ export default function ExamPlayerPage() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentIndex, session, isFullscreen]);
-
-  const handleNext = useCallback(() => {
-    if (!session) return;
-    if (currentIndex < session.questions.length - 1) setCurrentIndex(currentIndex + 1);
-    setShowExplanation(false);
-    setShowHintPanel(false);
-  }, [session, currentIndex]);
-
-  const handlePrev = useCallback(() => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
-    setShowExplanation(false);
-    setShowHintPanel(false);
-  }, [currentIndex]);
-
-  const handleToggleMark = useCallback(() => {
-    if (!session) return;
-    toggleMarkForReview(session.questions[currentIndex].questionId);
-  }, [session, currentIndex]);
-
-  const handleAnswer = useCallback((ans: UserAnswer) => {
-    setAnswer(ans.questionId, ans);
-    if (mode === "study") setShowExplanation(true);
-  }, [mode]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!session) return;
-    setSubmitted(true);
-    setSubmitConfirm(false);
-  }, [session]);
+  }, [handleNext, handlePrev, handleToggleMark, isFullscreen, setFullscreen]);
 
   if (loading) {
     return (
@@ -103,12 +126,30 @@ export default function ExamPlayerPage() {
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <div>
             <p className="font-semibold text-lg">Generating Questions</p>
-            <p className="text-sm text-muted-foreground mt-1">Retrieving from Azure AI Search · Grounding with Microsoft docs...</p>
+            <p className="text-sm text-muted-foreground mt-1">Searching indexed exam content · Grounding with Microsoft docs...</p>
           </div>
           <div className="flex gap-2 justify-center flex-wrap text-xs text-muted-foreground">
             {["Analyzing blueprint", "Retrieving chunks", "Building context", "Generating", "Validating"].map((step) => (
               <Badge key={step} variant="outline">{step}</Badge>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center p-6">
+        <div className="max-w-lg space-y-4 text-center">
+          <h1 className="text-xl font-semibold">Could not start your exam</h1>
+          <p className="text-sm text-muted-foreground">
+            The backend did not create a session. Check that it is running and that question generation succeeded, then try again.
+          </p>
+          <p className="text-xs text-muted-foreground" role="status">{loadError}</p>
+          <div className="flex justify-center gap-3">
+            <Button variant="outline" onClick={() => router.push("/exams")}>Back to Exams</Button>
+            <Button variant="azure" onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </div>
       </div>
@@ -123,16 +164,25 @@ export default function ExamPlayerPage() {
   const markedForReview = new Set<string>(markedForReviewArr);
 
   if (submitted) {
-    const answers = session.answers;
-    const correct = session.questions.filter((q) => {
-      const ans = answers[q.questionId];
-      if (!ans || ans.selectedOptions.length === 0) return false;
-      return q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
-        ans.selectedOptions.every((a) => q.correctAnswer.includes(a));
-    }).length;
-    const skipped = session.questions.filter((q) => !answers[q.questionId]?.selectedOptions?.length).length;
-    const incorrect = session.questions.length - correct - skipped;
-    const score = Math.round((correct / session.questions.length) * 1000);
+    const serverScore = session.score;
+    let scoreData;
+
+    if (serverScore) {
+      scoreData = serverScore;
+    } else {
+      const answers = session.answers;
+      const correct = session.questions.filter((q) => {
+        const ans = answers[q.questionId];
+        const ca = q.correctAnswer ?? [];
+        if (!ans || ans.selectedOptions.length === 0 || ca.length === 0) return false;
+        return ca.every((a) => ans.selectedOptions.includes(a)) &&
+          ans.selectedOptions.every((a) => ca.includes(a));
+      }).length;
+      const skipped = session.questions.filter((q) => !answers[q.questionId]?.selectedOptions?.length).length;
+      const incorrect = session.questions.length - correct - skipped;
+      const score = Math.round((correct / session.questions.length) * 1000);
+      scoreData = { totalQuestions: session.questions.length, correct, incorrect, skipped, score, passed: score >= 700, passingScore: 700, timeSpent: 0, domainScores: buildDomainScores(session.questions, session.answers) };
+    }
 
     return (
       <div className="flex flex-col min-h-[calc(100vh-56px)]">
@@ -149,7 +199,7 @@ export default function ExamPlayerPage() {
           </div>
         )}
         <ResultScreen
-          score={{ totalQuestions: session.questions.length, correct, incorrect, skipped, score, passed: score >= 700, passingScore: 700, timeSpent: 0, domainScores: buildDomainScores(session.questions, answers) }}
+          score={scoreData}
           examCode={examCode}
           onRetry={() => { clearSession(); setSubmitted(false); router.refresh(); }}
           onReview={() => setSubmitted(false)}
@@ -183,12 +233,6 @@ export default function ExamPlayerPage() {
           </Button>
         </div>
       </header>
-
-      {loadError && (
-        <div className="flex items-center justify-between bg-yellow-500/8 border-b border-yellow-500/20 px-4 py-1.5 text-xs text-yellow-500/80">
-          <span>Backend offline — showing sample questions for preview. Start the backend for AI-generated questions.</span>
-        </div>
-      )}
 
       <div className="flex flex-1 overflow-hidden">
         <QuestionNavigator
@@ -314,9 +358,10 @@ function buildDomainScores(questions: Question[], answers: Record<string, UserAn
     if (!map[q.objective]) map[q.objective] = { correct: 0, total: 0 };
     map[q.objective].total++;
     const ans = answers[q.questionId];
-    if (ans?.selectedOptions?.length &&
-      q.correctAnswer.every((a) => ans.selectedOptions.includes(a)) &&
-      ans.selectedOptions.every((a) => q.correctAnswer.includes(a))) {
+    const ca = q.correctAnswer ?? [];
+    if (ans?.selectedOptions?.length && ca.length > 0 &&
+      ca.every((a) => ans.selectedOptions.includes(a)) &&
+      ans.selectedOptions.every((a) => ca.includes(a))) {
       map[q.objective].correct++;
     }
   }

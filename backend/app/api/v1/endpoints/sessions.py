@@ -1,12 +1,19 @@
 """
 Exam session management endpoints.
 """
-from fastapi import APIRouter, HTTPException
+import json
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from uuid import uuid4
 from datetime import datetime
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.deps import get_current_user_optional
 from app.models.question import SessionCreate, SessionSubmit, QuestionGenerationRequest
+from app.models.db_models import User, ExamSessionRow, SessionAnswerRow
 from app.services.generation.generator import generator, EXAM_BLUEPRINTS
 
 
@@ -23,23 +30,67 @@ def _camelify(obj):
         return [_camelify(item) for item in obj]
     return obj
 
-router = APIRouter(prefix="/sessions", tags=["sessions"])
 
-_sessions: dict[str, dict] = {}
+_ANSWER_FIELDS = {"correctAnswer", "explanation", "whyCorrect", "whyIncorrect",
+                   "correct_answer", "why_correct", "why_incorrect"}
+
+
+def _strip_answers(questions: list[dict]) -> list[dict]:
+    return [{k: v for k, v in q.items() if k not in _ANSWER_FIELDS} for q in questions]
+
+
+def _session_to_dict(row: ExamSessionRow, answer_rows: list[SessionAnswerRow]) -> dict:
+    answers = {}
+    for a in answer_rows:
+        answers[a.question_id] = {
+            "question_id": a.question_id,
+            "selected_options": json.loads(a.selected_options),
+            "time_spent": a.time_spent,
+            "flagged": a.flagged,
+        }
+
+    session = {
+        "session_id": row.id,
+        "exam_code": row.exam_code,
+        "mode": row.mode,
+        "started_at": row.started_at.isoformat(),
+        "duration_minutes": row.duration_minutes,
+        "questions": json.loads(row.questions_json),
+        "answers": answers,
+        "marked_for_review": [],
+        "current_question_index": 0,
+        "submitted": row.submitted,
+    }
+    if row.score_json:
+        session["score"] = json.loads(row.score_json)
+    return session
+
+
+router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
 @router.post("/")
-async def create_session(req: SessionCreate):
-    """Create an exam session and pre-generate questions."""
+async def create_session(
+    req: SessionCreate,
+    db: AsyncSession = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
     blueprint = EXAM_BLUEPRINTS.get(req.exam_code)
     if not blueprint:
         raise HTTPException(status_code=404, detail=f"Exam {req.exam_code} not found")
 
+    effective_count = min(req.count, 5) if not user else req.count
+
+    selected_domain = req.domain
+    if selected_domain and selected_domain.casefold() in {"all", "all domains"}:
+        selected_domain = None
+
     gen_request = QuestionGenerationRequest(
         exam_code=req.exam_code,
-        difficulty=req.difficulty,
-        question_type=req.question_type,
-        count=req.count,
+        difficulty=req.difficulty if req.difficulty != "Mixed" else None,
+        question_type=req.question_type if req.question_type != "Mixed" else None,
+        objective=selected_domain,
+        count=effective_count,
     )
     questions = await generator.generate_batch(gen_request)
 
@@ -48,82 +99,165 @@ async def create_session(req: SessionCreate):
 
     duration = blueprint.get("duration_minutes", 100) if req.mode == "certification" else 0
     session_id = str(uuid4())
+
+    questions_data = [q.model_dump(mode="json", by_alias=True) for q in questions]
+
+    row = ExamSessionRow(
+        id=session_id,
+        user_id=user.id if user else None,
+        exam_code=req.exam_code,
+        mode=req.mode,
+        started_at=datetime.utcnow(),
+        duration_minutes=duration,
+        questions_json=json.dumps(questions_data),
+    )
+    db.add(row)
+    await db.commit()
+
+    client_questions = questions_data if req.mode == "study" else _strip_answers(questions_data)
+
     session = {
         "session_id": session_id,
         "exam_code": req.exam_code,
         "mode": req.mode,
-        "started_at": datetime.utcnow().isoformat(),
+        "started_at": row.started_at.isoformat(),
         "duration_minutes": duration,
-        "questions": [q.model_dump(by_alias=True) for q in questions],
+        "questions": client_questions,
         "answers": {},
         "marked_for_review": [],
         "current_question_index": 0,
         "submitted": False,
     }
-    _sessions[session_id] = session
     return _camelify(session)
 
 
 @router.get("/{session_id}")
-async def get_session(session_id: str):
-    session = _sessions.get(session_id)
-    if not session:
+async def get_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
+    result = await db.execute(select(ExamSessionRow).where(ExamSessionRow.id == session_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Session not found")
-    return _camelify(session)
+    if row.user_id and (not user or user.id != row.user_id):
+        raise HTTPException(status_code=403, detail="Not authorized to access this session")
+
+    answers_result = await db.execute(
+        select(SessionAnswerRow).where(SessionAnswerRow.session_id == session_id)
+    )
+    answer_rows = list(answers_result.scalars().all())
+    session_dict = _session_to_dict(row, answer_rows)
+
+    if not row.submitted and row.mode != "study":
+        session_dict["questions"] = _strip_answers(session_dict["questions"])
+
+    return _camelify(session_dict)
 
 
 @router.patch("/{session_id}/answers/{question_id}")
-async def save_answer(session_id: str, question_id: str, body: dict):
-    session = _sessions.get(session_id)
-    if not session:
+async def save_answer(
+    session_id: str,
+    question_id: str,
+    body: dict,
+    db: AsyncSession = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
+    result = await db.execute(select(ExamSessionRow).where(ExamSessionRow.id == session_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Session not found")
-    if session["submitted"]:
+    if row.user_id and (not user or user.id != row.user_id):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if row.submitted:
         raise HTTPException(status_code=400, detail="Session already submitted")
-    session["answers"][question_id] = {
-        "question_id": question_id,
-        "selected_options": body.get("selectedOptions", []),
-        "time_spent": body.get("timeSpent", 0),
-        "flagged": body.get("flagged", False),
-    }
+
+    ans_result = await db.execute(
+        select(SessionAnswerRow).where(
+            SessionAnswerRow.session_id == session_id,
+            SessionAnswerRow.question_id == question_id,
+        )
+    )
+    existing = ans_result.scalar_one_or_none()
+
+    selected = body.get("selectedOptions", [])
+    time_spent = body.get("timeSpent", 0)
+    flagged = body.get("flagged", False)
+
+    if existing:
+        existing.selected_options = json.dumps(selected)
+        existing.time_spent = time_spent
+        existing.flagged = flagged
+    else:
+        db.add(SessionAnswerRow(
+            session_id=session_id,
+            question_id=question_id,
+            selected_options=json.dumps(selected),
+            time_spent=time_spent,
+            flagged=flagged,
+        ))
+    await db.commit()
     return {"saved": True}
 
 
 @router.post("/{session_id}/submit")
-async def submit_session(session_id: str, body: SessionSubmit):
-    session = _sessions.get(session_id)
-    if not session:
+async def submit_session(
+    session_id: str,
+    body: SessionSubmit,
+    db: AsyncSession = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
+    result = await db.execute(select(ExamSessionRow).where(ExamSessionRow.id == session_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Session not found")
+    if row.user_id and (not user or user.id != row.user_id):
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     for qid, options in body.answers.items():
-        session["answers"][qid] = {
-            "question_id": qid,
-            "selected_options": options,
-            "time_spent": 0,
-            "flagged": False,
-        }
+        ans_result = await db.execute(
+            select(SessionAnswerRow).where(
+                SessionAnswerRow.session_id == session_id,
+                SessionAnswerRow.question_id == qid,
+            )
+        )
+        existing = ans_result.scalar_one_or_none()
+        if existing:
+            existing.selected_options = json.dumps(options)
+        else:
+            db.add(SessionAnswerRow(
+                session_id=session_id,
+                question_id=qid,
+                selected_options=json.dumps(options),
+            ))
 
-    questions = session["questions"]
-    answers = session["answers"]
+    questions = json.loads(row.questions_json)
+
+    answers_result = await db.execute(
+        select(SessionAnswerRow).where(SessionAnswerRow.session_id == session_id)
+    )
+    all_answers = {a.question_id: json.loads(a.selected_options) for a in answers_result.scalars().all()}
+
     correct = 0
     domain_map: dict[str, dict] = {}
 
     for q in questions:
-        qid = q["question_id"]
+        qid = q.get("questionId") or q.get("question_id")
         obj = q.get("objective", "General")
         if obj not in domain_map:
             domain_map[obj] = {"correct": 0, "total": 0}
         domain_map[obj]["total"] += 1
 
-        ans = answers.get(qid, {})
-        selected = set(ans.get("selected_options", []))
-        correct_set = set(q.get("correct_answer", []))
+        selected = set(all_answers.get(qid, []))
+        correct_set = set(q.get("correctAnswer") or q.get("correct_answer", []))
         if selected == correct_set:
             correct += 1
             domain_map[obj]["correct"] += 1
 
     total = len(questions)
     score = round((correct / total) * 1000) if total > 0 else 0
-    skipped = sum(1 for q in questions if not answers.get(q["question_id"], {}).get("selected_options"))
+    skipped = sum(1 for q in questions if not all_answers.get(q.get("questionId") or q.get("question_id")))
 
     domain_scores = [
         {
@@ -135,7 +269,7 @@ async def submit_session(session_id: str, body: SessionSubmit):
         for domain, data in domain_map.items()
     ]
 
-    result = {
+    score_result = {
         "total_questions": total,
         "correct": correct,
         "incorrect": total - correct - skipped,
@@ -147,6 +281,10 @@ async def submit_session(session_id: str, body: SessionSubmit):
         "domain_scores": domain_scores,
     }
 
-    session["submitted"] = True
-    session["score"] = result
-    return result
+    row.submitted = True
+    row.submitted_at = datetime.utcnow()
+    row.score_json = json.dumps(score_result)
+    await db.commit()
+
+    score_result["questions"] = questions
+    return _camelify(score_result)

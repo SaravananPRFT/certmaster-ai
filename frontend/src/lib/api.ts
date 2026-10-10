@@ -33,13 +33,10 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("certmaster-user");
-      if (stored) {
-        const user = JSON.parse(stored);
-        if (user?.email) config.headers.Authorization = `Bearer ${user.email}`;
-      }
-    } catch {}
+    const token = localStorage.getItem("certmaster-token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -67,8 +64,8 @@ export const examApi = {
   getBlueprint: (examCode: string) =>
     api.get<ExamBlueprint>(`/exams/${examCode}/blueprint`).then((r) => r.data),
 
-  startSession: (examCode: string, mode: string, count: number) =>
-    api.post<ExamSession>("/sessions/", { exam_code: examCode, mode, count }).then((r) => r.data),
+  startSession: (examCode: string, mode: string, count: number, opts?: { difficulty?: string; domain?: string; questionType?: string }) =>
+    api.post<ExamSession>("/sessions/", { exam_code: examCode, mode, count, difficulty: opts?.difficulty, domain: opts?.domain, question_type: opts?.questionType }).then((r) => r.data),
 
   getSession: (sessionId: string) =>
     api.get<ExamSession>(`/sessions/${sessionId}`).then((r) => r.data),
@@ -80,10 +77,10 @@ export const examApi = {
     api.patch(`/sessions/${sessionId}/answers/${questionId}`, { selectedOptions }).then((r) => r.data),
 
   submitFeedback: (feedback: QuestionFeedback) =>
-    api.post("/feedback", feedback).then((r) => r.data),
+    api.post("/questions/feedback", feedback).then((r) => r.data),
 
-  getProgress: (userId: string, examCode: string) =>
-    api.get<StudyProgress>(`/progress/${userId}/${examCode}`).then((r) => r.data),
+  getProgress: (examCode: string) =>
+    api.get<StudyProgress>(`/progress/${examCode}`).then((r) => r.data),
 
   getExams: () =>
     api.get<ExamBlueprint[]>("/exams").then((r) => r.data),
@@ -126,6 +123,16 @@ export const assistantApi = {
     exam_code?: string;
     conversation_history: { role: string; content: string }[];
   }) => api.post("/assistant/chat", req).then((r) => r.data),
+};
+
+export const authApi = {
+  login: (email: string, password: string) =>
+    api.post("/auth/login", { email, password }).then((r) => r.data),
+
+  register: (name: string, email: string, password: string) =>
+    api.post("/auth/register", { name, email, password }).then((r) => r.data),
+
+  me: () => api.get("/auth/me").then((r) => r.data),
 };
 
 export default api;

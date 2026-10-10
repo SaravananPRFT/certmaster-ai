@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { BookOpen, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function RegisterPage() {
-  const { login } = useAuth();
+  const { register: registerUser } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,10 +27,11 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
     try {
-      await login(email, password);
+      await registerUser(name, email, password);
       router.push("/dashboard");
-    } catch {
-      setError("Registration failed. Please try again.");
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setError(status === 409 ? "An account with this email already exists." : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -101,7 +102,7 @@ export default function RegisterPage() {
                 <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-0.5 cursor-pointer" />
                 <span>I agree to the <span className="text-primary hover:underline">Terms of Service</span> and <span className="text-primary hover:underline">Privacy Policy</span></span>
               </label>
-              <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded">Demo: any name/email/password creates an account instantly</p>
+              <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded">Password must be at least 8 characters</p>
               <Button type="submit" variant="azure" className="w-full gap-2 cursor-pointer" disabled={!agreed || loading}>
                 {loading ? "Creating account..." : "Create Account"} {!loading && <ArrowRight className="h-4 w-4" />}
               </Button>

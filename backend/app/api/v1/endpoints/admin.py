@@ -1,14 +1,19 @@
 """
 Admin endpoints: question review, knowledge index management, metrics.
 """
-from fastapi import APIRouter, HTTPException, UploadFile, File
-from typing import Optional
-import io
 import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.deps import get_current_user
+from app.models.db_models import GeneratedQuestionRow, User
 from app.services.indexing.indexer import indexer
 from app.services.generation.generator import generator
 
@@ -18,61 +23,103 @@ _ALERTS_FILE = Path("./data/alerts.json")
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-_admin_question_store: dict[str, dict] = {}
+
+def _require_admin(user: User) -> None:
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
 
 
 @router.get("/questions")
-async def get_questions(status: Optional[str] = None, exam: Optional[str] = None, page: int = 1):
-    questions = list(_admin_question_store.values())
+async def get_questions(
+    status: Optional[str] = None,
+    exam: Optional[str] = None,
+    page: int = 1,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    _require_admin(user)
+    query = select(GeneratedQuestionRow)
     if status:
-        questions = [q for q in questions if q.get("status") == status]
+        query = query.where(GeneratedQuestionRow.status == status)
     if exam:
-        questions = [q for q in questions if q.get("exam") == exam]
+        query = query.where(GeneratedQuestionRow.exam_code == exam)
+
+    count_query = select(func.count()).select_from(query.subquery())
+    total = (await db.execute(count_query)).scalar() or 0
+
     page_size = 20
     start = (page - 1) * page_size
-    return {"questions": questions[start:start + page_size], "total": len(questions)}
+    query = query.offset(start).limit(page_size)
+
+    result = await db.execute(query)
+    rows = result.scalars().all()
+    questions = [json.loads(row.question_json) for row in rows]
+    return {"questions": questions, "total": total}
 
 
 @router.patch("/questions/{question_id}/approve")
-async def approve_question(question_id: str):
-    q = _admin_question_store.get(question_id)
-    if not q:
+async def approve_question(question_id: str, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
+    result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Question not found")
-    q["status"] = "approved"
+    row.status = "approved"
+    q_data = json.loads(row.question_json)
+    q_data["status"] = "approved"
+    row.question_json = json.dumps(q_data)
+    await db.commit()
     return {"message": "Question approved"}
 
 
 @router.patch("/questions/{question_id}/reject")
-async def reject_question(question_id: str, body: dict):
-    q = _admin_question_store.get(question_id)
-    if not q:
+async def reject_question(question_id: str, body: dict, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
+    result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Question not found")
-    q["status"] = "rejected"
-    q["rejection_reason"] = body.get("reason", "")
+    row.status = "rejected"
+    q_data = json.loads(row.question_json)
+    q_data["status"] = "rejected"
+    q_data["rejection_reason"] = body.get("reason", "")
+    row.question_json = json.dumps(q_data)
+    await db.commit()
     return {"message": "Question rejected"}
 
 
 @router.post("/questions/{question_id}/regenerate")
-async def regenerate_question(question_id: str):
-    q = _admin_question_store.get(question_id)
-    if not q:
+async def regenerate_question(question_id: str, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
+    result = await db.execute(select(GeneratedQuestionRow).where(GeneratedQuestionRow.id == question_id))
+    row = result.scalar_one_or_none()
+    if not row:
         raise HTTPException(status_code=404, detail="Question not found")
+
+    q_data = json.loads(row.question_json)
     from app.models.question import QuestionGenerationRequest
     req = QuestionGenerationRequest(
-        exam_code=q.get("exam", "AI-102"),
-        objective=q.get("objective"),
-        difficulty=q.get("difficulty"),
-        question_type=q.get("type"),
+        exam_code=q_data.get("exam", "AI-102"),
+        objective=q_data.get("objective"),
+        difficulty=q_data.get("difficulty"),
+        question_type=q_data.get("type"),
         count=1,
     )
     questions = await generator.generate_batch(req)
     if not questions:
         raise HTTPException(status_code=422, detail="Regeneration failed")
-    new_q = questions[0].model_dump()
-    new_q["status"] = "pending"
-    _admin_question_store[new_q["question_id"]] = new_q
-    del _admin_question_store[question_id]
-    return new_q
+
+    new_q = questions[0]
+    await db.delete(row)
+    new_row = GeneratedQuestionRow(
+        id=new_q.question_id,
+        exam_code=new_q.exam,
+        question_json=new_q.model_dump_json(by_alias=True),
+        status="pending",
+    )
+    db.add(new_row)
+    await db.commit()
+    return new_q.model_dump(by_alias=True)
 
 
 @router.post("/index")
@@ -80,7 +127,9 @@ async def index_documents(
     files: list[UploadFile] = File(...),
     exam_code: str = "AI-102",
     objective: str = "General",
+    user: User = Depends(get_current_user),
 ):
+    _require_admin(user)
     """Upload and index documents into Azure AI Search."""
     results = []
     await indexer.ensure_index()
@@ -105,21 +154,22 @@ async def index_documents(
 
 
 @router.post("/reindex")
-async def reindex_all():
+async def reindex_all(user: User = Depends(get_current_user)):
     """Trigger a full reindex of all documents."""
+    _require_admin(user)
     await indexer.ensure_index()
     return {"message": "Reindex triggered", "status": "running"}
 
 
 @router.post("/index-documents")
-async def index_documents_chroma(body: dict):
+async def index_documents_chroma(body: dict, user: User = Depends(get_current_user)):
+    _require_admin(user)
     """
     Chunk, embed, and index scraped docs into ChromaDB.
     Called by n8n workflow_3_index or manually.
     Body: {"exam_code": "AI-102"|"all", "scraped_dir": "./data/scraped", "clear_first": false}
     """
     import os
-    import json
     from app.services.rag.chroma_retriever import chroma_retriever
     from app.services.embedding.local_embedder import embedder
 
@@ -191,8 +241,9 @@ async def index_documents_chroma(body: dict):
 
 
 @router.get("/index/status")
-async def index_status():
+async def index_status(user: User = Depends(get_current_user)):
     """Return ChromaDB chunk counts for all exam collections."""
+    _require_admin(user)
     from app.services.rag.chroma_retriever import chroma_retriever
     stats = chroma_retriever.get_stats()
     total = sum(stats.values())
@@ -204,11 +255,8 @@ async def index_status():
 
 
 @router.post("/content-alert")
-async def content_alert(body: dict):
-    """
-    Receive content-change or quality-degradation alerts from n8n workflows (WF4, WF5).
-    Persists to ./data/alerts.json and logs at WARNING level.
-    """
+async def content_alert(body: dict, user: User = Depends(get_current_user)):
+    _require_admin(user)
     alert = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         **body,
@@ -223,8 +271,8 @@ async def content_alert(body: dict):
 
 
 @router.get("/content-alerts")
-async def get_content_alerts():
-    """Return recent content alerts written by n8n workflows."""
+async def get_content_alerts(user: User = Depends(get_current_user)):
+    _require_admin(user)
     return {"alerts": _load_alerts()}
 
 
@@ -243,12 +291,24 @@ def _save_alerts(alerts: list) -> None:
 
 
 @router.get("/metrics")
-async def get_metrics():
+async def get_metrics(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    _require_admin(user)
+    total = (await db.execute(select(func.count()).select_from(GeneratedQuestionRow))).scalar() or 0
+    approved = (await db.execute(
+        select(func.count()).select_from(GeneratedQuestionRow).where(GeneratedQuestionRow.status == "approved")
+    )).scalar() or 0
+    pending = (await db.execute(
+        select(func.count()).select_from(GeneratedQuestionRow).where(GeneratedQuestionRow.status == "pending")
+    )).scalar() or 0
+    flagged = (await db.execute(
+        select(func.count()).select_from(GeneratedQuestionRow).where(GeneratedQuestionRow.status == "flagged")
+    )).scalar() or 0
+
     return {
-        "total_questions": len(_admin_question_store),
-        "approved": sum(1 for q in _admin_question_store.values() if q.get("status") == "approved"),
-        "pending": sum(1 for q in _admin_question_store.values() if q.get("status") == "pending"),
-        "flagged": sum(1 for q in _admin_question_store.values() if q.get("status") == "flagged"),
+        "total_questions": total,
+        "approved": approved,
+        "pending": pending,
+        "flagged": flagged,
         "avg_grounding_score": 0.93,
         "avg_quality_score": 0.87,
         "generation": {

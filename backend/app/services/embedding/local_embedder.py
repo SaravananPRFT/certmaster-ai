@@ -1,5 +1,6 @@
 """Local embeddings via sentence-transformers — no API key, no cost."""
 import logging
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class LocalEmbedder:
                 )
         return self._model
 
+    @lru_cache(maxsize=512)
     def embed(self, text: str) -> list[float]:
         model = self._get_model()
         return model.encode(text, normalize_embeddings=True).tolist()

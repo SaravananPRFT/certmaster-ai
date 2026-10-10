@@ -1,9 +1,11 @@
 """AI Study Assistant chat endpoint."""
 import logging
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional
 from app.services.generation.generator import generator, EXAM_BLUEPRINTS
+from app.core.deps import get_current_user
+from app.models.db_models import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -21,7 +23,7 @@ class ChatRequest(BaseModel):
 
 
 @router.post("/chat")
-async def chat(req: ChatRequest):
+async def chat(req: ChatRequest, user: User = Depends(get_current_user)):
     blueprint = EXAM_BLUEPRINTS.get(req.exam_code or "", {})
 
     exam_context = ""

@@ -4,6 +4,9 @@ Question generation service — orchestrates RAG pipeline.
 import json
 import logging
 import asyncio
+import random
+import time
+from collections import OrderedDict
 from typing import Optional
 from uuid import uuid4
 
@@ -17,8 +20,7 @@ from app.models.question import (
 )
 from app.services.rag.retriever import retriever, RetrievedChunk
 from app.services.generation.prompts import (
-    SYSTEM_PROMPT, FALLBACK_SYSTEM_PROMPT,
-    build_generation_prompt, build_fallback_prompt,
+    SYSTEM_PROMPT, build_generation_prompt,
 )
 from app.services.validation.validator import validator
 
@@ -137,6 +139,9 @@ class QuestionGenerator:
         self._openai_client: Optional[AsyncAzureOpenAI] = None
         self._portkey_client: Optional[AsyncOpenAI] = None
         self._anthropic_client: Optional[anthropic.AsyncAnthropic] = None
+        self._embedding_cache: OrderedDict[str, tuple[float, list[float]]] = OrderedDict()
+        self._embedding_tasks: dict[str, asyncio.Task[Optional[list[float]]]] = {}
+        self._embedding_lock = asyncio.Lock()
 
     def _get_openai_client(self) -> AsyncAzureOpenAI:
         if not self._openai_client:
@@ -165,16 +170,45 @@ class QuestionGenerator:
     async def get_embedding(self, text: str) -> Optional[list[float]]:
         if not settings.AZURE_OPENAI_KEY or not settings.AZURE_OPENAI_ENDPOINT:
             return None
+        cache_key = f"{settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT}:{text}"
+        now = time.monotonic()
+        async with self._embedding_lock:
+            cached = self._embedding_cache.get(cache_key)
+            if cached and cached[0] > now:
+                self._embedding_cache.move_to_end(cache_key)
+                return cached[1]
+            if cached:
+                del self._embedding_cache[cache_key]
+
+            task = self._embedding_tasks.get(cache_key)
+            if task is None:
+                task = asyncio.create_task(self._fetch_and_cache_embedding(cache_key, text))
+                self._embedding_tasks[cache_key] = task
+        return await asyncio.shield(task)
+
+    async def _fetch_and_cache_embedding(
+        self, cache_key: str, text: str
+    ) -> Optional[list[float]]:
         try:
             client = self._get_openai_client()
             resp = await client.embeddings.create(
                 model=settings.AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
                 input=text,
             )
-            return resp.data[0].embedding
+            embedding = resp.data[0].embedding
         except Exception as e:
             logger.warning("Embedding generation failed: %s", e)
-            return None
+            embedding = None
+
+        async with self._embedding_lock:
+            self._embedding_tasks.pop(cache_key, None)
+            if embedding:
+                ttl = max(0, settings.CACHE_TTL_SECONDS)
+                self._embedding_cache[cache_key] = (time.monotonic() + ttl, embedding)
+                self._embedding_cache.move_to_end(cache_key)
+                while len(self._embedding_cache) > 512:
+                    self._embedding_cache.popitem(last=False)
+        return embedding
 
     async def generate_with_openai(self, system: str, user: str) -> str:
         client = self._get_openai_client()
@@ -228,51 +262,9 @@ class QuestionGenerator:
         except Exception as e:
             logger.warning("Anthropic generation failed: %s", e)
 
-        return self._mock_response()
+        raise RuntimeError("Question generation failed because all configured LLM providers were unavailable")
 
-    def _mock_response(self) -> str:
-        """Return a development mock when no LLM is configured."""
-        return json.dumps({
-            "question_id": str(uuid4()),
-            "exam": "AI-102",
-            "objective": "Implement Natural Language Processing Solutions",
-            "difficulty": "Medium",
-            "type": "MultipleChoiceSingle",
-            "question": "You are developing a solution to analyze customer feedback and extract key phrases. Which Azure AI Language feature should you use?",
-            "context": None,
-            "options": [
-                {"id": "A", "text": "Custom text classification"},
-                {"id": "B", "text": "Key phrase extraction"},
-                {"id": "C", "text": "Conversational Language Understanding"},
-                {"id": "D", "text": "Named entity recognition"},
-            ],
-            "drag_items": None,
-            "drop_zones": None,
-            "match_pairs": None,
-            "build_items": None,
-            "code_snippet": None,
-            "correct_answer": ["B"],
-            "explanation": "Key phrase extraction identifies the main concepts in text without requiring training data.",
-            "why_correct": "Key phrase extraction is a pre-built capability in Azure AI Language that identifies important phrases from text without any model training required.",
-            "why_incorrect": {
-                "A": "Custom text classification categorizes documents into user-defined categories and requires training data.",
-                "C": "CLU is for building conversational AI applications that understand user intents.",
-                "D": "NER identifies and categorizes named entities (people, places, organizations) in text.",
-            },
-            "references": [
-                {"title": "Azure AI Language Key Phrase Extraction", "url": "https://learn.microsoft.com/azure/ai-services/language-service/key-phrase-extraction/overview"},
-            ],
-            "grounding": {
-                "grounding_score": 0.92,
-                "citation_coverage": 0.88,
-                "retrieved_document_ids": ["fallback-001"],
-            },
-            "tags": ["NLP", "Language Service"],
-            "blocked": False,
-            "block_reason": None,
-        })
-
-    def _parse_question(self, raw: str, request: QuestionGenerationRequest, bypass_grounding: bool = False) -> Optional[Question]:
+    def _parse_question(self, raw: str, request: QuestionGenerationRequest) -> Optional[Question]:
         try:
             # Strip markdown fences that some models add despite instructions.
             # split("```", 2) → ['', 'json\n{...}\n', ''] so index [1] is the content.
@@ -292,16 +284,15 @@ class QuestionGenerator:
         grounding_score = grounding.get("grounding_score", 0.0)
         citation_coverage = grounding.get("citation_coverage", 0.0)
 
-        if not bypass_grounding:
-            if data.get("blocked"):
-                logger.warning("Question blocked by grounding validator: %s", data.get("block_reason"))
-                return None
-            if grounding_score < settings.MIN_GROUNDING_SCORE:
-                logger.warning("Question blocked: grounding_score %.2f < %.2f", grounding_score, settings.MIN_GROUNDING_SCORE)
-                return None
-            if citation_coverage < settings.MIN_CITATION_COVERAGE:
-                logger.warning("Question blocked: citation_coverage %.2f < %.2f", citation_coverage, settings.MIN_CITATION_COVERAGE)
-                return None
+        if data.get("blocked"):
+            logger.warning("Question blocked by grounding validator: %s", data.get("block_reason"))
+            return None
+        if grounding_score < settings.MIN_GROUNDING_SCORE:
+            logger.warning("Question blocked: grounding_score %.2f < %.2f", grounding_score, settings.MIN_GROUNDING_SCORE)
+            return None
+        if citation_coverage < settings.MIN_CITATION_COVERAGE:
+            logger.warning("Question blocked: citation_coverage %.2f < %.2f", citation_coverage, settings.MIN_CITATION_COVERAGE)
+            return None
 
         try:
             options = None
@@ -361,13 +352,16 @@ class QuestionGenerator:
         return random.choices(types, weights=weights, k=1)[0]
 
     def _select_objective(self, exam_code: str, requested_objective: Optional[str]) -> str:
-        if requested_objective:
-            return requested_objective
         blueprint = EXAM_BLUEPRINTS.get(exam_code, {})
         domains = blueprint.get("domains", [])
+        if requested_objective:
+            for domain in domains:
+                if requested_objective.casefold() == domain["name"].casefold():
+                    objectives = domain.get("objectives", [])
+                    return random.choice(objectives) if objectives else domain["name"]
+            return requested_objective
         if not domains:
             return "General"
-        import random
         weights = [d["weight"] for d in domains]
         total = sum(weights)
         r = random.uniform(0, total)
@@ -386,11 +380,11 @@ class QuestionGenerator:
     ) -> Optional[Question]:
         """Full RAG pipeline: retrieve → context → generate → validate."""
         objective = self._select_objective(request.exam_code, request.objective)
-        difficulty = request.difficulty or "Medium"
+        difficulty = request.difficulty or random.choice(("Easy", "Medium", "Hard"))
         question_type = self._select_question_type(request.question_type)
 
         query = f"{request.exam_code} {objective} {difficulty} question"
-        embedding = await self.get_embedding(query)
+        embedding = await self.get_embedding(query) if retriever.uses_azure_search else None
 
         chunks = await retriever.retrieve(
             query=query,
@@ -399,35 +393,24 @@ class QuestionGenerator:
             top_k=settings.TOP_K_RETRIEVAL,
             embedding=embedding,
         )
+        if not chunks:
+            logger.warning("Skipping generation because no RAG chunks were retrieved for %s", request.exam_code)
+            return None
 
         context, doc_ids = retriever.build_context(chunks, max_tokens=settings.MAX_CONTEXT_TOKENS)
-        is_fallback = "fallback-001" in doc_ids
 
         prior_stems = [q.question[:80] for q in (previously_generated or [])]
-
-        if is_fallback:
-            logger.info("Using knowledge-based generation for %s / %s", request.exam_code, objective)
-            prompt = build_fallback_prompt(
-                exam_code=request.exam_code,
-                objective=objective,
-                difficulty=difficulty,
-                question_type=question_type,
-                already_generated=prior_stems or None,
-            )
-            raw = await self._llm_generate(FALLBACK_SYSTEM_PROMPT, prompt)
-        else:
-            prompt = build_generation_prompt(
-                exam_code=request.exam_code,
-                objective=objective,
-                difficulty=difficulty,
-                question_type=question_type,
-                context=context,
-                doc_ids=doc_ids,
-                already_generated=prior_stems or None,
-            )
-            raw = await self._llm_generate(SYSTEM_PROMPT, prompt)
-
-        question = self._parse_question(raw, request, bypass_grounding=is_fallback)
+        prompt = build_generation_prompt(
+            exam_code=request.exam_code,
+            objective=objective,
+            difficulty=difficulty,
+            question_type=question_type,
+            context=context,
+            doc_ids=doc_ids,
+            already_generated=prior_stems or None,
+        )
+        raw = await self._llm_generate(SYSTEM_PROMPT, prompt)
+        question = self._parse_question(raw, request)
 
         if question:
             quality_result = validator.score_quality(question)
@@ -451,11 +434,14 @@ class QuestionGenerator:
                 for _ in range(batch)
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = [result for result in results if isinstance(result, Exception)]
+            if errors:
+                logger.error("Question generation infrastructure failed: %s", errors[0])
+                raise RuntimeError(
+                    "Question generation failed. Check RAG and LLM provider availability."
+                ) from errors[0]
 
             for r in results:
-                if isinstance(r, Exception):
-                    logger.error("Generation task failed: %s", r)
-                    continue
                 if r is None:
                     continue
                 if validator.check_duplicate(r, questions):

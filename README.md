@@ -64,9 +64,10 @@ docker run -d -p 6379:6379 redis:7-alpine
 
 # Terminal 2 — Backend
 cd backend
-cp .env.example .env  # configure Azure keys
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+copy .env.example .env  # configure Azure keys
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 
 # Terminal 3 — Frontend
 cd frontend
@@ -85,12 +86,12 @@ docker-compose up --build
 Edit `backend/.env`:
 
 ```env
-# Required for LLM generation
+# Configure at least one supported LLM provider for generation
 AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com
 AZURE_OPENAI_KEY=your-key
 AZURE_OPENAI_DEPLOYMENT=gpt-4o
 
-# Required for RAG retrieval
+# Optional: Azure AI Search RAG (local ChromaDB is used if this is not configured)
 AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
 AZURE_SEARCH_KEY=your-admin-key
 
@@ -98,7 +99,7 @@ AZURE_SEARCH_KEY=your-admin-key
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-> **Dev mode:** Without Azure keys, the backend uses mock responses to power the UI.
+> Question generation requires indexed RAG content and a working LLM provider. If retrieval or generation is unavailable, the API returns an error instead of substituting sample questions.
 
 ## RAG Pipeline
 

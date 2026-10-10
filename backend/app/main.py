@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting CertMasterAI API v%s", settings.APP_VERSION)
+    from app.core.database import init_db
+    await init_db()
+    logger.info("Database tables initialized")
     try:
         from app.services.indexing.indexer import indexer
         await indexer.ensure_index()
